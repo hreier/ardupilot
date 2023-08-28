@@ -32,6 +32,8 @@
 #define APM_BUILD_AP_Bootloader  11
 #define APM_BUILD_Blimp      12
 #define APM_BUILD_Heli       13
+//#define APM_BUILD_ACoSoleon       14
+#define APM_BUILD_ACoSoleon       2
 
 #ifdef APM_BUILD_DIRECTORY
 /*
