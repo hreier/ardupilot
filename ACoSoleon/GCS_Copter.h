@@ -43,6 +43,7 @@ protected:
 
     GCS_MAVLINK_Copter *new_gcs_mavlink_backend(GCS_MAVLINK_Parameters &params,
                                                 AP_HAL::UARTDriver &uart) override {
+        mavlink_system.compid = MAV_COMP_ID_USER60;    //Set the ComponentID
         return new GCS_MAVLINK_Copter(params, uart);
     }
 
