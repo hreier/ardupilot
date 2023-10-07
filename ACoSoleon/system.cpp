@@ -210,7 +210,8 @@ void Copter::init_ardupilot()
         // set mode to STABILIZE will trigger mode change notification to pilot
         set_mode(Mode::Number::STABILIZE, ModeReason::UNAVAILABLE);
     }
-
+    TankSupervision.init(true);
+    
     // flag that initialisation has completed
     ap.initialised = true;
 }

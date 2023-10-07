@@ -179,6 +179,7 @@
 #endif
 
 #include "mode.h"
+#include "soTankSupervision.h"
 
 class Copter : public AP_Vehicle {
 public:
@@ -226,6 +227,7 @@ public:
     friend class ModeZigZag;
     friend class ModeAutorotate;
     friend class ModeTurtle;
+    friend class SO_TankSupervision;
 
     Copter(void);
 
@@ -513,6 +515,8 @@ private:
 #if HAL_SPRAYER_ENABLED
     AC_Sprayer sprayer;
 #endif
+
+    SO_TankSupervision TankSupervision;
 
     // Parachute release
 #if PARACHUTE == ENABLED

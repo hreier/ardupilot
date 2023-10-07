@@ -701,6 +701,43 @@ const AP_Param::Info Copter::var_info[] = {
     GSCALAR(throw_motor_start, "THROW_MOT_START", (float)ModeThrow::PreThrowMotorState::STOPPED),
 #endif
 
+    // @Param: SO_SPRAYERMODE
+    // @DisplayName: Solarion sprayer mode
+    // @Description: Defines the configuration mode of the sprayer controller
+    // @Values: 0:disabled, 1:mission, 2:pressure, 3:flow
+    // @User: Standard
+    GSCALAR(so_sprayermode, "SO_SPRAYERMODE", SO_SPRAYERMODE_DEF),
+
+    // @Param: SO_FLOWSENSOR
+    // @DisplayName: Solarion flow sensor configuration
+    // @Description: Defines the configuration mode of the sprayer controller
+    // @Values: 0:not connected, 1:digital cha1, 2:digital cha2, 3:analog
+    // @User: Advanced
+    GSCALAR(so_flow_sensor, "SO_FLOWSENSOR", SO_FLOWSENSOR_DEF),
+
+    // @Param: SO_PRESSURESENS
+    // @DisplayName: Solarion pressure sensor
+    // @Description: Defines the configuration mode of the sprayer controller
+    // @Values: 0:disabled, 1:analog1, 2:analog2
+    // @User: Advanced
+    GSCALAR(so_pressure_sensor, "SO_PRESSURESENS", SO_PRESSURESENS_DEF),
+
+    // @Param: SO_ARMING
+    // @DisplayName: Sprayer arming
+    // @Description: Arm disarm the sprayer arming
+    // @Values: 0:disarmed, 1:armed
+    // @User: Standard
+    GSCALAR(so_arming, "SO_ARMING", SO_ARMING_DEF),
+
+    // @Param: SO_PRESSURE_PID
+    // @DisplayName: Solarion pressure pid 
+    // @Description: Pressure pid configuration
+    // @Range: 0 100.0
+    // @User: Advanced
+    GSCALAR(so_pid_pressure, "SO_PRESSURE_PID", SO_PRESSURE_PID_DEF),
+
+
+
 #if OSD_ENABLED || OSD_PARAM_ENABLED
     // @Group: OSD
     // @Path: ../libraries/AP_OSD/AP_OSD.cpp

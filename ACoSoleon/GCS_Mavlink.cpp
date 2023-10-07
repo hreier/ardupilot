@@ -213,6 +213,18 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
 #endif
 }
 
+//-- sends the status of the Soleon AirController
+void GCS_MAVLINK_Copter::send_so_status(void) const
+{
+    mavlink_msg_so_status_send(chan,
+                                AP_HAL::millis(),   
+                                SO::TankSupervision()->get_level(),
+                                0,
+                                0,
+                                0);
+}
+
+
 void GCS_MAVLINK_Copter::send_nav_controller_output() const
 {
     if (!copter.ap.initialised) {
@@ -381,6 +393,12 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
 #endif
         break;
     }
+
+    case MSG_SO_STATUS:
+        send_so_status();
+        break;
+
+
 
     default:
         return GCS_MAVLINK::try_send_message(id);

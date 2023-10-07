@@ -82,6 +82,8 @@ private:
     void send_winch_status() const override;
 
     void send_wind() const;
+    void send_so_status(void) const;
+
 
 #if HAL_HIGH_LATENCY2_ENABLED
     int16_t high_latency_target_altitude() const override;

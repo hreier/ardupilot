@@ -604,6 +604,31 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+// Soleon defines
+//
+#ifndef SO_SPRAYERMODE_DEF
+# define SO_SPRAYERMODE_DEF DISABLED
+#endif
+
+#ifndef SO_FLOWSENSOR_DEF
+# define SO_FLOWSENSOR_DEF DISABLED
+#endif
+
+#ifndef SO_PRESSURESENS_DEF
+# define SO_PRESSURESENS_DEF DISABLED
+#endif
+
+#ifndef SO_ARMING_DEF
+# define SO_ARMING_DEF DISABLED
+#endif
+
+#ifndef SO_PRESSURE_PID_DEF
+# define SO_PRESSURE_PID_DEF 0.0
+#endif
+
+
+
+//////////////////////////////////////////////////////////////////////////////
 // Developer Items
 //
 

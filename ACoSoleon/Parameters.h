@@ -384,6 +384,27 @@ public:
 
         k_param_vehicle = 257, // vehicle common block of parameters
 
+        //
+        // 300: Area for Soleon Parameters
+        //
+        k_param_so_sprayermode = 300,
+        k_param_so_flow_sensor,
+        k_param_so_pressure_sensor,
+        k_param_so_arming,
+        k_param_so_pid_pressure,
+    //    k_param_so_pid_flow,
+    //    k_param_so_ref_in,
+    //    k_param_so_offset_in,
+    //    k_param_so_speed_in,
+    //    k_param_so_pump1_out,
+    //    k_param_so_pump2_out,
+    //    k_param_so_nozzle_type,
+    //    k_param_so_nozzle_warn,
+    //    k_param_so_tank_volume,
+    //    k_param_so_tank_level,
+    //    k_param_so_act_pressure,
+    //    k_param_so_act_flow,
+
         // the k_param_* space is 9-bits in size
         // 511: reserved
     };
@@ -460,6 +481,28 @@ public:
     AP_Int8         fs_crash_check;
     AP_Float        fs_ekf_thresh;
     AP_Int16        gcs_pid_mask;
+
+    // Soleon 
+    //
+    AP_Int8         so_sprayermode;
+    AP_Int8         so_flow_sensor;
+    AP_Int8         so_pressure_sensor;
+    AP_Int8         so_arming;
+    AP_Float        so_pid_pressure;
+ //   AP_Float        so_pid_flow;
+ //   AP_Int8         so_ref_in;
+ //   AP_Int8         so_offset_in;
+ //   AP_Int8         so_speed_in;
+ //   AP_Int8         so_pump1_out;
+ //   AP_Int8         so_pump2_out;
+ //   AP_Int8         so_nozzle_type;
+ //   AP_Int8         so_nozzle_warn;
+ //   AP_Int16        so_tank_volume;
+ //   AP_Int16        so_tank_level;
+ //   AP_Float        so_act_pressure;
+ //   AP_Float        so_act_flow;
+
+
 
 #if MODE_THROW_ENABLED == ENABLED
     AP_Enum<ModeThrow::PreThrowMotorState>         throw_motor_start;

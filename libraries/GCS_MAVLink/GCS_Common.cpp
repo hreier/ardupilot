@@ -63,6 +63,7 @@
 #include "MissionItemProtocol_Rally.h"
 #include "MissionItemProtocol_Fence.h"
 
+
 #include <stdio.h>
 
 #if HAL_RCINPUT_WITH_AP_RADIO
@@ -208,6 +209,7 @@ void GCS_MAVLINK::send_power_status(void)
                                   hal.analogin->power_status_flags());
 }
 
+
 #if HAL_WITH_MCU_MONITORING
 // report MCU voltage/temperature status
 void GCS_MAVLINK::send_mcu_status(void)
@@ -224,6 +226,7 @@ void GCS_MAVLINK::send_mcu_status(void)
                                 hal.analogin->mcu_voltage_max() * 1000);
 }
 #endif
+
 
 // returns the battery remaining percentage if valid, -1 otherwise
 int8_t GCS_MAVLINK::battery_remaining_pct(const uint8_t instance) const {
@@ -1054,6 +1057,7 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
 #if AP_MAVLINK_MSG_RELAY_STATUS_ENABLED
         { MAVLINK_MSG_ID_RELAY_STATUS, MSG_RELAY_STATUS},
 #endif
+        { MAVLINK_MSG_ID_SO_STATUS,            MSG_SO_STATUS},
             };
 
     for (uint8_t i=0; i<ARRAY_SIZE(map); i++) {
