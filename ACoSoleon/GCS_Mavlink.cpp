@@ -801,6 +801,10 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 {
     switch(packet.command) {
 
+    case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
+        SO::TankSupervision()->set(packet.param2);
+        return MAV_RESULT_ACCEPTED;
+
     case MAV_CMD_NAV_VTOL_TAKEOFF:
     case MAV_CMD_NAV_TAKEOFF: {
         // param3 : horizontal navigation by pilot acceptable

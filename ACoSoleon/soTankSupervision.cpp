@@ -18,7 +18,7 @@ SO_TankSupervision::SO_TankSupervision()
  * Init and run calls for brake flight mode
  */
 // brake_init - initialise brake controller
-void SO_TankSupervision::set(uint32_t val)
+void SO_TankSupervision::set(float val)
 {
     _delta_fill = val;
 }
@@ -28,7 +28,7 @@ void SO_TankSupervision::set(uint32_t val)
 bool SO_TankSupervision::init(bool ignore_checks)
 {
     _fill_level = 100.0f;
-    _delta_fill = 0.1f;
+    _delta_fill = 0.0f;
 
   /*  // initialise pos controller speed and acceleration
     pos_control->set_max_speed_accel_xy(inertial_nav.get_velocity_neu_cms().length(), BRAKE_MODE_DECEL_RATE);

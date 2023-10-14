@@ -22,7 +22,7 @@ public:
     bool init(bool ignore_checks) ;
     void run() ;
     void update();
-    void set(uint32_t val);
+    void set(float val);
     float get_level() const { return _fill_level; }
 
 
@@ -38,7 +38,7 @@ protected:
 
 private:
 
-    uint32_t _fill_level, _delta_fill;
+    float _fill_level, _delta_fill;
     uint32_t _timeout_start;
     uint32_t _timeout_ms;
 
