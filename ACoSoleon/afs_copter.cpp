@@ -2,7 +2,7 @@
   copter specific AP_AdvancedFailsafe class
  */
 
-#include "Copter.h"
+#include "Soleon.h"
 
 #if ADVANCED_FAILSAFE == ENABLED
 

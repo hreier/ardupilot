@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // checks if we should update ahrs/RTL home position from the EKF
 void Copter::update_home_from_EKF()

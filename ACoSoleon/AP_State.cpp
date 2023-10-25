@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // ---------------------------------------------
 void Copter::set_auto_armed(bool b)

@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #if AP_LANDINGGEAR_ENABLED
 

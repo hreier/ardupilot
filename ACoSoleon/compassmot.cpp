@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
   compass/motor interference calibration

@@ -2,7 +2,7 @@
 // functions to support precision landing
 //
 
-#include "Copter.h"
+#include "Soleon.h"
 
 #if AC_PRECLAND_ENABLED
 

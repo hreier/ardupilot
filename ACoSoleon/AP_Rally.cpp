@@ -15,7 +15,7 @@
 
 #include <AP_Common/Location.h>
 
-#include "Copter.h"
+#include "Soleon.h"
 
 #include "AP_Rally.h"
 

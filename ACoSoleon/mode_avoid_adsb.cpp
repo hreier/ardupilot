@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
  * control_avoid.cpp - init and run calls for AP_Avoidance's AVOID flight mode

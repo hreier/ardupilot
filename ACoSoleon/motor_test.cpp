@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
   mavlink motor test - implements the MAV_CMD_DO_MOTOR_TEST mavlink command so that the GCS/pilot can test an individual motor or flaps

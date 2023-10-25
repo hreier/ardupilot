@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 Mode::AutoYaw Mode::auto_yaw;
 

@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // update terrain data
 void Copter::terrain_update()

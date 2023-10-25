@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // land_init - initialise land controller
 bool ModeLand::init(bool ignore_checks)

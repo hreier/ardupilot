@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 #include <AP_ESC_Telem/AP_ESC_Telem.h>
 
 /*****************************************************************************

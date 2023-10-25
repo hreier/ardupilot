@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #if MODE_GUIDED_NOGPS_ENABLED == ENABLED
 

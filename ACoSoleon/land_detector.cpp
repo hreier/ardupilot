@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // Code to detect a crash main ArduCopter code
 #define LAND_CHECK_ANGLE_ERROR_DEG  30.0f       // maximum angle error to be considered landing

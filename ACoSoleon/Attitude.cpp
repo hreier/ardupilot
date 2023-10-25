@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*************************************************************
  *  Attitude Rate controllers and timing

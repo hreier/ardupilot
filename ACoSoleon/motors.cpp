@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #define ARM_DELAY               20  // called at 10hz so 2 seconds
 #define DISARM_DELAY            20  // called at 10hz so 2 seconds

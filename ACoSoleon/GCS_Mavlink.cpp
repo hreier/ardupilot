@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #include "GCS_Mavlink.h"
 #include <AP_RPM/AP_RPM_config.h>

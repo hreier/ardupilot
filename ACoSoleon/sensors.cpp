@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // return barometric altitude in centimeters
 void Copter::read_barometer(void)

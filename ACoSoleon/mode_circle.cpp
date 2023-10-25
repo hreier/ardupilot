@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 #include <AP_Mount/AP_Mount.h>
 
 #if MODE_CIRCLE_ENABLED == ENABLED

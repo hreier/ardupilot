@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // check if proximity type Simple Avoidance should be enabled based on alt
 void Copter::low_alt_avoidance()

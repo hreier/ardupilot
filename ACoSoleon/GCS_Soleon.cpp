@@ -1,6 +1,6 @@
-#include "GCS_Copter.h"
+#include "GCS_Soleon.h"
 
-#include "Copter.h"
+#include "Soleon.h"
 
 uint8_t GCS_Copter::sysid_this_mav() const
 {

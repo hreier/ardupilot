@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // read_inertia - read inertia in from accelerometers
 void Copter::read_inertia()

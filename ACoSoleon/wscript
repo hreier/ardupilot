@@ -8,12 +8,12 @@ def build(bld):
         ap_vehicle=vehicle,
         ap_libraries=bld.ap_common_vehicle_libraries() + [
             'AC_AttitudeControl',
-            'AC_InputManager',
+    #        'AC_InputManager',
             'AC_PrecLand',
-            'AC_Sprayer',
-            'AC_Autorotation',
+    #        'AC_Sprayer',
+    #        'AC_Autorotation',
             'AC_WPNav',
-            'AP_Camera',
+    #        'AP_Camera',
             'AP_IRLock',
             'AP_InertialNav',
             'AP_Motors',
@@ -38,7 +38,7 @@ def build(bld):
         program_name='aco-soleon',
         program_groups=['bin', 'soleon'],
         use=vehicle + '_libs',
-        defines=['FRAME_CONFIG=MULTICOPTER_FRAME'],
+       # defines=['FRAME_CONFIG=MULTICOPTER_FRAME'],
         )
 
  #   bld.ap_program(

@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
   autotune mode is a wrapper around the AC_AutoTune library

@@ -5,7 +5,7 @@
     https://discuss.ardupilot.org/t/autonomous-autorotation-gsoc-project-blog/42139
  -----------------------------------------------------------------------------------------*/
 
-#include "Copter.h"
+#include "Soleon.h"
 #include <AC_Autorotation/AC_Autorotation.h>
 #include "mode.h"
 

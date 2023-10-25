@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 // Code to detect a crash main ArduCopter code
 #define CRASH_CHECK_TRIGGER_SEC         2       // 2 seconds inverted indicates a crash

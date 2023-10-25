@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
  * Function to update various parameters in flight using the ch6 tuning knob

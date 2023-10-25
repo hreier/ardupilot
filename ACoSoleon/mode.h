@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Copter.h"
+#include "Soleon.h"
 #include <AP_Math/chirp.h>
 class Parameters;
 class ParametersG2;

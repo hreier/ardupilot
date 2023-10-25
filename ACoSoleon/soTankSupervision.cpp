@@ -1,3 +1,5 @@
+#include "GCS_Mavlink.h"
+
 #include "soTankSupervision.h"
 
 SO_TankSupervision::SO_TankSupervision()

@@ -96,7 +96,7 @@
 #include "RC_Channel.h"         // RC Channel Library
 
 #include "GCS_Mavlink.h"
-#include "GCS_Copter.h"
+#include "GCS_Soleon.h"
 #include "AP_Rally.h"           // Rally point library
 #include "AP_Arming.h"
 
