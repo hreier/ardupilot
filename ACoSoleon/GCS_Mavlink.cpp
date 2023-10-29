@@ -214,10 +214,19 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
 }
 
 //-- sends the status of the Soleon AirController
+int temp;
 void GCS_MAVLINK_Copter::send_so_status(void) const
 {
+    if (temp++> 4){
+        gcs().send_text(MAV_SEVERITY_INFO, "Update Tanklevel = %f", SO::TankSupervision()->get_level());  ///-HaRe debug
+        temp=0;
+    }
+    
+    
     mavlink_msg_so_status_send(chan,
-                                AP_HAL::millis(),   
+                                AP_HAL::millis(), 
+                                255,                //-- route to groundstation
+                                MAV_COMP_ID_ALL,  
                                 SO::TankSupervision()->get_level(),
                                 0,
                                 0,
@@ -803,6 +812,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
         SO::TankSupervision()->set(packet.param2);
+        gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param2);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
 
     case MAV_CMD_NAV_VTOL_TAKEOFF:

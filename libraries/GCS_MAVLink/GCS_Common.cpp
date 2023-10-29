@@ -2818,7 +2818,7 @@ MAV_STATE GCS_MAVLINK::system_status() const
  */
 void GCS_MAVLINK::send_heartbeat() const
 {
-    gcs().send_text(MAV_SEVERITY_INFO, "HeartBeat: chan=%d; sysis=%d; compid=%d", chan, mavlink_system.sysid, mavlink_system.compid);   //-- debug HaRe
+   // gcs().send_text(MAV_SEVERITY_INFO, "HeartBeat: chan=%d; sysis=%d; compid=%d", chan, mavlink_system.sysid, mavlink_system.compid);   //-- debug HaRe
 
     mavlink_msg_heartbeat_send(
         chan,
