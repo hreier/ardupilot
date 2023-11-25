@@ -9,7 +9,7 @@
 //  should be called at 3.3hz
 void Copter::tuning()
 {
-    const RC_Channel *rc6 = rc().channel(CH_6);
+    /*const RC_Channel *rc6 = rc().channel(CH_6);
 
     // exit immediately if the tuning function is not set or min and max are both zero
     if ((g.radio_tuning <= 0) || (is_zero(g2.tuning_min.get()) && is_zero(g2.tuning_max.get()))) {
@@ -194,4 +194,5 @@ void Copter::tuning()
         pos_control->set_lean_angle_max_cd(tuning_value * 100.0);
         break;
     }
+*/
 }

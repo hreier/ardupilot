@@ -8,6 +8,8 @@
 //  called at 400hz by default
 void Copter::run_rate_controller()
 {
+    
+    /*HaRe
     // set attitude and position controller loop time
     const float last_loop_time_s = AP::scheduler().get_last_loop_time_s();
     motors->set_dt(last_loop_time_s);
@@ -16,6 +18,7 @@ void Copter::run_rate_controller()
 
     // run low level rate controllers that only require IMU data
     attitude_control->rate_controller_run(); 
+    */
 }
 
 /*************************************************************
@@ -41,6 +44,7 @@ void Copter::update_throttle_hover()
         return;
     }
 
+    /*HaRe
     // get throttle output
     float throttle = motors->get_throttle();
 
@@ -53,6 +57,7 @@ void Copter::update_throttle_hover()
         gyro_fft.update_freq_hover(0.01f, motors->get_throttle_out());
 #endif
     }
+    */
 }
 
 // get_pilot_desired_climb_rate - transform pilot's throttle input to climb rate in cm/s
@@ -108,9 +113,10 @@ float Copter::get_non_takeoff_throttle()
 void Copter::set_accel_throttle_I_from_pilot_throttle()
 {
     // get last throttle input sent to attitude controller
-    float pilot_throttle = constrain_float(attitude_control->get_throttle_in(), 0.0f, 1.0f);
+    /*HaRe float pilot_throttle = constrain_float(attitude_control->get_throttle_in(), 0.0f, 1.0f);
     // shift difference between pilot's throttle and hover throttle into accelerometer I
     pos_control->get_accel_z_pid().set_integrator((pilot_throttle-motors->get_throttle_hover()) * 1000.0f);
+    */
 }
 
 // rotate vector from vehicle's perspective to North-East frame

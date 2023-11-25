@@ -13,6 +13,7 @@
 //      and landing detection is disabled.
 void Copter::standby_update()
 {
+    /*HaRe
     if (!standby_active) {
         return;
     }
@@ -20,4 +21,5 @@ void Copter::standby_update()
     attitude_control->reset_rate_controller_I_terms();
     attitude_control->reset_yaw_target_and_rate();
     pos_control->standby_xyz_reset();
+    */
 }

@@ -69,12 +69,13 @@ void Copter::crash_check()
         return;
     }
 
+    /*HaRe
     // check for angle error over 30 degrees
     const float angle_error = attitude_control->get_att_error_angle_deg();
     if (angle_error <= CRASH_CHECK_ANGLE_DEVIATION_DEG) {
         crash_counter = 0;
         return;
-    }
+    } */
 
     // check for speed under 10m/s (if available)
     Vector3f vel_ned;
@@ -90,7 +91,7 @@ void Copter::crash_check()
     if (crash_counter >= (CRASH_CHECK_TRIGGER_SEC * scheduler.get_loop_rate_hz())) {
         AP::logger().Write_Error(LogErrorSubsystem::CRASH_CHECK, LogErrorCode::CRASH_CHECK_CRASH);
         // send message to gcs
-        gcs().send_text(MAV_SEVERITY_EMERGENCY,"Crash: Disarming: AngErr=%.0f>%.0f, Accel=%.1f<%.1f", angle_error, CRASH_CHECK_ANGLE_DEVIATION_DEG, filtered_acc, CRASH_CHECK_ACCEL_MAX);
+        //HaRe gcs().send_text(MAV_SEVERITY_EMERGENCY,"Crash: Disarming: AngErr=%.0f>%.0f, Accel=%.1f<%.1f", angle_error, CRASH_CHECK_ANGLE_DEVIATION_DEG, filtered_acc, CRASH_CHECK_ACCEL_MAX);
         // disarm motors
         copter.arming.disarm(AP_Arming::Method::CRASH);
     }
@@ -122,6 +123,7 @@ void Copter::thrust_loss_check()
         return;
     }
 
+    /*HaRe
     // check for desired angle over 15 degrees
     // todo: add thrust angle to AC_AttitudeControl
     const Vector3f angle_target = attitude_control->get_att_target_euler_cd();
@@ -141,6 +143,7 @@ void Copter::thrust_loss_check()
         thrust_loss_counter = 0;
         return;
     }
+    */
 
     // check for descent
     if (!is_negative(inertial_nav.get_velocity_z_up_cms())) {
@@ -148,12 +151,14 @@ void Copter::thrust_loss_check()
         return;
     }
 
+    /*HaRe
     // check for angle error over 30 degrees to ensure the aircraft has attitude control
     const float angle_error = attitude_control->get_att_error_angle_deg();
     if (angle_error >= CRASH_CHECK_ANGLE_DEVIATION_DEG) {
         thrust_loss_counter = 0;
         return;
     }
+    */
 
     // the aircraft is descending with low requested roll and pitch, at full available throttle, with attitude control
     // we may have lost thrust
@@ -181,6 +186,7 @@ void Copter::thrust_loss_check()
 // check for a large yaw imbalance, could be due to badly calibrated ESC or misaligned motors
 void Copter::yaw_imbalance_check()
 {
+    /*HaRe
     // no-op if suppresed by flight options param
     if ((copter.g2.flight_options & uint32_t(FlightOptions::DISABLE_YAW_IMBALANCE_WARNING)) != 0) {
         return;
@@ -227,6 +233,7 @@ void Copter::yaw_imbalance_check()
             gcs().send_text(MAV_SEVERITY_EMERGENCY, "Yaw Imbalance %0.0f%%", I *100);
         }
     }
+    */
 }
 
 #if PARACHUTE == ENABLED

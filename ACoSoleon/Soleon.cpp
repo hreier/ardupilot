@@ -73,8 +73,6 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if FRAME_CONFIG == HELI_FRAME
     FAST_TASK(update_heli_control_dynamics),
 #endif //HELI_FRAME
-    // Inertial Nav
-    FAST_TASK(read_inertia),
     // check if ekf has reset target heading or position
     FAST_TASK(check_ekf_reset),
     // run the attitude controllers
@@ -143,9 +141,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(check_vibration,       10,     50,  87),
     SCHED_TASK(gpsglitch_check,       10,     50,  90),
     SCHED_TASK(takeoff_check,         50,     50,  91),
-#if AP_LANDINGGEAR_ENABLED
-    SCHED_TASK(landinggear_update,    10,     75,  93),
-#endif
+//#if AP_LANDINGGEAR_ENABLED  //HaRe
+//    SCHED_TASK(landinggear_update,    10,     75,  93),
+//#endif
     SCHED_TASK(standby_update,        100,    75,  96),
     SCHED_TASK(lost_vehicle_check,    10,     50,  99),
     SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_receive, 400, 180, 102),
@@ -168,9 +166,11 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_RPM,               &copter.rpm_sensor,          update,          40, 200, 129),
 #endif
     SCHED_TASK_CLASS(AP_TempCalibration,   &copter.g2.temp_calibration, update,          10, 100, 135),
+/* HaRe
 #if HAL_ADSB_ENABLED
     SCHED_TASK(avoidance_adsb_update, 10,    100, 138),
 #endif
+*/
 #if ADVANCED_FAILSAFE == ENABLED
     SCHED_TASK(afs_fs_check,          10,    100, 141),
 #endif
@@ -513,6 +513,7 @@ void Copter::ten_hz_logging_loop()
     if (should_log(MASK_LOG_IMU) || should_log(MASK_LOG_IMU_FAST) || should_log(MASK_LOG_IMU_RAW)) {
         AP::ins().Write_Vibration();
     }
+    /*HaRe
     if (should_log(MASK_LOG_CTUN)) {
         attitude_control->control_monitor_log();
 #if HAL_PROXIMITY_ENABLED
@@ -522,6 +523,7 @@ void Copter::ten_hz_logging_loop()
         g2.beacon.log();
 #endif
     }
+    */
 #if FRAME_CONFIG == HELI_FRAME
     Log_Write_Heli();
 #endif
@@ -582,8 +584,6 @@ void Copter::three_hz_loop()
     // update ch6 in flight tuning
     tuning();
 
-    // check if avoidance should be enabled based on alt
-    low_alt_avoidance();
 }
 
 // one_hz_loop - runs at 1Hz
@@ -610,11 +610,11 @@ void Copter::one_hz_loop()
 
     // log terrain data
     terrain_logging();
-
+/* HaRe
 #if HAL_ADSB_ENABLED
     adsb.set_is_flying(!ap.land_complete);
 #endif
-
+*/
     AP_Notify::flags.flying = !ap.land_complete;
 }
 
@@ -739,12 +739,14 @@ bool Copter::get_wp_crosstrack_error_m(float &xtrack_error) const
 // get the target earth-frame angular velocities in rad/s (Z-axis component used by some gimbals)
 bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
 {
+    /*HaRe
     // always returns zero vector if landed or disarmed
     if (copter.ap.land_complete) {
         rate_ef_targets.zero();
     } else {
         rate_ef_targets = attitude_control->get_rate_ef_targets();
     }
+    */
     return true;
 }
 

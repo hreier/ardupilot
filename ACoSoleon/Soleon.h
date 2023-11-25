@@ -29,34 +29,34 @@
 
 // Common dependencies
 #include <AP_Common/AP_Common.h>            // Common definitions and utility routines for the ArduPilot libraries
-#include <AP_Common/Location.h>             // Library having the implementation of location class         
+//HaRe#include <AP_Common/Location.h>             // Library having the implementation of location class         
 #include <AP_Param/AP_Param.h>              // A system for managing and storing variables that are of general interest to the system.
 #include <StorageManager/StorageManager.h>  // library for Management for hal.storage to allow for backwards compatible mapping of storage offsets to available storage
 
 // Application dependencies
 #include <AP_Logger/AP_Logger.h>            // ArduPilot Mega Flash Memory Library
 #include <AP_Math/AP_Math.h>                // ArduPilot Mega Vector/Matrix math Library
-#include <AP_AccelCal/AP_AccelCal.h>        // interface and maths for accelerometer calibration
-#include <AP_InertialSensor/AP_InertialSensor.h>                // ArduPilot Mega Inertial Sensor (accel & gyro) Library
-#include <AP_AHRS/AP_AHRS.h>                                    // AHRS (Attitude Heading Reference System) interface library for ArduPilot
-#include <AP_Mission/AP_Mission.h>                              // Mission command library
-#include <AP_Mission/AP_Mission_ChangeDetector.h>               // Mission command change detection library
-#include <AC_AttitudeControl/AC_AttitudeControl_Multi.h>        // Attitude control library
-#include <AC_AttitudeControl/AC_AttitudeControl_Multi_6DoF.h>   // 6DoF Attitude control library
-#include <AC_AttitudeControl/AC_AttitudeControl_Heli.h>         // Attitude control library for traditional helicopter
-#include <AC_AttitudeControl/AC_PosControl.h>                   // Position control library
-#include <AC_AttitudeControl/AC_CommandModel.h>                 // Command model library
+//HaRe#include <AP_AccelCal/AP_AccelCal.h>        // interface and maths for accelerometer calibration
+//HaRe#include <AP_InertialSensor/AP_InertialSensor.h>                // ArduPilot Mega Inertial Sensor (accel & gyro) Library
+//HaRe#include <AP_AHRS/AP_AHRS.h>                                    // AHRS (Attitude Heading Reference System) interface library for ArduPilot
+//HaRe#include <AP_Mission/AP_Mission.h>                              // Mission command library
+//HaRe#include <AP_Mission/AP_Mission_ChangeDetector.h>               // Mission command change detection library
+//HaRe#include <AC_AttitudeControl/AC_AttitudeControl_Multi.h>        // Attitude control library
+//HaRe#include <AC_AttitudeControl/AC_AttitudeControl_Multi_6DoF.h>   // 6DoF Attitude control library
+//#include <AC_AttitudeControl/AC_AttitudeControl_Heli.h>         // Attitude control library for traditional helicopter
+//#include <AC_AttitudeControl/AC_PosControl.h>                   // Position control library
+//#include <AC_AttitudeControl/AC_CommandModel.h>                 // Command model library
 #include <AP_Motors/AP_Motors.h>            // AP Motors library
 #include <AP_Stats/AP_Stats.h>              // statistics library
 #include <Filter/Filter.h>                  // Filter library
 #include <AP_Vehicle/AP_Vehicle.h>          // needed for AHRS build
-#include <AP_InertialNav/AP_InertialNav.h>  // inertial navigation library
+//HaRe#include <AP_InertialNav/AP_InertialNav.h>  // inertial navigation library
 #include <AC_WPNav/AC_WPNav.h>              // ArduCopter waypoint navigation library
 #include <AC_WPNav/AC_Loiter.h>             // ArduCopter Loiter Mode Library
 #include <AC_WPNav/AC_Circle.h>             // circle navigation library
 #include <AP_Declination/AP_Declination.h>  // ArduPilot Mega Declination Helper Library
 #include <AP_RCMapper/AP_RCMapper.h>        // RC input mapping library
-#include <AP_BattMonitor/AP_BattMonitor.h>  // Battery monitor library
+//HaRe#include <AP_BattMonitor/AP_BattMonitor.h>  // Battery monitor library
 #include <AP_LandingGear/AP_LandingGear.h>  // Landing Gear library
 #include <AC_InputManager/AC_InputManager.h>        // Pilot input handling library
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
@@ -66,23 +66,23 @@
 #include <AC_AutoTune/AC_AutoTune_Multi.h>  // ArduCopter autotune library. support for autotune of multirotors.
 #include <AC_AutoTune/AC_AutoTune_Heli.h>   // ArduCopter autotune library. support for autotune of helicopters.
 #include <AP_Parachute/AP_Parachute.h>      // ArduPilot parachute release library
-#include <AC_Sprayer/AC_Sprayer.h>          // Crop sprayer library
+//HaRe#include <AC_Sprayer/AC_Sprayer.h>          // Crop sprayer library
 #include <AP_ADSB/AP_ADSB.h>                // ADS-B RF based collision avoidance module library
 #include <AP_Proximity/AP_Proximity.h>      // ArduPilot proximity sensor library
-#include <AC_PrecLand/AC_PrecLand_config.h>
+//HaRe#include <AC_PrecLand/AC_PrecLand_config.h>
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
-#include <AP_Winch/AP_Winch_config.h>
+//HARe#include <AP_Winch/AP_Winch_config.h>
 
 // Configuration
 #include "defines.h"
 #include "config.h"
-
+/* HaRe
 #if FRAME_CONFIG == HELI_FRAME
     #define AC_AttitudeControl_t AC_AttitudeControl_Heli
 #else
     #define AC_AttitudeControl_t AC_AttitudeControl_Multi
 #endif
-
+*/
 #if FRAME_CONFIG == HELI_FRAME
  #define MOTOR_CLASS AP_MotorsHeli
 #else
@@ -97,7 +97,6 @@
 
 #include "GCS_Mavlink.h"
 #include "GCS_Soleon.h"
-#include "AP_Rally.h"           // Rally point library
 #include "AP_Arming.h"
 
 #include <AP_Beacon/AP_Beacon_config.h>
@@ -174,9 +173,11 @@
 #include "UserParameters.h"
 #endif
 #include "Parameters.h"
+/* HaRe
 #if HAL_ADSB_ENABLED
 #include "avoidance_adsb.h"
 #endif
+*/
 
 #include "mode.h"
 #include "soTankSupervision.h"
@@ -185,10 +186,9 @@ class Copter : public AP_Vehicle {
 public:
     friend class GCS_MAVLINK_Copter;
     friend class GCS_Copter;
-    friend class AP_Rally_Copter;
     friend class Parameters;
     friend class ParametersG2;
-    friend class AP_Avoidance_Copter;
+    friend class AP_Avoidance_Copter;  
 
 #if ADVANCED_FAILSAFE == ENABLED
     friend class AP_AdvancedFailsafe_Copter;
@@ -204,7 +204,7 @@ public:
     friend class ModeAcro;
     friend class ModeAcro_Heli;
     friend class ModeAltHold;
-    friend class ModeAuto;
+ //HaRe   friend class ModeAuto;
     friend class ModeAutoTune;
     friend class ModeAvoidADSB;
     friend class ModeBrake;
@@ -466,11 +466,11 @@ private:
     Location current_loc;
 
     // Inertial Navigation
-    AP_InertialNav inertial_nav;
+    AP_InertialNav inertial_nav; 
 
     // Attitude, Position and Waypoint navigation objects
     // To-Do: move inertial nav up or other navigation variables down here
-    AC_AttitudeControl_t *attitude_control;
+    //HaRe AC_AttitudeControl_t *attitude_control;
     AC_PosControl *pos_control;
     AC_WPNav *wp_nav;
     AC_Loiter *loiter_nav;
@@ -504,11 +504,6 @@ private:
 
 #if AC_AVOID_ENABLED == ENABLED
     AC_Avoid avoid;
-#endif
-
-    // Rally library
-#if HAL_RALLY_ENABLED
-    AP_Rally_Copter rally;
 #endif
 
     // Crop Sprayer
@@ -545,12 +540,14 @@ private:
     AC_InputManager_Heli input_manager;
 #endif
 
+/* HaRe
 #if HAL_ADSB_ENABLED
     AP_ADSB adsb;
 
     // avoidance of adsb enabled vehicles (normally manned vehicles)
     AP_Avoidance_Copter avoidance_adsb{adsb};
 #endif
+*/
 
     // last valid RC input time
     uint32_t last_radio_update_ms;
@@ -717,13 +714,13 @@ private:
     void run_custom_controller() { custom_control.update(); }
 #endif
 
-    // avoidance.cpp
-    void low_alt_avoidance();
 
+/* HaRe
 #if HAL_ADSB_ENABLED
     // avoidance_adsb.cpp
     void avoidance_adsb_update(void);
 #endif
+*/
 
     // baro_ground_effect.cpp
     void update_ground_effect_detector(void);
@@ -809,9 +806,6 @@ private:
     void heli_update_rotor_speed_targets();
     void heli_update_autorotation();
     void update_collective_low_flag(int16_t throttle_control);
-
-    // inertia.cpp
-    void read_inertia();
 
     // landing_detector.cpp
     void update_land_and_crash_detectors();
@@ -1009,9 +1003,11 @@ private:
 #if MODE_SYSTEMID_ENABLED == ENABLED
     ModeSystemId mode_systemid;
 #endif
+/* HaRe
 #if HAL_ADSB_ENABLED
     ModeAvoidADSB mode_avoid_adsb;
 #endif
+*/
 #if MODE_THROW_ENABLED == ENABLED
     ModeThrow mode_throw;
 #endif

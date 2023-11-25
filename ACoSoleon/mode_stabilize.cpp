@@ -8,6 +8,7 @@
 // should be called at 100hz or more
 void ModeStabilize::run()
 {
+    /*HaRe
     // apply simple mode transform to pilot inputs
     update_simple_mode();
 
@@ -67,4 +68,5 @@ void ModeStabilize::run()
 
     // output pilot's throttle
     attitude_control->set_throttle_out(pilot_desired_throttle, true, g.throttle_filt);
+    */
 }

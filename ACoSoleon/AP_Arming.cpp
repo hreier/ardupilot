@@ -177,9 +177,10 @@ bool AP_Arming_Copter::terrain_database_required() const
         // primary terrain source is from rangefinder, allow arming without terrain database
         return false;
     }
-
+/*HaRe 
     if (copter.wp_nav->get_terrain_source() == AC_WPNav::TerrainSource::TERRAIN_FROM_TERRAINDATABASE &&
-        copter.mode_rtl.get_alt_type() == ModeRTL::RTLAltType::RTL_ALTTYPE_TERRAIN) {
+        copter.mode_rtl.get_alt_type() == ModeRTL::RTLAltType::RTL_ALTTYPE_TERRAIN) {  */
+    if (copter.wp_nav->get_terrain_source() == AC_WPNav::TerrainSource::TERRAIN_FROM_TERRAINDATABASE){
         return true;
     }
     return AP_Arming::terrain_database_required();
@@ -280,13 +281,14 @@ bool AP_Arming_Copter::parameter_checks(bool display_failure)
         }
 #endif
 
-        // check adsb avoidance failsafe
+        // check adsb avoidance failsafe 
+/* HaRe
 #if HAL_ADSB_ENABLED
         if (copter.failsafe.adsb) {
             check_failed(ARMING_CHECK_PARAMETERS, display_failure, "ADSB threat detected");
             return false;
         }
-#endif
+#endif */
 
         // ensure controllers are OK with us arming:
         char failure_msg[50] = {};
@@ -294,10 +296,12 @@ bool AP_Arming_Copter::parameter_checks(bool display_failure)
             check_failed(ARMING_CHECK_PARAMETERS, display_failure, "Bad parameter: %s", failure_msg);
             return false;
         }
+        /* HaRe
         if (!copter.attitude_control->pre_arm_checks("ATC", failure_msg, ARRAY_SIZE(failure_msg))) {
             check_failed(ARMING_CHECK_PARAMETERS, display_failure, "Bad parameter: %s", failure_msg);
             return false;
         }
+        */
     }
 
     return true;
@@ -530,6 +534,7 @@ bool AP_Arming_Copter::gcs_failsafe_check(bool display_failure)
 // check winch
 bool AP_Arming_Copter::winch_checks(bool display_failure) const
 {
+/*HaRe
 #if AP_WINCH_ENABLED
     // pass if parameter or all arming checks disabled
     if (!check_enabled(ARMING_CHECK_PARAMETERS)) {
@@ -546,6 +551,7 @@ bool AP_Arming_Copter::winch_checks(bool display_failure) const
         return false;
     }
 #endif
+*/
     return true;
 }
 
@@ -606,6 +612,7 @@ bool AP_Arming_Copter::arm_checks(AP_Arming::Method method)
     }
 
     // check adsb
+/* HaRe
 #if HAL_ADSB_ENABLED
     if (check_enabled(ARMING_CHECK_PARAMETERS)) {
         if (copter.failsafe.adsb) {
@@ -614,7 +621,7 @@ bool AP_Arming_Copter::arm_checks(AP_Arming::Method method)
         }
     }
 #endif
-
+*/
     // check throttle
     if (check_enabled(ARMING_CHECK_RC)) {
          #if FRAME_CONFIG == HELI_FRAME

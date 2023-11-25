@@ -226,6 +226,7 @@ void Copter::failsafe_ekf_recheck()
 // check for ekf yaw reset and adjust target heading, also log position reset
 void Copter::check_ekf_reset()
 {
+    /*HaRe
     // check for yaw reset
     float yaw_angle_change_rad;
     uint32_t new_ekfYawReset_ms = ahrs.getLastYawResetAngle(yaw_angle_change_rad);
@@ -242,6 +243,7 @@ void Copter::check_ekf_reset()
         AP::logger().Write_Error(LogErrorSubsystem::EKF_PRIMARY, LogErrorCode(ekf_primary_core));
         gcs().send_text(MAV_SEVERITY_WARNING, "EKF primary changed:%d", (unsigned)ekf_primary_core);
     }
+    */
 }
 
 // check for high vibrations affecting altitude control

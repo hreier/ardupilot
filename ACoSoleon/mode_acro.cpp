@@ -30,6 +30,7 @@ void ModeAcro::run()
 
     float pilot_desired_throttle = get_pilot_desired_throttle();
 
+    /*HaRe
     switch (motors->get_spool_state()) {
     case AP_Motors::SpoolState::SHUT_DOWN:
         // Motors Stopped
@@ -57,7 +58,9 @@ void ModeAcro::run()
         // do nothing
         break;
     }
+    */
 
+    /*HaRe
     // run attitude controller
     if (g2.acro_options.get() & uint8_t(AcroOptions::RATE_LOOP_ONLY)) {
         attitude_control->input_rate_bf_roll_pitch_yaw_2(target_roll, target_pitch, target_yaw);
@@ -67,6 +70,7 @@ void ModeAcro::run()
 
     // output pilot's throttle without angle boost
     attitude_control->set_throttle_out(pilot_desired_throttle, false, copter.g.throttle_filt);
+    */
 }
 
 bool ModeAcro::init(bool ignore_checks)

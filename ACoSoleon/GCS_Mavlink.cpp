@@ -95,6 +95,7 @@ MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
 
 void GCS_MAVLINK_Copter::send_attitude_target()
 {
+    /*HaRe
     const Quaternion quat  = copter.attitude_control->get_attitude_target_quat();
     const Vector3f ang_vel = copter.attitude_control->get_attitude_target_ang_vel();
     const float thrust = copter.attitude_control->get_throttle_in();
@@ -114,6 +115,8 @@ void GCS_MAVLINK_Copter::send_attitude_target()
         ang_vel.y,              // pitch rate (rad/s)
         ang_vel.z,              // yaw rate (rad/s)
         thrust);                // Collective thrust, normalized to 0 .. 1
+        
+    */
 }
 
 void GCS_MAVLINK_Copter::send_position_target_global_int()
@@ -214,13 +217,13 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
 }
 
 //-- sends the status of the Soleon AirController
-int temp;
+//int temp;
 void GCS_MAVLINK_Copter::send_so_status(void) const
 {
-    if (temp++> 4){
-        gcs().send_text(MAV_SEVERITY_INFO, "Update Tanklevel = %f", SO::TankSupervision()->get_level());  ///-HaRe debug
-        temp=0;
-    }
+//    if (temp++> 4){
+//        gcs().send_text(MAV_SEVERITY_INFO, "Update Tanklevel = %f", SO::TankSupervision()->get_level());  ///-HaRe debug
+//        temp=0;
+//    }
     
     
     mavlink_msg_so_status_send(chan,
@@ -236,6 +239,7 @@ void GCS_MAVLINK_Copter::send_so_status(void) const
 
 void GCS_MAVLINK_Copter::send_nav_controller_output() const
 {
+    /*HaRe
     if (!copter.ap.initialised) {
         return;
     }
@@ -251,6 +255,7 @@ void GCS_MAVLINK_Copter::send_nav_controller_output() const
         copter.pos_control->get_pos_error_z_cm() * 1.0e-2f,
         0,
         flightmode->crosstrack_error() * 1.0e-2f);
+    */
 }
 
 float GCS_MAVLINK_Copter::vfr_hud_airspeed() const
@@ -287,6 +292,7 @@ int16_t GCS_MAVLINK_Copter::vfr_hud_throttle() const
  */
 void GCS_MAVLINK_Copter::send_pid_tuning()
 {
+    /*HaRe
     static const PID_TUNING_AXIS axes[] = {
         PID_TUNING_ROLL,
         PID_TUNING_PITCH,
@@ -330,6 +336,7 @@ void GCS_MAVLINK_Copter::send_pid_tuning()
                                         pid_info->Dmod);
         }
     }
+    */
 }
 
 // send winch status message
@@ -375,10 +382,11 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
         break;
 
     case MSG_WIND:
+/*HaRe
         CHECK_PAYLOAD_SIZE(WIND);
         send_wind();
         break;
-
+*/
     case MSG_SERVO_OUT:
     case MSG_AOA_SSA:
     case MSG_LANDING:
@@ -386,6 +394,7 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
         break;
 
     case MSG_ADSB_VEHICLE: {
+/* HaRe
 #if HAL_ADSB_ENABLED
         CHECK_PAYLOAD_SIZE(ADSB_VEHICLE);
         copter.adsb.send_adsb_vehicle(chan);
@@ -400,8 +409,10 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
             }
         }
 #endif
+ */
         break;
     }
+
 
     case MSG_SO_STATUS:
         send_so_status();
@@ -607,10 +618,10 @@ const struct GCS_MAVLINK::stream_entries GCS_MAVLINK::all_stream_entries[] = {
 };
 
 MISSION_STATE GCS_MAVLINK_Copter::mission_state(const class AP_Mission &mission) const
-{
+{/* HaRe MODE_AUTO_ENABLED 
     if (copter.mode_auto.paused()) {
         return MISSION_STATE_PAUSED;
-    }
+    }*/
     return GCS_MAVLINK::mission_state(mission);
 }
 
@@ -627,12 +638,14 @@ void GCS_MAVLINK_Copter::packetReceived(const mavlink_status_t &status,
                                         const mavlink_message_t &msg)
 {
     // we handle these messages here to avoid them being blocked by mavlink routing code
+/* HaRe
 #if HAL_ADSB_ENABLED
     if (copter.g2.dev_options.get() & DevOptionADSBMAVLink) {
         // optional handling of GLOBAL_POSITION_INT as a MAVLink based avoidance source
         copter.avoidance_adsb.handle_msg(msg);
     }
 #endif
+*/
 #if MODE_FOLLOW_ENABLED == ENABLED
     // pass message to follow library
     copter.g2.follow.handle_msg(msg);
@@ -810,6 +823,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 {
     switch(packet.command) {
 
+    case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
         SO::TankSupervision()->set(packet.param2);
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param2);  ///-HaRe debug
@@ -1507,7 +1521,7 @@ MAV_LANDED_STATE GCS_MAVLINK_Copter::landed_state() const
     }
     return MAV_LANDED_STATE_IN_AIR;
 }
-
+/*HaRe
 void GCS_MAVLINK_Copter::send_wind() const
 {
     Vector3f airspeed_vec_bf;
@@ -1523,6 +1537,7 @@ void GCS_MAVLINK_Copter::send_wind() const
         wind.length(),
         wind.z);
 }
+*/
 
 #if HAL_HIGH_LATENCY2_ENABLED
 int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const

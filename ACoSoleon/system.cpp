@@ -51,9 +51,11 @@ void Copter::init_ardupilot()
     // setup telem slots with serial ports
     gcs().setup_uarts();
 
+/*HaRe
 #if OSD_ENABLED == ENABLED
     osd.init();
 #endif
+*/
 
 #if LOGGING_ENABLED == ENABLED
     log_init();
@@ -117,7 +119,7 @@ void Copter::init_ardupilot()
     g2.oa.init();
 #endif
 
-    attitude_control->parameter_sanity_check();
+    //HaRe attitude_control->parameter_sanity_check();
 
 #if AP_OPTICALFLOW_ENABLED
     // initialise optical flow sensor
@@ -442,7 +444,8 @@ void Copter::allocate_motors(void)
     if (ahrs_view == nullptr) {
         AP_BoardConfig::allocation_error("AP_AHRS_View");
     }
-
+    
+/*HaRe
     const struct AP_Param::GroupInfo *ac_var_info;
 
 #if FRAME_CONFIG != HELI_FRAME
@@ -459,9 +462,11 @@ void Copter::allocate_motors(void)
     attitude_control = new AC_AttitudeControl_Heli(*ahrs_view, aparm, *motors);
     ac_var_info = AC_AttitudeControl_Heli::var_info;
 #endif
+
     if (attitude_control == nullptr) {
         AP_BoardConfig::allocation_error("AttitudeControl");
     }
+
     AP_Param::load_object_from_eeprom(attitude_control, ac_var_info);
         
     pos_control = new AC_PosControl(*ahrs_view, inertial_nav, *motors, *attitude_control);
@@ -510,10 +515,11 @@ void Copter::allocate_motors(void)
     case AP_Motors::MOTOR_FRAME_TRI:
         attitude_control->get_rate_yaw_pid().filt_D_hz().set_default(100);
         break;
+       
     default:
         break;
     }
-
+*/ 
     // brushed 16kHz defaults to 16kHz pulses
     if (motors->is_brushed_pwm_type()) {
         g.rc_speed.set_default(16000);

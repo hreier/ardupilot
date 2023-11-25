@@ -25,6 +25,7 @@ bool ModeAltHold::init(bool ignore_checks)
 // should be called at 100hz or more
 void ModeAltHold::run()
 {
+    /*HaRe
     // set vertical speed and acceleration limits
     pos_control->set_max_speed_accel_z(-get_pilot_speed_dn(), g.pilot_speed_up, g.pilot_accel_z);
 
@@ -100,4 +101,5 @@ void ModeAltHold::run()
 
     // run the vertical position controller and set output throttle
     pos_control->update_z_controller();
+    */
 }

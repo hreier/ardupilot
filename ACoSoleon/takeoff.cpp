@@ -65,12 +65,14 @@ void Mode::_TakeOff::start(float alt_cm)
 // stop takeoff
 void Mode::_TakeOff::stop()
 {
+    /*HaRe
     _running = false;
     // Check if we have progressed far enough through the takeoff process that the
     // aircraft may have left the ground but not yet detected the climb.
     if (copter.attitude_control->get_throttle_in() > copter.get_non_takeoff_throttle()) {
         copter.set_land_complete(false);
     }
+    */
 }
 
 // do_pilot_takeoff - controls the vertical position controller during the process of taking off
@@ -79,6 +81,7 @@ void Mode::_TakeOff::stop()
 //  sets take off to complete when target altitude is within 1% of the take off altitude
 void Mode::_TakeOff::do_pilot_takeoff(float& pilot_climb_rate_cm)
 {
+    /*HaRe
     // return pilot_climb_rate if take-off inactive
     if (!_running) {
         return;
@@ -114,12 +117,14 @@ void Mode::_TakeOff::do_pilot_takeoff(float& pilot_climb_rate_cm)
             stop();
         }
     }
+    */
 }
 
 // auto_takeoff_run - controls the vertical position controller during the process of taking off in auto modes
 // auto_takeoff_complete set to true when target altitude is within 10% of the take off altitude and less than 50% max climb rate
 void Mode::auto_takeoff_run()
 {
+    /*HaRe
     // if not armed set throttle to zero and exit immediately
     if (!motors->armed() || !copter.ap.auto_armed) {
         // do not spool down tradheli when on the ground with motor interlock enabled
@@ -218,6 +223,7 @@ void Mode::auto_takeoff_run()
         const Vector3p& complete_pos = copter.pos_control->get_pos_target_cm();
         auto_takeoff_complete_pos = Vector3p{complete_pos.x, complete_pos.y, pos_z};
     }
+    */
 }
 
 void Mode::auto_takeoff_start(float complete_alt_cm, bool terrain_alt)

@@ -121,6 +121,7 @@ void Mode::AutoYaw::set_fixed_yaw(float angle_deg, float turn_rate_ds, int8_t di
         }
     }
 
+    /*HaRe
     // get turn speed
     if (!is_positive(turn_rate_ds)) {
         // default to default slew rate
@@ -128,6 +129,7 @@ void Mode::AutoYaw::set_fixed_yaw(float angle_deg, float turn_rate_ds, int8_t di
     } else {
         _fixed_yaw_slewrate_cds = MIN(copter.attitude_control->get_slew_yaw_max_degs(), turn_rate_ds) * 100.0;
     }
+    */
 
     // set yaw mode
     set_mode(Mode::FIXED);
@@ -256,17 +258,20 @@ float Mode::AutoYaw::yaw_cd()
         break;
     }
 
+    /*HaRe
     case Mode::RATE:
     case Mode::WEATHERVANE:
     case Mode::PILOT_RATE:
         _yaw_angle_cd = copter.attitude_control->get_att_target_euler_cd().z;
         break;
-
+    */
     case Mode::LOOK_AT_NEXT_WP:
     default:
+        /*HaRe
         // point towards next waypoint.
         // we don't use wp_bearing because we don't want the copter to turn too much during flight
         _yaw_angle_cd = copter.pos_control->get_yaw_cd();
+        */
     break;
     }
     
@@ -355,6 +360,7 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
 #if WEATHERVANE_ENABLED == ENABLED
 void Mode::AutoYaw::update_weathervane(const int16_t pilot_yaw_cds)
 {
+    /*HaRe
     if (!copter.flightmode->allows_weathervaning()) {
         return;
     }
@@ -379,5 +385,6 @@ void Mode::AutoYaw::update_weathervane(const int16_t pilot_yaw_cds)
             set_mode(_last_mode);
         }
     }
+    */
 }
 #endif // WEATHERVANE_ENABLED == ENABLED

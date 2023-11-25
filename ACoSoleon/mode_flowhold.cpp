@@ -228,6 +228,7 @@ void ModeFlowHold::flowhold_flow_to_angle(Vector2f &bf_angles, bool stick_input)
 // should be called at 100hz or more
 void ModeFlowHold::run()
 {
+    /*HaRe
     update_height_estimate();
 
     // set vertical speed and acceleration limits
@@ -258,6 +259,7 @@ void ModeFlowHold::run()
         quality_filtered = 0;
     }
 
+    
     // Flow Hold State Machine
     switch (flowhold_state) {
 
@@ -307,7 +309,7 @@ void ModeFlowHold::run()
         pos_control->set_pos_target_z_from_climb_rate_cm(target_climb_rate);
         break;
     }
-
+    
     // flowhold attitude target calculations
     Vector2f bf_angles;
 
@@ -340,6 +342,7 @@ void ModeFlowHold::run()
 
     // run the vertical position controller and set output throttle
     pos_control->update_z_controller();
+    */
 }
 
 /*

@@ -53,10 +53,17 @@ bool SO_TankSupervision::init(bool ignore_checks)
     return true;
 }
 
+int temp2;
 void SO_TankSupervision::update()
 {
     _fill_level -= _delta_fill;
     if (_fill_level < 0.0f) _fill_level = 100.0f;
+    
+    if (temp2++> 30){  //-- debugging
+        gcs().send_text(MAV_SEVERITY_INFO, "ACo Tanklevel = %f", _fill_level);  ///-HaRe debug
+        temp2=0;
+    }
+
 };
 
 // brake_run - runs the brake controller

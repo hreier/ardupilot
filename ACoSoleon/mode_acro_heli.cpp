@@ -10,6 +10,7 @@
 // heli_acro_init - initialise acro controller
 bool ModeAcro_Heli::init(bool ignore_checks)
 {
+    /*HaRe
     // if heli is equipped with a flybar, then tell the attitude controller to pass through controls directly to servos
     attitude_control->use_flybar_passthrough(motors->has_flybar(), motors->supports_yaw_passthrough());
 
@@ -19,6 +20,7 @@ bool ModeAcro_Heli::init(bool ignore_checks)
     copter.input_manager.set_use_stab_col(false);
 
     // always successfully enter acro
+    */
     return true;
 }
 
@@ -42,6 +44,7 @@ void ModeAcro_Heli::run()
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
     }
 
+    /*HaRe
     switch (motors->get_spool_state()) {
     case AP_Motors::SpoolState::SHUT_DOWN:
         // Motors Stopped
@@ -66,6 +69,7 @@ void ModeAcro_Heli::run()
         // do nothing
         break;
     }
+    */
 
     if (!motors->has_flybar()){
         // convert the input to the desired body frame rate
@@ -87,12 +91,14 @@ void ModeAcro_Heli::run()
             target_yaw = channel_yaw->get_control_in_zero_dz();
         }
 
+        /*HaRe
         // run attitude controller
         if (g2.acro_options.get() & uint8_t(AcroOptions::RATE_LOOP_ONLY)) {
             attitude_control->input_rate_bf_roll_pitch_yaw_2(target_roll, target_pitch, target_yaw);
         } else {
             attitude_control->input_rate_bf_roll_pitch_yaw(target_roll, target_pitch, target_yaw);
         }
+        */
     }else{
         /*
           for fly-bar passthrough use control_in values with no
@@ -114,21 +120,26 @@ void ModeAcro_Heli::run()
             yaw_in = get_pilot_desired_yaw_rate(channel_yaw->norm_input_dz());
         }
 
+        /*HaRe
         // run attitude controller
         attitude_control->passthrough_bf_roll_pitch_rate_yaw(roll_in, pitch_in, yaw_in);
+        */
     }
 
     // get pilot's desired throttle
     pilot_throttle_scaled = copter.input_manager.get_pilot_desired_collective(channel_throttle->get_control_in());
 
+    /*HaRe
     // output pilot's throttle without angle boost
     attitude_control->set_throttle_out(pilot_throttle_scaled, false, g.throttle_filt);
+    */
 }
 
 
 // virtual_flybar - acts like a flybar by leaking target atttitude back to current attitude
 void ModeAcro_Heli::virtual_flybar( float &roll_out, float &pitch_out, float &yaw_out, float pitch_leak, float roll_leak)
 {
+    /*HaRe
     Vector3f rate_ef_level, rate_bf_level;
 
     // get attitude targets
@@ -150,6 +161,7 @@ void ModeAcro_Heli::virtual_flybar( float &roll_out, float &pitch_out, float &ya
     roll_out += rate_bf_level.x;
     pitch_out += rate_bf_level.y;
     yaw_out += rate_bf_level.z;
+    */
 
 }
 #endif  //HELI_FRAME

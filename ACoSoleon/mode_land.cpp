@@ -97,6 +97,7 @@ void ModeLand::gps_run()
 //      should be called at 100hz or more
 void ModeLand::nogps_run()
 {
+    /*HaRe
     float target_roll = 0.0f, target_pitch = 0.0f;
 
     // process pilot inputs
@@ -139,6 +140,7 @@ void ModeLand::nogps_run()
 
     // call attitude controller
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(target_roll, target_pitch, auto_yaw.get_heading().yaw_rate_cds);
+   */
 }
 
 // do_not_use_GPS - forces land-mode to not use the GPS but instead rely on pilot input for roll and pitch

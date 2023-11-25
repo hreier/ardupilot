@@ -201,7 +201,7 @@ public:
         //
         k_param_inertial_nav = 100, // deprecated
         k_param_wp_nav,
-        k_param_attitude_control,
+        //HaRe k_param_attitude_control,
         k_param_pos_control,
         k_param_circle_nav,
         k_param_loiter_nav,     // 105
@@ -684,7 +684,7 @@ public:
     AC_CommandModel command_model_acro_y;
 #endif
 
-    AC_CommandModel command_model_pilot;
+    //HaRe AC_CommandModel command_model_pilot;
 
 #if MODE_ACRO_ENABLED == ENABLED
     AP_Int8 acro_options;

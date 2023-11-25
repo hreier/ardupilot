@@ -32,6 +32,7 @@ void Copter::Log_Write_Control_Tuning()
         terr_alt = logger.quiet_nan();
     }
 #endif
+    /*HaRe
     float des_alt_m = 0.0f;
     int16_t target_climb_rate_cms = 0;
     if (!flightmode->has_manual_throttle()) {
@@ -62,20 +63,24 @@ void Copter::Log_Write_Control_Tuning()
         climb_rate          : int16_t(inertial_nav.get_velocity_z_up_cms()) // float -> int16_t
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
+    */
 }
 
 // Write an attitude packet
 void Copter::Log_Write_Attitude()
 {
+    /*HaRe
     Vector3f targets = attitude_control->get_att_target_euler_cd();
     targets.z = wrap_360_cd(targets.z);
     ahrs.Write_Attitude(targets);
     ahrs_view->Write_Rate(*motors, *attitude_control, *pos_control);
+    */
  }
 
 // Write PIDS packets
 void Copter::Log_Write_PIDS()
 {
+   /*HaRe
    if (should_log(MASK_LOG_PID)) {
         logger.Write_PID(LOG_PIDR_MSG, attitude_control->get_rate_roll_pid().get_pid_info());
         logger.Write_PID(LOG_PIDP_MSG, attitude_control->get_rate_pitch_pid().get_pid_info());
@@ -86,6 +91,7 @@ void Copter::Log_Write_PIDS()
             logger.Write_PID(LOG_PIDE_MSG, pos_control->get_vel_xy_pid().get_pid_info_y());
         }
     }
+    */
 }
 
 // Write an EKF and POS packet

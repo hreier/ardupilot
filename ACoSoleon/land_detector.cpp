@@ -34,6 +34,7 @@ void Copter::update_land_and_crash_detectors()
 // called at MAIN_LOOP_RATE
 void Copter::update_land_detector()
 {
+    /*HaRe
     // land detector can not use the following sensors because they are unreliable during landing
     // barometer altitude :                 ground effect can cause errors larger than 4m
     // EKF vertical velocity or altitude :  poor barometer and large acceleration from ground impact
@@ -128,6 +129,7 @@ void Copter::update_land_detector()
     }
 
     set_land_complete_maybe(ap.land_complete || (land_detector_count >= LAND_DETECTOR_MAYBE_TRIGGER_SEC*scheduler.get_loop_rate_hz()));
+  */
 }
 
 // set land_complete flag and disarm motors if disarm-on-land is configured
@@ -180,6 +182,7 @@ void Copter::set_land_complete_maybe(bool b)
 //  has no effect when throttle is above hover throttle
 void Copter::update_throttle_mix()
 {
+/*HaRe
 #if FRAME_CONFIG != HELI_FRAME
     // if disarmed or landed prioritise throttle
     if (!motors->armed() || ap.land_complete) {
@@ -221,4 +224,5 @@ void Copter::update_throttle_mix()
         }
     }
 #endif
+*/
 }

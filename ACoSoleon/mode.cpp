@@ -16,7 +16,7 @@ Mode::Mode(void) :
     pos_control(copter.pos_control),
     inertial_nav(copter.inertial_nav),
     ahrs(copter.ahrs),
-    attitude_control(copter.attitude_control),
+    /*HaRe attitude_control(copter.attitude_control), */
     motors(copter.motors),
     channel_roll(copter.channel_roll),
     channel_pitch(copter.channel_pitch),
@@ -121,11 +121,14 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
+
+/* HaRe
 #if HAL_ADSB_ENABLED
         case Mode::Number::AVOID_ADSB:
             ret = &mode_avoid_adsb;
             break;
 #endif
+*/
 
 #if MODE_GUIDED_NOGPS_ENABLED == ENABLED
         case Mode::Number::GUIDED_NOGPS:
@@ -246,6 +249,7 @@ bool Copter::gcs_mode_enabled(const Mode::Number mode_num)
 // ACRO, STABILIZE, ALTHOLD, LAND, DRIFT and SPORT can always be set successfully but the return state of other flight modes should be checked and the caller should deal with failures appropriately
 bool Copter::set_mode(Mode::Number mode, ModeReason reason)
 {
+    /*HaRe
     // update last reason
     const ModeReason last_reason = _last_reason;
     _last_reason = reason;
@@ -359,9 +363,11 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     logger.Write_Mode((uint8_t)flightmode->mode_number(), reason);
     gcs().send_message(MSG_HEARTBEAT);
 
+
 #if HAL_ADSB_ENABLED
     adsb.set_is_auto_mode((mode == Mode::Number::AUTO) || (mode == Mode::Number::RTL) || (mode == Mode::Number::GUIDED));
 #endif
+
 
 #if AP_FENCE_ENABLED
     // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
@@ -392,7 +398,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     if (copter.ap.initialised) {
         AP_Notify::events.user_mode_change = 1;
     }
-
+*/
     // return success
     return true;
 }
@@ -544,6 +550,7 @@ bool Mode::is_disarmed_or_landed() const
 
 void Mode::zero_throttle_and_relax_ac(bool spool_up)
 {
+    /*HaRe
     if (spool_up) {
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
     } else {
@@ -551,13 +558,16 @@ void Mode::zero_throttle_and_relax_ac(bool spool_up)
     }
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(0.0f, 0.0f, 0.0f);
     attitude_control->set_throttle_out(0.0f, false, copter.g.throttle_filt);
+    */
 }
 
 void Mode::zero_throttle_and_hold_attitude()
 {
+    /*HaRe
     // run attitude controller
     attitude_control->input_rate_bf_roll_pitch_yaw(0.0f, 0.0f, 0.0f);
     attitude_control->set_throttle_out(0.0f, false, copter.g.throttle_filt);
+    */
 }
 
 // handle situations where the vehicle is on the ground waiting for takeoff
@@ -568,6 +578,7 @@ void Mode::zero_throttle_and_hold_attitude()
 // ultimately it forces the motor interlock to be obeyed in auto and guided modes when on the ground.
 void Mode::make_safe_ground_handling(bool force_throttle_unlimited)
 {
+    /*HaRe
     if (force_throttle_unlimited) {
         // keep rotors turning 
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
@@ -598,6 +609,7 @@ void Mode::make_safe_ground_handling(bool force_throttle_unlimited)
     pos_control->update_z_controller();
     // we may need to move this out
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(0.0f, 0.0f, 0.0f);
+    */
 }
 
 /*
@@ -686,6 +698,7 @@ void Mode::land_run_vertical_control(bool pause_descent)
 
 void Mode::land_run_horizontal_control()
 {
+    /*HaRe
     Vector2f vel_correction;
 
     // relax loiter target if we might be landed
@@ -782,6 +795,7 @@ void Mode::land_run_horizontal_control()
 
     // call attitude controller
     attitude_control->input_thrust_vector_heading(thrust_vector, auto_yaw.get_heading());
+    */
 
 }
 
@@ -809,6 +823,7 @@ void Mode::land_run_normal_or_precland(bool pause_descent)
 // The passed in location is expected to be NED and in m
 void Mode::precland_retry_position(const Vector3f &retry_pos)
 {
+    /*HaRe
     if (!copter.failsafe.radio) {
         if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && copter.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
             AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
@@ -848,6 +863,7 @@ void Mode::precland_retry_position(const Vector3f &retry_pos)
 
     // call attitude controller
     attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
+    */
 
 }
 
@@ -1012,7 +1028,8 @@ float Mode::get_pilot_desired_yaw_rate(float yaw_in)
     }
 
     // convert pilot input to the desired yaw rate
-    return g2.command_model_pilot.get_rate() * 100.0 * input_expo(yaw_in, g2.command_model_pilot.get_expo());
+    //HaRereturn g2.command_model_pilot.get_rate() * 100.0 * input_expo(yaw_in, g2.command_model_pilot.get_expo());
+    return 0;
 }
 
 // pass-through functions to reduce code churn on conversion;

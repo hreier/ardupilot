@@ -155,7 +155,7 @@ protected:
     // Run precland statemachine. This function should be called from any mode that wants to do precision landing.
     // This handles everything from prec landing, to prec landing failures, to retries and failsafe measures
     void precland_run();
-#endif
+#endif  
 
     // return expected input throttle setting to hover:
     virtual float throttle_hover() const;
@@ -178,7 +178,7 @@ protected:
     AC_PosControl *&pos_control;
     AP_InertialNav &inertial_nav;
     AP_AHRS &ahrs;
-    AC_AttitudeControl_t *&attitude_control;
+    //HaReAC_AttitudeControl_t *&attitude_control;
     MOTOR_CLASS *&motors;
     RC_Channel *&channel_roll;
     RC_Channel *&channel_pitch;
@@ -502,7 +502,7 @@ public:
         FUNCTOR_BIND_MEMBER(&ModeAuto::exit_mission, void)};
 
     // Mission change detector
-    AP_Mission_ChangeDetector mis_change_detector;
+    //HaReAP_Mission_ChangeDetector mis_change_detector;
 
     // true if weathervaning is allowed in auto
 #if WEATHERVANE_ENABLED == ENABLED

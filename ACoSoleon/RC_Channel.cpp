@@ -345,6 +345,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
+        /*HaRe
         case AUX_FUNC::ATTCON_FEEDFWD:
             // enable or disable feed forward
             copter.attitude_control->bf_feedforward(ch_flag == AuxSwitchPos::HIGH);
@@ -354,6 +355,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             // enable or disable accel limiting by restoring defaults
             copter.attitude_control->accel_limiting(ch_flag == AuxSwitchPos::HIGH);
             break;
+        */
 
         case AUX_FUNC::MOTOR_INTERLOCK:
 #if FRAME_CONFIG == HELI_FRAME
