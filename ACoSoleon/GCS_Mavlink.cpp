@@ -228,9 +228,9 @@ void GCS_MAVLINK_Copter::send_so_status(void) const
     
     mavlink_msg_so_status_send(chan,
                                 AP_HAL::millis(), 
-                                255,                //-- route to groundstation
-                                MAV_COMP_ID_ALL,  
+                                0,                //-- route to groundstation
                                 SO::TankSupervision()->get_level(),
+                                0,
                                 0,
                                 0,
                                 0);
@@ -824,6 +824,12 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
     switch(packet.command) {
 
     case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
+        if ((uint8_t)packet.param1 != 0)
+        {
+            gcs().send_text(MAV_SEVERITY_INFO, "DO_SEND_SCRIPT_MESSAGE ignored [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
+            return MAV_RESULT_ACCEPTED;
+        }
+        [[fallthrough]]; 
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
         SO::TankSupervision()->set(packet.param2);
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param2);  ///-HaRe debug
