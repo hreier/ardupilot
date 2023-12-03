@@ -36,14 +36,14 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             ret = &mode_acro;
             break;
 #endif
-
+/*HaRe
         case Mode::Number::STABILIZE:
-            ret = &mode_stabilize;
+        mode_stabilize    ret = &mode_stabilize;
             break;
 
         case Mode::Number::ALT_HOLD:
-            ret = &mode_althold;
-            break;
+        //HaRe    ret = &mode_althold;
+            break;*/
 
 #if MODE_AUTO_ENABLED == ENABLED
         case Mode::Number::AUTO:
@@ -68,10 +68,11 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             ret = &mode_guided;
             break;
 #endif
-
+/*HaRe
         case Mode::Number::LAND:
             ret = &mode_land;
-            break;
+            break; 
+*/
 
 #if MODE_RTL_ENABLED == ENABLED
         case Mode::Number::RTL:
@@ -171,13 +172,13 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
             ret = &mode_autorotate;
             break;
 #endif
-
+/*HaRe
 #if MODE_TURTLE_ENABLED == ENABLED
         case Mode::Number::TURTLE:
             ret = &mode_turtle;
             break;
 #endif
-
+*/
         default:
             break;
     }
@@ -419,7 +420,7 @@ bool Copter::set_mode(const uint8_t new_mode, const ModeReason reason)
 // called at 100hz or more
 void Copter::update_flight_mode()
 {
-    surface_tracking.invalidate_for_logging();  // invalidate surface tracking alt, flight mode will set to true if used
+   //HaRe surface_tracking.invalidate_for_logging();  // invalidate surface tracking alt, flight mode will set to true if used
 
     flightmode->run();
 }
@@ -428,11 +429,12 @@ void Copter::update_flight_mode()
 void Copter::exit_mode(Mode *&old_flightmode,
                        Mode *&new_flightmode)
 {
+    /*HaRe
     // smooth throttle transition when switching from manual to automatic flight modes
     if (old_flightmode->has_manual_throttle() && !new_flightmode->has_manual_throttle() && motors->armed() && !ap.land_complete) {
         // this assumes all manual flight modes use get_pilot_desired_throttle to translate pilot input to output throttle
         set_accel_throttle_I_from_pilot_throttle();
-    }
+    }*/
 
     // cancel any takeoffs in progress
     old_flightmode->takeoff_stop();
@@ -511,7 +513,7 @@ Vector2f Mode::get_pilot_desired_velocity(float vel_max) const
     if (vel.is_zero()) {
         return vel;
     }
-    copter.rotate_body_frame_to_NE(vel.x, vel.y);
+ //HaRe   copter.rotate_body_frame_to_NE(vel.x, vel.y);
 
     // Transform square input range to circular output
     // vel_scaler is the vector to the edge of the +- 1.0 square in the direction of the current input
@@ -1037,12 +1039,14 @@ float Mode::get_pilot_desired_yaw_rate(float yaw_in)
 // class.
 float Mode::get_pilot_desired_climb_rate(float throttle_control)
 {
-    return copter.get_pilot_desired_climb_rate(throttle_control);
+//HaRe    return copter.get_pilot_desired_climb_rate(throttle_control);
+return 0.0; //-- HaRe
 }
 
 float Mode::get_non_takeoff_throttle()
 {
-    return copter.get_non_takeoff_throttle();
+ //HaRe       return copter.get_non_takeoff_throttle();
+ return 0.0; //-- HaRe
 }
 
 void Mode::update_simple_mode(void) {
@@ -1056,7 +1060,7 @@ bool Mode::set_mode(Mode::Number mode, ModeReason reason)
 
 void Mode::set_land_complete(bool b)
 {
-    return copter.set_land_complete(b);
+ //HaRe   return copter.set_land_complete(b);
 }
 
 GCS_Copter &Mode::gcs()
@@ -1066,5 +1070,6 @@ GCS_Copter &Mode::gcs()
 
 uint16_t Mode::get_pilot_speed_dn()
 {
-    return copter.get_pilot_speed_dn();
+//HaRe    return copter.get_pilot_speed_dn();
+return 0;
 }

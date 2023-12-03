@@ -74,7 +74,7 @@ public:
     virtual const char *name() const = 0;
     virtual const char *name4() const = 0;
 
-    bool do_user_takeoff(float takeoff_alt_cm, bool must_navigate);
+  //HaRe  bool do_user_takeoff(float takeoff_alt_cm, bool must_navigate);
     virtual bool is_taking_off() const;
     static void takeoff_stop() { takeoff.stop(); }
 
@@ -214,9 +214,11 @@ protected:
 
     virtual bool do_user_takeoff_start(float takeoff_alt_cm);
 
+    /*HaRe
     // method shared by both Guided and Auto for takeoff.
     // position controller controls vehicle but the user can control the yaw.
     void auto_takeoff_run();
+    
     void auto_takeoff_start(float complete_alt_cm, bool terrain_alt);
     bool auto_takeoff_get_position(Vector3p& completion_pos);
 
@@ -229,7 +231,7 @@ protected:
     static bool auto_takeoff_terrain_alt;       // true if altitudes are above terrain
     static bool auto_takeoff_complete;          // true when takeoff is complete
     static Vector3p auto_takeoff_complete_pos;  // target takeoff position as offset from ekf origin in cm
-
+*/
 public:
     // Navigation Yaw control
     class AutoYaw {
@@ -392,7 +394,7 @@ private:
 };
 #endif
 
-
+/*HaRe
 class ModeAltHold : public Mode {
 
 public:
@@ -420,7 +422,7 @@ protected:
 
 private:
 
-};
+};*/
 
 
 class ModeAuto : public Mode {
@@ -871,6 +873,7 @@ private:
   optical flow directly, avoiding the need for a rangefinder
  */
 
+/*HaRe
 class ModeFlowHold : public Mode {
 public:
     // need a constructor for parameters
@@ -951,7 +954,9 @@ private:
     // last time there was significant stick input
     uint32_t last_stick_input_ms;
 };
+*/
 #endif // MODE_FLOWHOLD_ENABLED
+
 
 
 class ModeGuided : public Mode {
@@ -1119,7 +1124,7 @@ private:
 
 };
 
-
+/*HaRe
 class ModeLand : public Mode {
 
 public:
@@ -1158,7 +1163,7 @@ private:
 
     uint32_t land_start_time;
     bool land_pause;
-};
+};*/
 
 
 class ModeLoiter : public Mode {
@@ -1487,7 +1492,7 @@ private:
 
 };
 
-
+/*HaRe
 class ModeStabilize : public Mode {
 
 public:
@@ -1512,7 +1517,7 @@ protected:
 
 private:
 
-};
+};*/
 
 #if FRAME_CONFIG == HELI_FRAME
 class ModeStabilize_Heli : public ModeStabilize {
@@ -1657,6 +1662,7 @@ private:
     float free_fall_start_velz;     // vertical velocity when free fall was detected
 };
 
+/*HaRe
 #if MODE_TURTLE_ENABLED == ENABLED
 class ModeTurtle : public Mode {
 
@@ -1689,7 +1695,9 @@ private:
     uint32_t last_throttle_warning_output_ms;
 };
 #endif
+*/
 
+/*HaRe
 // modes below rely on Guided mode so must be declared at the end (instead of in alphabetical order)
 
 class ModeAvoidADSB : public ModeGuided {
@@ -1716,7 +1724,7 @@ protected:
 
 private:
 
-};
+}; */
 
 #if AP_FOLLOW_ENABLED
 class ModeFollow : public ModeGuided {

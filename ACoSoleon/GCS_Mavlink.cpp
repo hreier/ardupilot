@@ -373,7 +373,7 @@ bool GCS_Copter::vehicle_initialised() const {
 bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
 {
     switch(id) {
-
+/*HaRe
     case MSG_TERRAIN:
 #if AP_TERRAIN_AVAILABLE
         CHECK_PAYLOAD_SIZE(TERRAIN_REQUEST);
@@ -382,19 +382,19 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
         break;
 
     case MSG_WIND:
-/*HaRe
+
         CHECK_PAYLOAD_SIZE(WIND);
         send_wind();
         break;
-*/
+
     case MSG_SERVO_OUT:
     case MSG_AOA_SSA:
     case MSG_LANDING:
         // unused
-        break;
-
-    case MSG_ADSB_VEHICLE: {
+        break;*/
 /* HaRe
+    case MSG_ADSB_VEHICLE: {
+
 #if HAL_ADSB_ENABLED
         CHECK_PAYLOAD_SIZE(ADSB_VEHICLE);
         copter.adsb.send_adsb_vehicle(chan);
@@ -409,9 +409,9 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
             }
         }
 #endif
- */
+ 
         break;
-    }
+    }*/
 
 
     case MSG_SO_STATUS:
@@ -695,10 +695,11 @@ void GCS_MAVLINK_Copter::handle_landing_target(const mavlink_landing_target_t &p
 
 MAV_RESULT GCS_MAVLINK_Copter::_handle_command_preflight_calibration(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
+    /*Hare
     if (is_equal(packet.param6,1.0f)) {
         // compassmot calibration
         return copter.mavlink_compassmot(*this);
-    }
+    }*/
 
     return GCS_MAVLINK::_handle_command_preflight_calibration(packet, msg);
 }
@@ -835,6 +836,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param2);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
 
+    /*HaRe
     case MAV_CMD_NAV_VTOL_TAKEOFF:
     case MAV_CMD_NAV_TAKEOFF: {
         // param3 : horizontal navigation by pilot acceptable
@@ -849,7 +851,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
             return MAV_RESULT_FAILED;
         }
         return MAV_RESULT_ACCEPTED;
-    }
+    }*/
 
 #if MODE_AUTO_ENABLED == ENABLED
     case MAV_CMD_DO_LAND_START:
@@ -949,7 +951,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         }
         return MAV_RESULT_FAILED;
 #endif
-
+/*HaRe
     case MAV_CMD_DO_MOTOR_TEST:
         // param1 : motor sequence number (a number from 1 to max number of motors on the vehicle)
         // param2 : throttle type (0=throttle percentage, 1=PWM, 2=pilot throttle channel pass-through. See MOTOR_TEST_THROTTLE_TYPE enum)
@@ -987,7 +989,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         }
         return MAV_RESULT_FAILED;
 #endif
-
+*/
         /* Solo user presses Fly button */
     case MAV_CMD_SOLO_BTN_FLY_CLICK: {
         if (copter.failsafe.radio) {
@@ -1001,7 +1003,9 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         return MAV_RESULT_ACCEPTED;
     }
 
+    
         /* Solo user holds down Fly button for a couple of seconds */
+    /*HaRe
     case MAV_CMD_SOLO_BTN_FLY_HOLD: {
         if (copter.failsafe.radio) {
             return MAV_RESULT_ACCEPTED;
@@ -1020,9 +1024,10 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
             copter.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND);
         }
         return MAV_RESULT_ACCEPTED;
-    }
+    }*/
 
         /* Solo user presses pause button */
+    /*HaRe
     case MAV_CMD_SOLO_BTN_PAUSE_CLICK: {
         if (copter.failsafe.radio) {
             return MAV_RESULT_ACCEPTED;
@@ -1053,7 +1058,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
             }
         }
         return MAV_RESULT_ACCEPTED;
-    }
+    }*/
 
     default:
         return GCS_MAVLINK::handle_command_long_packet(packet);
@@ -1481,12 +1486,14 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_flight_termination(const mavlink_command_l
         return MAV_RESULT_ACCEPTED;
     }
 #endif
+ /*HaRe
     if (packet.param1 > 0.5f) {
         copter.arming.disarm(AP_Arming::Method::TERMINATION);
         return MAV_RESULT_ACCEPTED;
     }
 
-    return MAV_RESULT_FAILED;
+    return MAV_RESULT_FAILED;*/
+    return MAV_RESULT_ACCEPTED; //-HaRe
 }
 
 float GCS_MAVLINK_Copter::vfr_hud_alt() const

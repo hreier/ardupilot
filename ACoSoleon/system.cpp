@@ -62,7 +62,7 @@ void Copter::init_ardupilot()
 #endif
 
     // update motor interlock state
-    update_using_interlock();
+  //HaRe  update_using_interlock();
 
 #if FRAME_CONFIG == HELI_FRAME
     // trad heli specific initialisation
@@ -76,7 +76,7 @@ void Copter::init_ardupilot()
 
     // initialise surface to be tracked in SurfaceTracking
     // must be before rc init to not override initial switch position
-    surface_tracking.init((SurfaceTracking::Surface)copter.g2.surftrak_mode.get());
+//HaRe    surface_tracking.init((SurfaceTracking::Surface)copter.g2.surftrak_mode.get());
 
     // allocate the motors class
     allocate_motors();
@@ -88,8 +88,8 @@ void Copter::init_ardupilot()
     // sets up motors and output to escs
     init_rc_out();
 
-    // check if we should enter esc calibration mode
-    esc_calibration_startup_check();
+    /*HaRe// check if we should enter esc calibration mode
+    esc_calibration_startup_check();*/
 
     // motors initialised so parameters can be sent
     ap.initialised_params = true;
@@ -197,8 +197,8 @@ void Copter::init_ardupilot()
 #endif
 
     // set landed flags
-    set_land_complete(true);
-    set_land_complete_maybe(true);
+//HaRe    set_land_complete(true);
+//HaRe    set_land_complete_maybe(true);
 
     // enable CPU failsafe
     failsafe_enable();
@@ -323,6 +323,7 @@ bool Copter::ekf_alt_ok() const
 // update_auto_armed - update status of auto_armed flag
 void Copter::update_auto_armed()
 {
+    /*HaRe
     // disarm checks
     if(ap.auto_armed){
         // if motors are disarmed, auto_armed should also be false
@@ -351,6 +352,7 @@ void Copter::update_auto_armed()
             }
         }
     }
+    */
 }
 
 /*

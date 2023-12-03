@@ -122,7 +122,7 @@ void Copter::read_radio()
 
     // Log an error and enter failsafe.
     AP::logger().Write_Error(LogErrorSubsystem::RADIO, LogErrorCode::RADIO_LATE_FRAME);
-    set_failsafe_radio(true);
+//haRe    set_failsafe_radio(true);
 }
 
 #define FS_COUNTER 3        // radio failsafe kicks in after 3 consecutive throttle values below failsafe_throttle_value
@@ -146,7 +146,7 @@ void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
         failsafe.radio_counter++;
         if( failsafe.radio_counter >= FS_COUNTER ) {
             failsafe.radio_counter = FS_COUNTER;  // check to ensure we don't overflow the counter
-            set_failsafe_radio(true);
+     //HaRe       set_failsafe_radio(true);
         }
     }else{
         // we have a good throttle so reduce failsafe counter
@@ -156,7 +156,7 @@ void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
 
             // disengage failsafe after three (nearly) consecutive valid throttle values
             if (failsafe.radio) {
-                set_failsafe_radio(false);
+           //HaRe     set_failsafe_radio(false);
             }
         }
         // pass through throttle

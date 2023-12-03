@@ -29,11 +29,12 @@ void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
         !rc().find_channel_for_option(AUX_FUNC::SUPERSIMPLE_MODE)) {
         // if none of the Aux Switches are set to Simple or Super Simple Mode then
         // set Simple Mode using stored parameters from EEPROM
+        /*HaRe
         if (BIT_IS_SET(copter.g.super_simple, new_pos)) {
             copter.set_simple_mode(Copter::SimpleMode::SUPERSIMPLE);
         } else {
             copter.set_simple_mode(BIT_IS_SET(copter.g.simple_modes, new_pos) ? Copter::SimpleMode::SIMPLE : Copter::SimpleMode::NONE);
-        }
+        }*/
     }
 }
 
@@ -166,10 +167,11 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             }
             break;
 
+        /*HaRe
         case AUX_FUNC::SIMPLE_MODE:
             // low = simple mode off, middle or high position turns simple mode on
             copter.set_simple_mode((ch_flag == AuxSwitchPos::LOW) ? Copter::SimpleMode::NONE : Copter::SimpleMode::SIMPLE);
-            break;
+            break; 
 
         case AUX_FUNC::SUPERSIMPLE_MODE: {
             Copter::SimpleMode newmode = Copter::SimpleMode::NONE;
@@ -185,7 +187,8 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             }
             copter.set_simple_mode(newmode);
             break;
-        }
+        
+        }*/
 
         case AUX_FUNC::RTL:
 #if MODE_RTL_ENABLED == ENABLED
@@ -554,7 +557,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
         }
 
-        case AUX_FUNC::SURFACE_TRACKING:
+        /*HaRecase AUX_FUNC::SURFACE_TRACKING:
             switch (ch_flag) {
             case AuxSwitchPos::LOW:
                 copter.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::GROUND);
@@ -566,7 +569,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
                 copter.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::CEILING);
                 break;
             }
-            break;
+            break; */
 
         case AUX_FUNC::ZIGZAG_Auto:
 #if MODE_ZIGZAG_ENABLED == ENABLED
@@ -600,6 +603,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
+/*HaRe
         case AUX_FUNC::TURTLE:
 #if MODE_TURTLE_ENABLED == ENABLED
             do_aux_function_change_mode(Mode::Number::TURTLE, ch_flag);
@@ -619,6 +623,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
                 copter.ap.armed_with_airmode_switch = true;
             }
             break;
+*/
 
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
         case AUX_FUNC::CUSTOM_CONTROLLER:
@@ -701,11 +706,12 @@ void Copter::auto_trim_cancel()
 void Copter::auto_trim()
 {
     if (auto_trim_counter > 0) {
+        /*HaRe
         if (copter.flightmode != &copter.mode_stabilize ||
             !copter.motors->armed()) {
             auto_trim_cancel();
             return;
-        }
+        }*/
 
         // flash the leds
         AP_Notify::flags.save_trim = true;

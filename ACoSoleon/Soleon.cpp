@@ -59,7 +59,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     // update INS immediately to get current gyro data populated
     FAST_TASK_CLASS(AP_InertialSensor, &copter.ins, update),
     // run low level rate controllers that only require IMU data
-    FAST_TASK(run_rate_controller),
+ //HaRe   FAST_TASK(run_rate_controller),
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
     FAST_TASK(run_custom_controller),
 #endif
@@ -67,20 +67,20 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     FAST_TASK(heli_update_autorotation),
 #endif //HELI_FRAME
     // send outputs to the motors library immediately
-    FAST_TASK(motors_output),
+//HaRe    FAST_TASK(motors_output),
      // run EKF state estimator (expensive)
     FAST_TASK(read_AHRS),
 #if FRAME_CONFIG == HELI_FRAME
     FAST_TASK(update_heli_control_dynamics),
 #endif //HELI_FRAME
     // check if ekf has reset target heading or position
-    FAST_TASK(check_ekf_reset),
+ //HaRe   FAST_TASK(check_ekf_reset),
     // run the attitude controllers
     FAST_TASK(update_flight_mode),
     // update home from EKF if necessary
     FAST_TASK(update_home_from_EKF),
     // check if we've landed or crashed
-    FAST_TASK(update_land_and_crash_detectors),
+//HaRe    FAST_TASK(update_land_and_crash_detectors),
     // surface tracking update
     FAST_TASK(update_rangefinder_terrain_offset),
 #if HAL_MOUNT_ENABLED
@@ -97,11 +97,11 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(update_batt_compass,   10,    120, 15),
     SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&copter.g2.rc_channels, read_aux_all,    10,  50,  18),
-    SCHED_TASK(arm_motors_check,      10,     50, 21),
+//HaRe    SCHED_TASK(arm_motors_check,      10,     50, 21),
 #if TOY_MODE_ENABLED == ENABLED
     SCHED_TASK_CLASS(ToyMode,              &copter.g2.toy_mode,         update,          10,  50,  24),
 #endif
-    SCHED_TASK(auto_disarm_check,     10,     50,  27),
+//HaRe    SCHED_TASK(auto_disarm_check,     10,     50,  27),
     SCHED_TASK(auto_trim,             10,     75,  30),
 #if RANGEFINDER_ENABLED == ENABLED
     SCHED_TASK(read_rangefinder,      20,    100,  33),
@@ -113,8 +113,8 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_Beacon,            &copter.g2.beacon,           update,         400,  50,  39),
 #endif
     SCHED_TASK(update_altitude,       10,    100,  42),
-    SCHED_TASK(run_nav_updates,       50,    100,  45),
-    SCHED_TASK(update_throttle_hover,100,     90,  48),
+//HaRe    SCHED_TASK(run_nav_updates,       50,    100,  45),
+//HaRe    SCHED_TASK(update_throttle_hover,100,     90,  48),
 #if MODE_SMARTRTL_ENABLED == ENABLED
     SCHED_TASK_CLASS(ModeSmartRTL,         &copter.mode_smartrtl,       save_position,    3, 100,  51),
 #endif
@@ -137,15 +137,15 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(loop_rate_logging, LOOP_RATE,    50,  75),
 #endif
     SCHED_TASK(one_hz_loop,            1,    100,  81),
-    SCHED_TASK(ekf_check,             10,     75,  84),
-    SCHED_TASK(check_vibration,       10,     50,  87),
+ //HaRe   SCHED_TASK(ekf_check,             10,     75,  84),
+//HaRe    SCHED_TASK(check_vibration,       10,     50,  87),
     SCHED_TASK(gpsglitch_check,       10,     50,  90),
-    SCHED_TASK(takeoff_check,         50,     50,  91),
+//HaRe    SCHED_TASK(takeoff_check,         50,     50,  91),
 //#if AP_LANDINGGEAR_ENABLED  //HaRe
 //    SCHED_TASK(landinggear_update,    10,     75,  93),
 //#endif
-    SCHED_TASK(standby_update,        100,    75,  96),
-    SCHED_TASK(lost_vehicle_check,    10,     50,  99),
+//    SCHED_TASK(standby_update,        100,    75,  96),
+//HaRe    SCHED_TASK(lost_vehicle_check,    10,     50,  99),
     SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_receive, 400, 180, 102),
     SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_send,    400, 550, 105),
 #if HAL_MOUNT_ENABLED
@@ -174,9 +174,11 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if ADVANCED_FAILSAFE == ENABLED
     SCHED_TASK(afs_fs_check,          10,    100, 141),
 #endif
+/*haRe
 #if AP_TERRAIN_AVAILABLE
     SCHED_TASK(terrain_update,        10,    100, 144),
 #endif
+*/
 #if AP_GRIPPER_ENABLED
     SCHED_TASK_CLASS(AP_Gripper,           &copter.g2.gripper,          update,          10,  75, 147),
 #endif
@@ -430,7 +432,7 @@ void Copter::rc_loop()
 void Copter::throttle_loop()
 {
     // update throttle_low_comp value (controls priority of throttle vs attitude control)
-    update_throttle_mix();
+ //HaRe   update_throttle_mix();
 
     // check auto_armed status
     update_auto_armed();
@@ -444,8 +446,8 @@ void Copter::throttle_loop()
 #endif
 
     // compensate for ground effect (if enabled)
-    update_ground_effect_detector();
-    update_ekf_terrain_height_stable();
+ //   update_ground_effect_detector();
+ //   update_ekf_terrain_height_stable();
 }
 
 // update_batt_compass - read battery and compass
@@ -507,9 +509,10 @@ void Copter::ten_hz_logging_loop()
     if (should_log(MASK_LOG_RCOUT)) {
         logger.Write_RCOUT();
     }
+    /*HaRe
     if (should_log(MASK_LOG_NTUN) && (flightmode->requires_GPS() || landing_with_GPS() || !flightmode->has_manual_throttle())) {
         pos_control->write_log();
-    }
+    }*/
     if (should_log(MASK_LOG_IMU) || should_log(MASK_LOG_IMU_FAST) || should_log(MASK_LOG_IMU_RAW)) {
         AP::ins().Write_Vibration();
     }
@@ -574,15 +577,15 @@ void Copter::three_hz_loop()
 
     // check for deadreckoning failsafe
     failsafe_deadreckon_check();
-
+/*HaRe
 #if AP_FENCE_ENABLED
     // check if we have breached a fence
     fence_check();
 #endif // AP_FENCE_ENABLED
-
+*/
 
     // update ch6 in flight tuning
-    tuning();
+//HaRe    tuning();
 
 }
 
@@ -594,7 +597,7 @@ void Copter::one_hz_loop()
     }
 
     if (!motors->armed()) {
-        update_using_interlock();
+    //HaRe    update_using_interlock();
 
         // check the user hasn't updated the frame class or type
         motors->set_frame_class_and_type((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
@@ -608,9 +611,10 @@ void Copter::one_hz_loop()
     // update assigned functions and enable auxiliary servos
     SRV_Channels::enable_aux_servos();
 
+/* HaRe
     // log terrain data
     terrain_logging();
-/* HaRe
+
 #if HAL_ADSB_ENABLED
     adsb.set_is_flying(!ap.land_complete);
 #endif
@@ -663,6 +667,7 @@ void Copter::update_simple_mode(void)
     channel_pitch->set_control_in(-rollx*ahrs.sin_yaw() + pitchx*ahrs.cos_yaw());
 }
 
+/*HaRe
 // update_super_simple_bearing - adjusts simple bearing based on location
 // should be called after home_bearing has been updated
 void Copter::update_super_simple_bearing(bool force_update)
@@ -687,7 +692,7 @@ void Copter::update_super_simple_bearing(bool force_update)
     const float angle_rad = radians((super_simple_last_bearing+18000)/100);
     super_simple_cos_yaw = cosf(angle_rad);
     super_simple_sin_yaw = sinf(angle_rad);
-}
+}*/
 
 void Copter::read_AHRS(void)
 {
@@ -761,8 +766,8 @@ Copter::Copter(void)
     land_accel_ef_filter(LAND_DETECTOR_ACCEL_LPF_CUTOFF),
     rc_throttle_control_in_filter(1.0f),
     inertial_nav(ahrs),
-    param_loader(var_info),
-    flightmode(&mode_stabilize)
+    param_loader(var_info)/*,
+    flightmode(&mode_stabilize)*/
 {
 }
 

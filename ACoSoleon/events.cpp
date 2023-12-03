@@ -47,7 +47,7 @@ void Copter::failsafe_radio_on_event()
     if (should_disarm_on_failsafe()) {
         // should immediately disarm when we're on the ground
         announce_failsafe("Radio", "Disarming");
-        arming.disarm(AP_Arming::Method::RADIOFAILSAFE);
+     //HaRe   arming.disarm(AP_Arming::Method::RADIOFAILSAFE);
         desired_action = FailsafeAction::NONE;
 
     } else if (flightmode->is_landing() && ((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
@@ -102,6 +102,7 @@ void Copter::handle_battery_failsafe(const char *type_str, const int8_t action)
 
     FailsafeAction desired_action = (FailsafeAction)action;
 
+    /*Hare
     // Conditions to deviate from BATT_FS_XXX_ACT parameter setting
     if (should_disarm_on_failsafe()) {
         // should immediately disarm when we're on the ground
@@ -115,7 +116,7 @@ void Copter::handle_battery_failsafe(const char *type_str, const int8_t action)
         announce_failsafe("Battery", "Continuing Landing");
     } else {
         announce_failsafe("Battery");
-    }
+    }*/
 
     // Battery FS options already use the Failsafe_Options enum. So use them directly.
     do_failsafe_action(desired_action, ModeReason::BATTERY_FAILSAFE);
@@ -134,12 +135,14 @@ void Copter::failsafe_gcs_check()
     if (gcs_last_seen_ms == 0) {
         return;
     }
-
+    
+/*HaRe
     // calc time since last gcs update
     // note: this only looks at the heartbeat from the device id set by g.sysid_my_gcs
     const uint32_t last_gcs_update_ms = millis() - gcs_last_seen_ms;
     const uint32_t gcs_timeout_ms = uint32_t(constrain_float(g2.fs_gcs_timeout * 1000.0f, 0.0f, UINT32_MAX));
 
+    
     // Determine which event to trigger
     if (last_gcs_update_ms < gcs_timeout_ms && failsafe.gcs) {
         // Recovery from a GCS failsafe
@@ -156,7 +159,7 @@ void Copter::failsafe_gcs_check()
         // New GCS failsafe event, trigger events
         set_failsafe_gcs(true);
         failsafe_gcs_on_event();
-    }
+    }*/
 }
 
 // failsafe_gcs_on_event - actions to take when GCS contact is lost
@@ -201,7 +204,7 @@ void Copter::failsafe_gcs_on_event(void)
 
     } else if (should_disarm_on_failsafe()) {
         // should immediately disarm when we're on the ground
-        arming.disarm(AP_Arming::Method::GCSFAILSAFE);
+//HaRe arming.disarm(AP_Arming::Method::GCSFAILSAFE);
         desired_action = FailsafeAction::NONE;
         announce_failsafe("GCS", "Disarming");
 
@@ -242,7 +245,7 @@ void Copter::failsafe_gcs_off_event(void)
 // executes terrain failsafe if data is missing for longer than a few seconds
 void Copter::failsafe_terrain_check()
 {
-    // trigger within <n> milliseconds of failures while in various modes
+   /*HaRe // trigger within <n> milliseconds of failures while in various modes
     bool timeout = (failsafe.terrain_last_failure_ms - failsafe.terrain_first_failure_ms) > FS_TERRAIN_TIMEOUT_MS;
     bool trigger_event = timeout && flightmode->requires_terrain_failsafe();
 
@@ -254,7 +257,7 @@ void Copter::failsafe_terrain_check()
             AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_TERRAIN, LogErrorCode::ERROR_RESOLVED);
             failsafe.terrain = false;
         }
-    }
+    }*/
 }
 
 // set terrain data status (found or not found)
@@ -285,7 +288,7 @@ void Copter::failsafe_terrain_on_event()
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_TERRAIN, LogErrorCode::FAILSAFE_OCCURRED);
 
     if (should_disarm_on_failsafe()) {
-        arming.disarm(AP_Arming::Method::TERRAINFAILSAFE);
+ //HaRe       arming.disarm(AP_Arming::Method::TERRAINFAILSAFE);
 #if MODE_RTL_ENABLED == ENABLED
     } else if (flightmode->mode_number() == Mode::Number::RTL) {
         mode_rtl.restart_without_terrain();
@@ -363,11 +366,12 @@ void Copter::failsafe_deadreckon_check()
             // log error
             AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_DEADRECKON, LogErrorCode::FAILSAFE_OCCURRED);
 
+            /*HaRe
             // immediately disarm while landed
             if (should_disarm_on_failsafe()) {
                 arming.disarm(AP_Arming::Method::DEADRECKON_FAILSAFE);
                 return;
-            }
+            }*/
 
             // take user specified action
             do_failsafe_action((FailsafeAction)g2.failsafe_dr_enable.get(), ModeReason::DEADRECKON_FAILSAFE);
@@ -382,7 +386,7 @@ void Copter::set_mode_RTL_or_land_with_pause(ModeReason reason)
     // attempt to switch to RTL, if this fails then switch to Land
     if (!set_mode(Mode::Number::RTL, reason)) {
         // set mode to land will trigger mode change notification to pilot
-        set_mode_land_with_pause(reason);
+     //HaRe   set_mode_land_with_pause(reason);
     } else {
         // alert pilot to mode change
         AP_Notify::events.failsafe_mode_change = 1;
@@ -396,7 +400,7 @@ void Copter::set_mode_SmartRTL_or_land_with_pause(ModeReason reason)
     // attempt to switch to SMART_RTL, if this failed then switch to Land
     if (!set_mode(Mode::Number::SMART_RTL, reason)) {
         gcs().send_text(MAV_SEVERITY_WARNING, "SmartRTL Unavailable, Using Land Mode");
-        set_mode_land_with_pause(reason);
+      //HaRe  set_mode_land_with_pause(reason);
     } else {
         AP_Notify::events.failsafe_mode_change = 1;
     }
@@ -443,7 +447,7 @@ void Copter::set_mode_brake_or_land_with_pause(ModeReason reason)
 #endif
 
     gcs().send_text(MAV_SEVERITY_WARNING, "Trying Land Mode");
-    set_mode_land_with_pause(reason);
+   //HaRe set_mode_land_with_pause(reason);
 }
 
 bool Copter::should_disarm_on_failsafe() {
@@ -475,7 +479,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
         case FailsafeAction::NONE:
             return;
         case FailsafeAction::LAND:
-            set_mode_land_with_pause(reason);
+         //HaRe   set_mode_land_with_pause(reason);
             break;
         case FailsafeAction::RTL:
             set_mode_RTL_or_land_with_pause(reason);
@@ -490,7 +494,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 #if ADVANCED_FAILSAFE == ENABLED
             g2.afs.gcs_terminate(true, "Failsafe");
 #else
-            arming.disarm(AP_Arming::Method::FAILSAFE_ACTION_TERMINATE);
+  //HaRe          arming.disarm(AP_Arming::Method::FAILSAFE_ACTION_TERMINATE);
 #endif
             break;
         }
