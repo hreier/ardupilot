@@ -420,9 +420,9 @@ bool Copter::set_mode(const uint8_t new_mode, const ModeReason reason)
 // called at 100hz or more
 void Copter::update_flight_mode()
 {
-   //HaRe surface_tracking.invalidate_for_logging();  // invalidate surface tracking alt, flight mode will set to true if used
+   /*HaRe surface_tracking.invalidate_for_logging();  // invalidate surface tracking alt, flight mode will set to true if used
 
-    flightmode->run();
+    flightmode->run();*/
 }
 
 // exit_mode - high level call to organise cleanup as a flight mode is exited
@@ -464,9 +464,11 @@ void Copter::exit_mode(Mode *&old_flightmode,
 
 // notify_flight_mode - sets notify object based on current flight mode.  Only used for OreoLED notify device
 void Copter::notify_flight_mode() {
+    /*HaRe
     AP_Notify::flags.autopilot_mode = flightmode->is_autopilot();
     AP_Notify::flags.flight_mode = (uint8_t)flightmode->mode_number();
     notify.set_flight_mode_str(flightmode->name4());
+    */
 }
 
 // get_pilot_desired_angle - transform pilot's roll or pitch input into a desired lean angle

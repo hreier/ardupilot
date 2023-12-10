@@ -138,6 +138,7 @@ bool Copter::rangefinder_up_ok() const
     return (rangefinder_up_state.enabled && rangefinder_up_state.alt_healthy);
 }
 
+/*HaRe
 // update rangefinder based terrain offset
 // terrain offset is the terrain's height above the EKF origin
 void Copter::update_rangefinder_terrain_offset()
@@ -154,7 +155,7 @@ void Copter::update_rangefinder_terrain_offset()
         circle_nav->set_rangefinder_terrain_offset(rangefinder_state.enabled && wp_nav->rangefinder_used(), rangefinder_state.alt_healthy, rangefinder_state.terrain_offset_cm);
 #endif
     }
-}
+} */
 
 /*
   get inertially interpolated rangefinder height. Inertial height is

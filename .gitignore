@@ -59,6 +59,7 @@
 Tools/vagrant/*.log
 Rover/test.Rover/
 Rover/way.txt
+ArduCopter/debugging/
 ArduCopter/Debug/
 ArduCopter/arducopter.exe.stackdump
 ArduCopter/fence.txt

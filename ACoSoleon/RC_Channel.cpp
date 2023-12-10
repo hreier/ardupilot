@@ -140,7 +140,8 @@ void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxS
 // being moved
 void RC_Channel_Copter::do_aux_function_change_mode(const Mode::Number mode,
                                                     const AuxSwitchPos ch_flag)
-{
+{ 
+    /*HaRe
     switch(ch_flag) {
     case AuxSwitchPos::HIGH: {
         // engage mode (if not possible we remain in current flight mode)
@@ -148,12 +149,14 @@ void RC_Channel_Copter::do_aux_function_change_mode(const Mode::Number mode,
         break;
     }
     default:
+       
         // return to flight mode switch's flight mode if we are currently
         // in this mode
         if (copter.flightmode->mode_number() == mode) {
             rc().reset_mode_switch();
-        }
-    }
+       
+    } 
+    }*/
 }
 
 // do_aux_function - implement the function invoked by auxiliary switches
@@ -198,7 +201,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 
         case AUX_FUNC::SAVE_TRIM:
             if ((ch_flag == AuxSwitchPos::HIGH) &&
-                (copter.flightmode->allows_save_trim()) &&
+            //HaRe    (copter.flightmode->allows_save_trim()) &&
                 (copter.channel_throttle->get_control_in() == 0)) {
                 copter.save_trim();
             }

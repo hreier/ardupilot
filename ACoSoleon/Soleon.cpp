@@ -82,7 +82,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     // check if we've landed or crashed
 //HaRe    FAST_TASK(update_land_and_crash_detectors),
     // surface tracking update
-    FAST_TASK(update_rangefinder_terrain_offset),
+//HaRe    FAST_TASK(update_rangefinder_terrain_offset),
 #if HAL_MOUNT_ENABLED
     // camera mount's fast update
     FAST_TASK_CLASS(AP_Mount, &copter.camera_mount, update_fast),
@@ -351,10 +351,11 @@ bool Copter::set_circle_rate(float rate_dps)
 // set desired speed (m/s). Used for scripting.
 bool Copter::set_desired_speed(float speed)
 {
+    /*HaRe
     // exit if vehicle is not in auto mode
     if (!flightmode->is_autopilot()) {
         return false;
-    }
+    }*/
 
     wp_nav->set_speed_xy(speed * 100.0f);
     return true;
@@ -399,13 +400,15 @@ bool Copter::has_ekf_failsafed() const
 // returns true if vehicle is landing. Only used by Lua scripts
 bool Copter::is_landing() const
 {
-    return flightmode->is_landing();
+    //HaRe return flightmode->is_landing();
+    return false; //HaRe
 }
 
 // returns true if vehicle is taking off. Only used by Lua scripts
 bool Copter::is_taking_off() const
 {
-    return flightmode->is_taking_off();
+    //HaRe return flightmode->is_taking_off();
+    return false; //HaRe
 }
 
 bool Copter::current_mode_requires_mission() const
@@ -469,6 +472,7 @@ void Copter::update_batt_compass(void)
 // should be run at loop rate
 void Copter::loop_rate_logging()
 {
+    /*HaRe
     if (should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
         Log_Write_Attitude();
         Log_Write_PIDS(); // only logs if PIDS bitmask is set
@@ -478,13 +482,14 @@ void Copter::loop_rate_logging()
     }
     if (should_log(MASK_LOG_IMU_FAST)) {
         AP::ins().Write_IMU();
-    }
+    } */
 }
 
 // ten_hz_logging_loop
 // should be run at 10hz
 void Copter::ten_hz_logging_loop()
 {
+    /*HaRe
     // log attitude data if we're not already logging at the higher rate
     if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
         Log_Write_Attitude();
@@ -492,7 +497,7 @@ void Copter::ten_hz_logging_loop()
     if (!should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
     // log at 10Hz if PIDS bitmask is selected, even if no ATT bitmask is selected; logs at looprate if ATT_FAST and PIDS bitmask set
         Log_Write_PIDS();
-    }
+    }*/
     // log EKF attitude data always at 10Hz unless ATTITUDE_FAST, then do it in the 25Hz loop
     if (!should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_EKF_POS();
@@ -721,7 +726,7 @@ void Copter::update_altitude()
 bool Copter::get_wp_distance_m(float &distance) const
 {
     // see GCS_MAVLINK_Copter::send_nav_controller_output()
-    distance = flightmode->wp_distance() * 0.01;
+//HaRe    distance = flightmode->wp_distance() * 0.01;
     return true;
 }
 
@@ -729,7 +734,7 @@ bool Copter::get_wp_distance_m(float &distance) const
 bool Copter::get_wp_bearing_deg(float &bearing) const
 {
     // see GCS_MAVLINK_Copter::send_nav_controller_output()
-    bearing = flightmode->wp_bearing() * 0.01;
+//HaRe    bearing = flightmode->wp_bearing() * 0.01;
     return true;
 }
 
@@ -737,7 +742,7 @@ bool Copter::get_wp_bearing_deg(float &bearing) const
 bool Copter::get_wp_crosstrack_error_m(float &xtrack_error) const
 {
     // see GCS_MAVLINK_Copter::send_nav_controller_output()
-    xtrack_error = flightmode->crosstrack_error() * 0.01;
+//HaRe    xtrack_error = flightmode->crosstrack_error() * 0.01;
     return true;
 }
 
@@ -770,6 +775,7 @@ Copter::Copter(void)
     flightmode(&mode_stabilize)*/
 {
 }
+
 
 Copter copter;
 AP_Vehicle& vehicle = copter;

@@ -50,17 +50,18 @@ void Copter::failsafe_radio_on_event()
      //HaRe   arming.disarm(AP_Arming::Method::RADIOFAILSAFE);
         desired_action = FailsafeAction::NONE;
 
-    } else if (flightmode->is_landing() && ((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
+    } else if (/*HaRe flightmode->is_landing() && */((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
         // Allow landing to continue when battery failsafe requires it (not a user option)
         announce_failsafe("Radio + Battery", "Continuing Landing");
         desired_action = FailsafeAction::LAND;
 
-    } else if (flightmode->is_landing() && failsafe_option(FailsafeOption::CONTINUE_IF_LANDING)) {
+    } /*HaRe else if (flightmode->is_landing() && failsafe_option(FailsafeOption::CONTINUE_IF_LANDING)) {
         // Allow landing to continue when FS_OPTIONS is set to continue landing
         announce_failsafe("Radio", "Continuing Landing");
         desired_action = FailsafeAction::LAND;
 
-    } else if (flightmode->mode_number() == Mode::Number::AUTO && failsafe_option(FailsafeOption::RC_CONTINUE_IF_AUTO)) {
+    }
+    else if (flightmode->mode_number() == Mode::Number::AUTO && failsafe_option(FailsafeOption::RC_CONTINUE_IF_AUTO)) {
         // Allow mission to continue when FS_OPTIONS is set to continue mission
         announce_failsafe("Radio", "Continuing Auto");
         desired_action = FailsafeAction::NONE;
@@ -69,8 +70,8 @@ void Copter::failsafe_radio_on_event()
         // Allow guided mode to continue when FS_OPTIONS is set to continue in guided mode
         announce_failsafe("Radio", "Continuing Guided Mode");
         desired_action = FailsafeAction::NONE;
-
-    } else {
+ 
+    } */else {
         announce_failsafe("Radio");
     }
 
@@ -208,7 +209,9 @@ void Copter::failsafe_gcs_on_event(void)
         desired_action = FailsafeAction::NONE;
         announce_failsafe("GCS", "Disarming");
 
-    } else if (flightmode->is_landing() && ((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
+    } 
+    /*HaRe 
+    else if (flightmode->is_landing() && ((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
         // Allow landing to continue when battery failsafe requires it (not a user option)
         announce_failsafe("GCS + Battery", "Continuing Landing");
         desired_action = FailsafeAction::LAND;
@@ -227,7 +230,8 @@ void Copter::failsafe_gcs_on_event(void)
         // should continue when in a pilot controlled mode because FS_OPTIONS is set to continue in pilot controlled modes
         announce_failsafe("GCS", "Continuing Pilot Control");
         desired_action = FailsafeAction::NONE;
-    } else {
+    } */
+    else {
         announce_failsafe("GCS");
     }
 
@@ -356,6 +360,7 @@ void Copter::failsafe_deadreckon_check()
         return;
     }
 
+    /*HaRe
     // check for failsafe action
     if (failsafe.deadreckon != ekf_dead_reckoning) {
         failsafe.deadreckon = ekf_dead_reckoning;
@@ -366,17 +371,18 @@ void Copter::failsafe_deadreckon_check()
             // log error
             AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_DEADRECKON, LogErrorCode::FAILSAFE_OCCURRED);
 
-            /*HaRe
+            
             // immediately disarm while landed
             if (should_disarm_on_failsafe()) {
                 arming.disarm(AP_Arming::Method::DEADRECKON_FAILSAFE);
                 return;
-            }*/
+            }
 
             // take user specified action
             do_failsafe_action((FailsafeAction)g2.failsafe_dr_enable.get(), ModeReason::DEADRECKON_FAILSAFE);
         }
-    }
+    } 
+    */
 }
 
 // set_mode_RTL_or_land_with_pause - sets mode to RTL if possible or LAND with 4 second delay before descent starts
@@ -455,6 +461,7 @@ bool Copter::should_disarm_on_failsafe() {
         return true;
     }
 
+    /*HaRe 
     switch (flightmode->mode_number()) {
         case Mode::Number::STABILIZE:
         case Mode::Number::ACRO:
@@ -468,7 +475,8 @@ bool Copter::should_disarm_on_failsafe() {
             // used for AltHold, Guided, Loiter, RTL, Circle, Drift, Sport, Flip, Autotune, PosHold
             // if landed disarm
             return ap.land_complete;
-    }
+    }*/
+    return true;
 }
 
 

@@ -60,7 +60,7 @@
 #include <AP_LandingGear/AP_LandingGear.h>  // Landing Gear library
 #include <AC_InputManager/AC_InputManager.h>        // Pilot input handling library
 #include <AC_InputManager/AC_InputManager_Heli.h>   // Heli specific pilot input handling library
-//HaRe#include <AP_Arming/AP_Arming.h>            // ArduPilot motor arming library
+#include <AP_Arming/AP_Arming.h>            // ArduPilot motor arming library
 #include <AP_SmartRTL/AP_SmartRTL.h>        // ArduPilot Smart Return To Launch Mode (SRTL) library
 #include <AP_TempCalibration/AP_TempCalibration.h>  // temperature calibration library
 #include <AC_AutoTune/AC_AutoTune_Multi.h>  // ArduCopter autotune library. support for autotune of multirotors.
@@ -97,7 +97,7 @@
 
 #include "GCS_Mavlink.h"
 #include "GCS_Soleon.h"
-//HaRe #include "AP_Arming.h"
+#include "AP_Arming.h"
 
 #include <AP_Beacon/AP_Beacon_config.h>
 #if AP_BEACON_ENABLED
@@ -193,7 +193,7 @@ public:
 #if ADVANCED_FAILSAFE == ENABLED
     friend class AP_AdvancedFailsafe_Copter;
 #endif
-    friend class AP_Arming_Copter;
+    friend class AP_Arming_Soleon;
     friend class ToyMode;
     friend class RC_Channel_Copter;
     friend class RC_Channels_Copter;
@@ -313,10 +313,10 @@ private:
 
     // Inertial Navigation EKF - different viewpoint
     AP_AHRS_View *ahrs_view;
-/*HaRe
+
     // Arming/Disarming management class
-    AP_Arming_Copter arming;
-    */
+    AP_Arming_Soleon arming;
+    
 
     // Optical flow sensor
 #if AP_OPTICALFLOW_ENABLED
@@ -388,7 +388,7 @@ private:
 
     // This is the state of the flight control system
     // There are multiple states defined such as STABILIZE, ACRO,
-    Mode *flightmode;
+ //   Mode *flightmode;
     Mode::Number prev_control_mode;
 
     RCMapper rcmap;
@@ -865,7 +865,8 @@ private:
     ModeReason _last_reason;
     // called when an attempt to change into a mode is unsuccessful:
     void mode_change_failed(const Mode *mode, const char *reason);
-    uint8_t get_mode() const override { return (uint8_t)flightmode->mode_number(); }
+ //HaRe   uint8_t get_mode() const override { return (uint8_t)flightmode->mode_number(); }
+    uint8_t get_mode() const override { return 0; }
     bool current_mode_requires_mission() const override;
     void update_flight_mode();
     void notify_flight_mode();
@@ -927,7 +928,7 @@ private:
     void read_rangefinder(void);
     bool rangefinder_alt_ok() const;
     bool rangefinder_up_ok() const;
-    void update_rangefinder_terrain_offset();
+  //HaRe  void update_rangefinder_terrain_offset();
     void update_optical_flow(void);
 
     // takeoff_check.cpp

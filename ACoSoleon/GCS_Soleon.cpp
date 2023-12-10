@@ -56,6 +56,7 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     control_sensors_present |= MAV_SYS_STATUS_SENSOR_Z_ALTITUDE_CONTROL;
     control_sensors_present |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
 
+    /*HaRe
     switch (copter.flightmode->mode_number()) {
     case Mode::Number::AUTO:
     case Mode::Number::AUTO_RTL:
@@ -85,7 +86,7 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     default:
         // stabilize, acro, drift, and flip have no automatic x,y or z control (i.e. all manual)
         break;
-    }
+    }*/
 
     // optional sensors, some of which are essentially always
     // available in the firmware:

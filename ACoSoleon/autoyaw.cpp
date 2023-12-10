@@ -315,6 +315,7 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
 {
     // process pilot's yaw input
     _pilot_yaw_rate_cds = 0.0;
+    /*HaRe
     if (!copter.failsafe.radio && copter.flightmode->use_pilot_yaw()) {
         // get pilot's desired yaw rate
         _pilot_yaw_rate_cds = copter.flightmode->get_pilot_desired_yaw_rate(copter.channel_yaw->norm_input_dz());
@@ -325,6 +326,7 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
         // RC failsafe, or disabled make sure not in pilot control
         auto_yaw.set_mode(AutoYaw::Mode::HOLD);
     }
+    */
 
 #if WEATHERVANE_ENABLED == ENABLED
     update_weathervane(_pilot_yaw_rate_cds);

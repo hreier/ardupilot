@@ -31,6 +31,7 @@
 #define AP_WINCH_ENABLED    DISABLED  //HaRe
 #define HAL_SPRAYER_ENABLED DISABLED  //HaRe
 #define AC_PRECLAND_ENABLED DISABLED  //HaRe
+#define AC_CUSTOMCONTROL_MULTI_ENABLED DISABLED  //HaRe
 
 // features below are disabled by default on all boards
 //#define CAL_ALWAYS_REBOOT                         // flight controller will reboot after compass or accelerometer calibration completes

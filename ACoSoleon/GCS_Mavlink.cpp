@@ -29,6 +29,7 @@ MAV_TYPE GCS_Copter::frame_type() const
 MAV_MODE GCS_MAVLINK_Copter::base_mode() const
 {
     uint8_t _base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
+    /*HaRe
     // work out the base_mode. This value is not very useful
     // for APM, but we calculate it as best we can so a generic
     // MAVLink enabled ground station can work out something about
@@ -60,6 +61,7 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
 
     // all modes except INITIALISING have some form of manual
     // override if stick mixing is enabled
+    */
     _base_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
     // we are armed if we are not initialising
@@ -75,7 +77,9 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
 
 uint32_t GCS_Copter::custom_mode() const
 {
-    return (uint32_t)copter.flightmode->mode_number();
+    /*HaRe
+    return (uint32_t)copter.flightmode->mode_number();*/
+    return 0;
 }
 
 MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
@@ -122,9 +126,10 @@ void GCS_MAVLINK_Copter::send_attitude_target()
 void GCS_MAVLINK_Copter::send_position_target_global_int()
 {
     Location target;
+    /*HaRe
     if (!copter.flightmode->get_wp(target)) {
         return;
-    }
+    }*/
 
     // convert altitude frame to AMSL (this may use the terrain database)
     if (!target.change_alt_frame(Location::AltFrame::ABSOLUTE)) {
@@ -412,7 +417,16 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
  
         break;
     }*/
-
+    
+    case MSG_POSITION_TARGET_GLOBAL_INT:
+    case MSG_TERRAIN:
+    case MSG_ADSB_VEHICLE:
+    case MSG_WIND:
+    case MSG_SERVO_OUT:
+    case MSG_AOA_SSA:
+    case MSG_LANDING:
+        // unused
+       break;
 
     case MSG_SO_STATUS:
         send_so_status();
@@ -710,7 +724,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_do_set_roi(const Location &roi_loc
     if (!roi_loc.check_latlng()) {
         return MAV_RESULT_FAILED;
     }
-    copter.flightmode->auto_yaw.set_roi(roi_loc);
+   //HaRe copter.flightmode->auto_yaw.set_roi(roi_loc);
     return MAV_RESULT_ACCEPTED;
 }
 
@@ -807,11 +821,12 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_mount(const mavlink_command_long_t
 {
     switch (packet.command) {
     case MAV_CMD_DO_MOUNT_CONTROL:
+        /*HaRe
         // if vehicle has a camera mount but it doesn't do pan control then yaw the entire vehicle instead
         if ((copter.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
             !copter.camera_mount.has_pan_control()) {
             copter.flightmode->auto_yaw.set_yaw_angle_rate((float)packet.param3, 0.0f);
-        }
+        }*/
         break;
     default:
         break;
@@ -880,7 +895,9 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         }
         return MAV_RESULT_ACCEPTED;
 
+/*HaRe
     case MAV_CMD_CONDITION_YAW:
+        
         // param1 : target angle [0-360]
         // param2 : speed during change [deg per second]
         // param3 : direction (-1:ccw, +1:cw)
@@ -894,9 +911,10 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
                 (int8_t)packet.param3,
                 is_positive(packet.param4));
             return MAV_RESULT_ACCEPTED;
-        }
+        } 
         return MAV_RESULT_FAILED;
-
+        */
+/*HaRe
     case MAV_CMD_DO_CHANGE_SPEED:
         // param1 : Speed type (0 or 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
         // param2 : new speed in m/s
@@ -950,7 +968,8 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
             return MAV_RESULT_ACCEPTED;
         }
         return MAV_RESULT_FAILED;
-#endif
+#endif 
+*/
 /*HaRe
     case MAV_CMD_DO_MOTOR_TEST:
         // param1 : motor sequence number (a number from 1 to max number of motors on the vehicle)
@@ -1067,6 +1086,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 
 MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_command_int_t &packet)
 {
+    /*HaRe
     // requested pause
     if ((uint8_t) packet.param1 == 0) {
         if (copter.flightmode->pause()) {
@@ -1083,7 +1103,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_comma
         }
         send_text(MAV_SEVERITY_INFO, "Failed to resume");
         return MAV_RESULT_FAILED;
-    }
+    }*/
     return MAV_RESULT_DENIED;
 }
 
@@ -1095,9 +1115,11 @@ void GCS_MAVLINK_Copter::handle_mount_message(const mavlink_message_t &msg)
         // if vehicle has a camera mount but it doesn't do pan control then yaw the entire vehicle instead
         if ((copter.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
             !copter.camera_mount.has_pan_control()) {
+            /*Hare 
             copter.flightmode->auto_yaw.set_yaw_angle_rate(
                 mavlink_msg_mount_control_get_input_c(&msg) * 0.01f,
                 0.0f);
+            */
 
             break;
         }
@@ -1526,12 +1548,13 @@ MAV_LANDED_STATE GCS_MAVLINK_Copter::landed_state() const
     if (copter.ap.land_complete) {
         return MAV_LANDED_STATE_ON_GROUND;
     }
+    /*HaRe
     if (copter.flightmode->is_landing()) {
         return MAV_LANDED_STATE_LANDING;
     }
     if (copter.flightmode->is_taking_off()) {
         return MAV_LANDED_STATE_TAKEOFF;
-    }
+    }*/
     return MAV_LANDED_STATE_IN_AIR;
 }
 /*HaRe
@@ -1569,22 +1592,24 @@ int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const
 
 uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
 {
+    /*HaRe
     if (copter.ap.initialised) {
         // return units are deg/2
         const Mode *flightmode = copter.flightmode;
         // need to convert -18000->18000 to 0->360/2
         return wrap_360_cd(flightmode->wp_bearing()) / 200;
-    }
+    }*/
     return 0;     
 }
     
 uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
 {
+    /*HaRe
     if (copter.ap.initialised) {
         // return units are dm
         const Mode *flightmode = copter.flightmode;
         return MIN(flightmode->wp_distance() * 1.0e-2, UINT16_MAX) / 10;
-    }
+    }*/
     return 0;
 }
 
