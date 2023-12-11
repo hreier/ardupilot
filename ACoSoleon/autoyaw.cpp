@@ -5,15 +5,15 @@ Mode::AutoYaw Mode::auto_yaw;
 // roi_yaw - returns heading towards location held in roi
 float Mode::AutoYaw::roi_yaw() const
 {
-    return get_bearing_cd(copter.inertial_nav.get_position_xy_cm(), roi.xy());
+    return get_bearing_cd(soleon.inertial_nav.get_position_xy_cm(), roi.xy());
 }
 
 float Mode::AutoYaw::look_ahead_yaw()
 {
-    const Vector3f& vel = copter.inertial_nav.get_velocity_neu_cms();
+    const Vector3f& vel = soleon.inertial_nav.get_velocity_neu_cms();
     const float speed_sq = vel.xy().length_squared();
     // Commanded Yaw to automatically look ahead.
-    if (copter.position_ok() && (speed_sq > (YAW_LOOK_AHEAD_MIN_SPEED * YAW_LOOK_AHEAD_MIN_SPEED))) {
+    if (soleon.position_ok() && (speed_sq > (YAW_LOOK_AHEAD_MIN_SPEED * YAW_LOOK_AHEAD_MIN_SPEED))) {
         _look_ahead_yaw = degrees(atan2f(vel.y,vel.x))*100.0f;
     }
     return _look_ahead_yaw;
@@ -28,7 +28,7 @@ void Mode::AutoYaw::set_mode_to_default(bool rtl)
 // set rtl parameter to true if this is during an RTL
 Mode::AutoYaw::Mode Mode::AutoYaw::default_mode(bool rtl) const
 {
-    switch (copter.g.wp_yaw_behavior) {
+    switch (soleon.g.wp_yaw_behavior) {
 
     case WP_YAW_BEHAVIOR_NONE:
         return Mode::HOLD;
@@ -80,7 +80,7 @@ void Mode::AutoYaw::set_mode(Mode yaw_mode)
 
     case Mode::LOOK_AHEAD:
         // Commanded Yaw to automatically look ahead.
-        _look_ahead_yaw = copter.ahrs.yaw_sensor;
+        _look_ahead_yaw = soleon.ahrs.yaw_sensor;
         break;
 
     case Mode::RESETTOARMEDYAW:
@@ -125,9 +125,9 @@ void Mode::AutoYaw::set_fixed_yaw(float angle_deg, float turn_rate_ds, int8_t di
     // get turn speed
     if (!is_positive(turn_rate_ds)) {
         // default to default slew rate
-        _fixed_yaw_slewrate_cds = copter.attitude_control->get_slew_yaw_max_degs() * 100.0;
+        _fixed_yaw_slewrate_cds = soleon.attitude_control->get_slew_yaw_max_degs() * 100.0;
     } else {
-        _fixed_yaw_slewrate_cds = MIN(copter.attitude_control->get_slew_yaw_max_degs(), turn_rate_ds) * 100.0;
+        _fixed_yaw_slewrate_cds = MIN(soleon.attitude_control->get_slew_yaw_max_degs(), turn_rate_ds) * 100.0;
     }
     */
 
@@ -156,20 +156,20 @@ void Mode::AutoYaw::set_roi(const Location &roi_location)
         auto_yaw.set_mode_to_default(false);
 #if HAL_MOUNT_ENABLED
         // switch off the camera tracking if enabled
-        if (copter.camera_mount.get_mode() == MAV_MOUNT_MODE_GPS_POINT) {
-            copter.camera_mount.set_mode_to_default();
+        if (soleon.camera_mount.get_mode() == MAV_MOUNT_MODE_GPS_POINT) {
+            soleon.camera_mount.set_mode_to_default();
         }
 #endif  // HAL_MOUNT_ENABLED
     } else {
 #if HAL_MOUNT_ENABLED
         // check if mount type requires us to rotate the quad
-        if (!copter.camera_mount.has_pan_control()) {
+        if (!soleon.camera_mount.has_pan_control()) {
             if (roi_location.get_vector_from_origin_NEU(roi)) {
                 auto_yaw.set_mode(Mode::ROI);
             }
         }
         // send the command to the camera mount
-        copter.camera_mount.set_roi_target(roi_location);
+        soleon.camera_mount.set_roi_target(roi_location);
 
         // TO-DO: expand handling of the do_nav_roi to support all modes of the MAVLink.  Currently we only handle mode 4 (see below)
         //      0: do nothing
@@ -207,7 +207,7 @@ bool Mode::AutoYaw::reached_fixed_yaw_target()
     }
 
     // Within 2 deg of target
-    return (fabsf(wrap_180_cd(copter.ahrs.yaw_sensor-_yaw_angle_cd)) <= 200);
+    return (fabsf(wrap_180_cd(soleon.ahrs.yaw_sensor-_yaw_angle_cd)) <= 200);
 }
 
 // yaw_cd - returns target heading depending upon auto_yaw.mode()
@@ -239,13 +239,13 @@ float Mode::AutoYaw::yaw_cd()
 
     case Mode::RESETTOARMEDYAW:
         // changes yaw to be same as when quad was armed
-        _yaw_angle_cd = copter.initial_armed_bearing;
+        _yaw_angle_cd = soleon.initial_armed_bearing;
         break;
 
     case Mode::CIRCLE:
 #if MODE_CIRCLE_ENABLED
-        if (copter.circle_nav->is_active()) {
-            _yaw_angle_cd = copter.circle_nav->get_yaw();
+        if (soleon.circle_nav->is_active()) {
+            _yaw_angle_cd = soleon.circle_nav->get_yaw();
         }
 #endif
         break;
@@ -262,15 +262,15 @@ float Mode::AutoYaw::yaw_cd()
     case Mode::RATE:
     case Mode::WEATHERVANE:
     case Mode::PILOT_RATE:
-        _yaw_angle_cd = copter.attitude_control->get_att_target_euler_cd().z;
+        _yaw_angle_cd = soleon.attitude_control->get_att_target_euler_cd().z;
         break;
     */
     case Mode::LOOK_AT_NEXT_WP:
     default:
         /*HaRe
         // point towards next waypoint.
-        // we don't use wp_bearing because we don't want the copter to turn too much during flight
-        _yaw_angle_cd = copter.pos_control->get_yaw_cd();
+        // we don't use wp_bearing because we don't want the soleon to turn too much during flight
+        _yaw_angle_cd = soleon.pos_control->get_yaw_cd();
         */
     break;
     }
@@ -294,7 +294,7 @@ float Mode::AutoYaw::rate_cds()
         break;
 
     case Mode::LOOK_AT_NEXT_WP:
-        _yaw_rate_cds = copter.pos_control->get_yaw_rate_cds();
+        _yaw_rate_cds = soleon.pos_control->get_yaw_rate_cds();
         break;
 
     case Mode::PILOT_RATE:
@@ -316,9 +316,9 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
     // process pilot's yaw input
     _pilot_yaw_rate_cds = 0.0;
     /*HaRe
-    if (!copter.failsafe.radio && copter.flightmode->use_pilot_yaw()) {
+    if (!soleon.failsafe.radio && soleon.flightmode->use_pilot_yaw()) {
         // get pilot's desired yaw rate
-        _pilot_yaw_rate_cds = copter.flightmode->get_pilot_desired_yaw_rate(copter.channel_yaw->norm_input_dz());
+        _pilot_yaw_rate_cds = soleon.flightmode->get_pilot_desired_yaw_rate(soleon.channel_yaw->norm_input_dz());
         if (!is_zero(_pilot_yaw_rate_cds)) {
             auto_yaw.set_mode(AutoYaw::Mode::PILOT_RATE);
         }
@@ -363,16 +363,16 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
 void Mode::AutoYaw::update_weathervane(const int16_t pilot_yaw_cds)
 {
     /*HaRe
-    if (!copter.flightmode->allows_weathervaning()) {
+    if (!soleon.flightmode->allows_weathervaning()) {
         return;
     }
 
     float yaw_rate_cds;
-    if (copter.g2.weathervane.get_yaw_out(yaw_rate_cds, pilot_yaw_cds, copter.flightmode->get_alt_above_ground_cm()*0.01,
-                                                                       copter.pos_control->get_roll_cd()-copter.attitude_control->get_roll_trim_cd(),
-                                                                       copter.pos_control->get_pitch_cd(),
-                                                                       copter.flightmode->is_taking_off(),
-                                                                       copter.flightmode->is_landing())) {
+    if (soleon.g2.weathervane.get_yaw_out(yaw_rate_cds, pilot_yaw_cds, soleon.flightmode->get_alt_above_ground_cm()*0.01,
+                                                                       soleon.pos_control->get_roll_cd()-soleon.attitude_control->get_roll_trim_cd(),
+                                                                       soleon.pos_control->get_pitch_cd(),
+                                                                       soleon.flightmode->is_taking_off(),
+                                                                       soleon.flightmode->is_landing())) {
         set_mode(Mode::WEATHERVANE);
         _yaw_rate_cds = yaw_rate_cds;
         return;

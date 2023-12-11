@@ -4,25 +4,25 @@
 
 uint8_t GCS_Copter::sysid_this_mav() const
 {
-    return copter.g.sysid_this_mav;
+    return soleon.g.sysid_this_mav;
 }
 
 const char* GCS_Copter::frame_string() const
 {
-    if (copter.motors == nullptr) {
+    if (soleon.motors == nullptr) {
         return "MultiCopter";
     }
-    return copter.motors->get_frame_string();
+    return soleon.motors->get_frame_string();
 }
 
 bool GCS_Copter::simple_input_active() const
 {
-    return copter.simple_mode == Copter::SimpleMode::SIMPLE;
+    return soleon.simple_mode == Soleon::SimpleMode::SIMPLE;
 }
 
 bool GCS_Copter::supersimple_input_active() const
 {
-    return copter.simple_mode == Copter::SimpleMode::SUPERSIMPLE;
+    return soleon.simple_mode == Soleon::SimpleMode::SUPERSIMPLE;
 }
 
 void GCS_Copter::update_vehicle_sensor_status_flags(void)
@@ -42,13 +42,13 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
         MAV_SYS_STATUS_SENSOR_ATTITUDE_STABILIZATION |
         MAV_SYS_STATUS_SENSOR_YAW_POSITION;
 
-    const Copter::ap_t &ap = copter.ap;
+    const Soleon::ap_t &ap = soleon.ap;
 
     if (ap.rc_receiver_present) {
         control_sensors_present |= MAV_SYS_STATUS_SENSOR_RC_RECEIVER;
         control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_RC_RECEIVER;
     }
-    if (ap.rc_receiver_present && !copter.failsafe.radio) {
+    if (ap.rc_receiver_present && !soleon.failsafe.radio) {
         control_sensors_health |= MAV_SYS_STATUS_SENSOR_RC_RECEIVER;
     }
 
@@ -57,7 +57,7 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     control_sensors_present |= MAV_SYS_STATUS_SENSOR_XY_POSITION_CONTROL;
 
     /*HaRe
-    switch (copter.flightmode->mode_number()) {
+    switch (soleon.flightmode->mode_number()) {
     case Mode::Number::AUTO:
     case Mode::Number::AUTO_RTL:
     case Mode::Number::AVOID_ADSB:
@@ -91,13 +91,13 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     // optional sensors, some of which are essentially always
     // available in the firmware:
 #if HAL_PROXIMITY_ENABLED
-    if (copter.g2.proximity.sensor_present()) {
+    if (soleon.g2.proximity.sensor_present()) {
         control_sensors_present |= MAV_SYS_STATUS_SENSOR_PROXIMITY;
     }
-    if (copter.g2.proximity.sensor_enabled()) {
+    if (soleon.g2.proximity.sensor_enabled()) {
         control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_PROXIMITY;
     }
-    if (!copter.g2.proximity.sensor_failed()) {
+    if (!soleon.g2.proximity.sensor_failed()) {
         control_sensors_health |= MAV_SYS_STATUS_SENSOR_PROXIMITY;
     }
 #endif
@@ -107,7 +107,7 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     if (rangefinder && rangefinder->has_orientation(ROTATION_PITCH_270)) {
         control_sensors_present |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
     }
-    if (copter.rangefinder_state.enabled) {
+    if (soleon.rangefinder_state.enabled) {
         control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
         if (rangefinder && rangefinder->has_data_orient(ROTATION_PITCH_270)) {
             control_sensors_health |= MAV_SYS_STATUS_SENSOR_LASER_POSITION;
@@ -116,21 +116,21 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
 #endif
 
 #if AC_PRECLAND_ENABLED
-    if (copter.precland.enabled()) {
+    if (soleon.precland.enabled()) {
         control_sensors_present |= MAV_SYS_STATUS_SENSOR_VISION_POSITION;
         control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_VISION_POSITION;
     }
-    if (copter.precland.enabled() && copter.precland.healthy()) {
+    if (soleon.precland.enabled() && soleon.precland.healthy()) {
         control_sensors_health |= MAV_SYS_STATUS_SENSOR_VISION_POSITION;
     }
 #endif
 
 #if AP_TERRAIN_AVAILABLE
-    switch (copter.terrain.status()) {
+    switch (soleon.terrain.status()) {
     case AP_Terrain::TerrainStatusDisabled:
         break;
     case AP_Terrain::TerrainStatusUnhealthy:
-        // To-Do: restore unhealthy terrain status reporting once terrain is used in copter
+        // To-Do: restore unhealthy terrain status reporting once terrain is used in soleon
         //control_sensors_present |= MAV_SYS_STATUS_TERRAIN;
         //control_sensors_enabled |= MAV_SYS_STATUS_TERRAIN;
         //break;
@@ -146,7 +146,7 @@ void GCS_Copter::update_vehicle_sensor_status_flags(void)
     control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_PROPULSION;
     // only mark propulsion healthy if all of the motors are producing
     // nominal thrust
-    if (!copter.motors->get_thrust_boost()) {
+    if (!soleon.motors->get_thrust_boost()) {
         control_sensors_health |= MAV_SYS_STATUS_SENSOR_PROPULSION;
     }
 }

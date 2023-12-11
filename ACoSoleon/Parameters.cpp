@@ -27,7 +27,7 @@
 #define DEFAULT_FRAME_CLASS 0
 #endif
 
-const AP_Param::Info Copter::var_info[] = {
+const AP_Param::Info Soleon::var_info[] = {
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format
@@ -609,11 +609,11 @@ const AP_Param::Info Copter::var_info[] = {
 #if FRAME_CONFIG == HELI_FRAME
     // @Group: H_
     // @Path: ../libraries/AP_Motors/AP_MotorsHeli_Single.cpp,../libraries/AP_Motors/AP_MotorsHeli_Dual.cpp,../libraries/AP_Motors/AP_MotorsHeli.cpp
-    GOBJECTVARPTR(motors, "H_",        &copter.motors_var_info),
+    GOBJECTVARPTR(motors, "H_",        &soleon.motors_var_info),
 #else
     // @Group: MOT_
     // @Path: ../libraries/AP_Motors/AP_MotorsMulticopter.cpp
-    GOBJECTVARPTR(motors, "MOT_",      &copter.motors_var_info),
+    GOBJECTVARPTR(motors, "MOT_",      &soleon.motors_var_info),
 #endif
 
     // @Group: RCMAP_
@@ -976,7 +976,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:Disabled, 1:Continue if in Auto on RC failsafe only, 2:Continue if in Auto on GCS failsafe only, 3:Continue if in Auto on RC and/or GCS failsafe, 4:Continue if in Guided on RC failsafe only, 8:Continue if landing on any failsafe, 16:Continue if in pilot controlled modes on GCS failsafe, 19:Continue if in Auto on RC and/or GCS failsafe and continue if in pilot controlled modes on GCS failsafe
     // @Bitmask: 0:Continue if in Auto on RC failsafe, 1:Continue if in Auto on GCS failsafe, 2:Continue if in Guided on RC failsafe, 3:Continue if landing on any failsafe, 4:Continue if in pilot controlled modes on GCS failsafe, 5:Release Gripper
     // @User: Advanced
-    AP_GROUPINFO("FS_OPTIONS", 36, ParametersG2, fs_options, (float)Copter::FailsafeOption::GCS_CONTINUE_IF_PILOT_CONTROL),
+    AP_GROUPINFO("FS_OPTIONS", 36, ParametersG2, fs_options, (float)Soleon::FailsafeOption::GCS_CONTINUE_IF_PILOT_CONTROL),
 
 #if MODE_AUTOROTATE_ENABLED == ENABLED
     // @Group: AROT_
@@ -1073,7 +1073,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:Do not track, 1:Ground, 2:Ceiling
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Copter::SurfaceTracking::Surface::GROUND),
+    AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Soleon::SurfaceTracking::Surface::GROUND),
 */
 
     // @Param: FS_DR_ENABLE
@@ -1081,7 +1081,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Description: Failsafe action taken immediately as deadreckoning starts. Deadreckoning starts when EKF loses position and velocity source and relies only on wind estimates
     // @Values: 0:Disabled/NoAction,1:Land, 2:RTL, 3:SmartRTL or RTL, 4:SmartRTL or Land, 6:Auto DO_LAND_START or RTL
     // @User: Standard
-    AP_GROUPINFO("FS_DR_ENABLE", 52, ParametersG2, failsafe_dr_enable, (uint8_t)Copter::FailsafeAction::RTL),
+    AP_GROUPINFO("FS_DR_ENABLE", 52, ParametersG2, failsafe_dr_enable, (uint8_t)Soleon::FailsafeAction::RTL),
 
     // @Param: FS_DR_TIMEOUT
     // @DisplayName: DeadReckon Failsafe Timeout
@@ -1284,7 +1284,7 @@ ParametersG2::ParametersG2(void)
     ,smart_rtl()
 #endif
 #if MODE_FLOWHOLD_ENABLED == ENABLED
-//HaRe    ,mode_flowhold_ptr(&copter.mode_flowhold)
+//HaRe    ,mode_flowhold_ptr(&soleon.mode_flowhold)
 #endif
 #if MODE_FOLLOW_ENABLED == ENABLED
     ,follow()
@@ -1293,19 +1293,19 @@ ParametersG2::ParametersG2(void)
     ,user_parameters()
 #endif
 #if AUTOTUNE_ENABLED == ENABLED
-    ,autotune_ptr(&copter.mode_autotune.autotune)
+    ,autotune_ptr(&soleon.mode_autotune.autotune)
 #endif
 #if MODE_SYSTEMID_ENABLED == ENABLED
-    ,mode_systemid_ptr(&copter.mode_systemid)
+    ,mode_systemid_ptr(&soleon.mode_systemid)
 #endif
 #if MODE_AUTOROTATE_ENABLED == ENABLED
     ,arot()
 #endif
 #if HAL_BUTTON_ENABLED
-    ,button_ptr(&copter.button)
+    ,button_ptr(&soleon.button)
 #endif
 #if MODE_ZIGZAG_ENABLED == ENABLED
-    ,mode_zigzag_ptr(&copter.mode_zigzag)
+    ,mode_zigzag_ptr(&soleon.mode_zigzag)
 #endif
 
 #if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
@@ -1361,7 +1361,7 @@ const AP_Param::ConversionInfo conversion_table[] = {
     { Parameters::k_param_arming,             2,     AP_PARAM_INT16,  "ARMING_CHECK" },
 };
 
-void Copter::load_parameters(void)
+void Soleon::load_parameters(void)
 {
     hal.util->set_soft_armed(false);
 
@@ -1408,7 +1408,7 @@ void Copter::load_parameters(void)
 }
 
 // handle conversion of PID gains
-void Copter::convert_pid_parameters(void)
+void Soleon::convert_pid_parameters(void)
 {
     const AP_Param::ConversionInfo angle_and_filt_conversion_info[] = {
         // PARAMETER_CONVERSION - Added: Jan-2018
@@ -1556,7 +1556,7 @@ void Copter::convert_pid_parameters(void)
 }
 
 #if HAL_PROXIMITY_ENABLED
-void Copter::convert_prx_parameters()
+void Soleon::convert_prx_parameters()
 {
     // convert PRX to PRX1_ parameters for Copter-4.3
     // PARAMETER_CONVERSION - Added: Aug-2022
@@ -1585,7 +1585,7 @@ void Copter::convert_prx_parameters()
 /*
   convert landing gear parameters
  */
-void Copter::convert_lgr_parameters(void)
+void Soleon::convert_lgr_parameters(void)
 {
     // PARAMETER_CONVERSION - Added: Nov-2018
 
@@ -1669,7 +1669,7 @@ void Copter::convert_lgr_parameters(void)
 
 #if FRAME_CONFIG == HELI_FRAME
 // handle conversion of tradheli parameters from Copter-3.6 to Copter-3.7
-void Copter::convert_tradheli_parameters(void) const
+void Soleon::convert_tradheli_parameters(void) const
 {
         // PARAMETER_CONVERSION - Added: Mar-2019
     if (g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI) {

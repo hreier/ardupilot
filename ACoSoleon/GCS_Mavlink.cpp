@@ -16,10 +16,10 @@ MAV_TYPE GCS_Copter::frame_type() const
 #else
     const MAV_TYPE mav_type_default = MAV_TYPE_QUADROTOR;
 #endif
-    if (copter.motors == nullptr) {
+    if (soleon.motors == nullptr) {
         return mav_type_default;
     }
-    MAV_TYPE mav_type = copter.motors->get_frame_mav_type();
+    MAV_TYPE mav_type = soleon.motors->get_frame_mav_type();
     if (mav_type == MAV_TYPE_GENERIC) {
         mav_type = mav_type_default;
     }
@@ -38,7 +38,7 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
     // only get useful information from the custom_mode, which maps to
     // the APM flight mode and has a well defined meaning in the
     // ArduPlane documentation
-    switch (copter.flightmode->mode_number()) {
+    switch (soleon.flightmode->mode_number()) {
     case Mode::Number::AUTO:
     case Mode::Number::AUTO_RTL:
     case Mode::Number::RTL:
@@ -65,7 +65,7 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
     _base_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
     // we are armed if we are not initialising
-    if (copter.motors != nullptr && copter.motors->armed()) {
+    if (soleon.motors != nullptr && soleon.motors->armed()) {
         _base_mode |= MAV_MODE_FLAG_SAFETY_ARMED;
     }
 
@@ -78,18 +78,18 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
 uint32_t GCS_Copter::custom_mode() const
 {
     /*HaRe
-    return (uint32_t)copter.flightmode->mode_number();*/
+    return (uint32_t)soleon.flightmode->mode_number();*/
     return 0;
 }
 
 MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
 {
     // set system as critical if any failsafe have triggered
-    if (copter.any_failsafe_triggered())  {
+    if (soleon.any_failsafe_triggered())  {
         return MAV_STATE_CRITICAL;
     }
 
-    if (copter.ap.land_complete) {
+    if (soleon.ap.land_complete) {
         return MAV_STATE_STANDBY;
     }
 
@@ -100,9 +100,9 @@ MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
 void GCS_MAVLINK_Copter::send_attitude_target()
 {
     /*HaRe
-    const Quaternion quat  = copter.attitude_control->get_attitude_target_quat();
-    const Vector3f ang_vel = copter.attitude_control->get_attitude_target_ang_vel();
-    const float thrust = copter.attitude_control->get_throttle_in();
+    const Quaternion quat  = soleon.attitude_control->get_attitude_target_quat();
+    const Vector3f ang_vel = soleon.attitude_control->get_attitude_target_ang_vel();
+    const float thrust = soleon.attitude_control->get_throttle_in();
 
     const float quat_out[4] {quat.q1, quat.q2, quat.q3, quat.q4};
 
@@ -127,7 +127,7 @@ void GCS_MAVLINK_Copter::send_position_target_global_int()
 {
     Location target;
     /*HaRe
-    if (!copter.flightmode->get_wp(target)) {
+    if (!soleon.flightmode->get_wp(target)) {
         return;
     }*/
 
@@ -160,11 +160,11 @@ void GCS_MAVLINK_Copter::send_position_target_global_int()
 void GCS_MAVLINK_Copter::send_position_target_local_ned()
 {
 #if MODE_GUIDED_ENABLED == ENABLED
-    if (!copter.flightmode->in_guided_mode()) {
+    if (!soleon.flightmode->in_guided_mode()) {
         return;
     }
 
-    const ModeGuided::SubMode guided_mode = copter.mode_guided.submode();
+    const ModeGuided::SubMode guided_mode = soleon.mode_guided.submode();
     Vector3f target_pos;
     Vector3f target_vel;
     Vector3f target_accel;
@@ -180,25 +180,25 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
         type_mask = POSITION_TARGET_TYPEMASK_VX_IGNORE | POSITION_TARGET_TYPEMASK_VY_IGNORE | POSITION_TARGET_TYPEMASK_VZ_IGNORE |
                     POSITION_TARGET_TYPEMASK_AX_IGNORE | POSITION_TARGET_TYPEMASK_AY_IGNORE | POSITION_TARGET_TYPEMASK_AZ_IGNORE |
                     POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; // ignore everything except position
-        target_pos = copter.mode_guided.get_target_pos().tofloat() * 0.01; // convert to metres
+        target_pos = soleon.mode_guided.get_target_pos().tofloat() * 0.01; // convert to metres
         break;
     case ModeGuided::SubMode::PosVelAccel:
         type_mask = POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; // ignore everything except position, velocity & acceleration
-        target_pos = copter.mode_guided.get_target_pos().tofloat() * 0.01; // convert to metres
-        target_vel = copter.mode_guided.get_target_vel() * 0.01f; // convert to metres/s
-        target_accel = copter.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
+        target_pos = soleon.mode_guided.get_target_pos().tofloat() * 0.01; // convert to metres
+        target_vel = soleon.mode_guided.get_target_vel() * 0.01f; // convert to metres/s
+        target_accel = soleon.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
         break;
     case ModeGuided::SubMode::VelAccel:
         type_mask = POSITION_TARGET_TYPEMASK_X_IGNORE | POSITION_TARGET_TYPEMASK_Y_IGNORE | POSITION_TARGET_TYPEMASK_Z_IGNORE |
                     POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; // ignore everything except velocity & acceleration
-        target_vel = copter.mode_guided.get_target_vel() * 0.01f; // convert to metres/s
-        target_accel = copter.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
+        target_vel = soleon.mode_guided.get_target_vel() * 0.01f; // convert to metres/s
+        target_accel = soleon.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
         break;
     case ModeGuided::SubMode::Accel:
         type_mask = POSITION_TARGET_TYPEMASK_X_IGNORE | POSITION_TARGET_TYPEMASK_Y_IGNORE | POSITION_TARGET_TYPEMASK_Z_IGNORE |
                     POSITION_TARGET_TYPEMASK_VX_IGNORE | POSITION_TARGET_TYPEMASK_VY_IGNORE | POSITION_TARGET_TYPEMASK_VZ_IGNORE |
                     POSITION_TARGET_TYPEMASK_YAW_IGNORE| POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE; // ignore everything except velocity & acceleration
-        target_accel = copter.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
+        target_accel = soleon.mode_guided.get_target_accel() * 0.01f; // convert to metres/s/s
         break;
     }
 
@@ -245,11 +245,11 @@ void GCS_MAVLINK_Copter::send_so_status(void) const
 void GCS_MAVLINK_Copter::send_nav_controller_output() const
 {
     /*HaRe
-    if (!copter.ap.initialised) {
+    if (!soleon.ap.initialised) {
         return;
     }
-    const Vector3f &targets = copter.attitude_control->get_att_target_euler_cd();
-    const Mode *flightmode = copter.flightmode;
+    const Vector3f &targets = soleon.attitude_control->get_att_target_euler_cd();
+    const Mode *flightmode = soleon.flightmode;
     mavlink_msg_nav_controller_output_send(
         chan,
         targets.x * 1.0e-2f,
@@ -257,7 +257,7 @@ void GCS_MAVLINK_Copter::send_nav_controller_output() const
         targets.z * 1.0e-2f,
         flightmode->wp_bearing() * 1.0e-2f,
         MIN(flightmode->wp_distance() * 1.0e-2f, UINT16_MAX),
-        copter.pos_control->get_pos_error_z_cm() * 1.0e-2f,
+        soleon.pos_control->get_pos_error_z_cm() * 1.0e-2f,
         0,
         flightmode->crosstrack_error() * 1.0e-2f);
     */
@@ -270,8 +270,8 @@ float GCS_MAVLINK_Copter::vfr_hud_airspeed() const
     // will use an airspeed sensor, that value is constrained by the
     // ground speed. When reporting we should send the true airspeed
     // value if possible:
-    if (copter.airspeed.enabled() && copter.airspeed.healthy()) {
-        return copter.airspeed.get_airspeed();
+    if (soleon.airspeed.enabled() && soleon.airspeed.healthy()) {
+        return soleon.airspeed.get_airspeed();
     }
 #endif
     
@@ -286,10 +286,10 @@ float GCS_MAVLINK_Copter::vfr_hud_airspeed() const
 
 int16_t GCS_MAVLINK_Copter::vfr_hud_throttle() const
 {
-    if (copter.motors == nullptr) {
+    if (soleon.motors == nullptr) {
         return 0;
     }
-    return (int16_t)(copter.motors->get_throttle() * 100);
+    return (int16_t)(soleon.motors->get_throttle() * 100);
 }
 
 /*
@@ -305,7 +305,7 @@ void GCS_MAVLINK_Copter::send_pid_tuning()
         PID_TUNING_ACCZ
     };
     for (uint8_t i=0; i<ARRAY_SIZE(axes); i++) {
-        if (!(copter.g.gcs_pid_mask & (1<<(axes[i]-1)))) {
+        if (!(soleon.g.gcs_pid_mask & (1<<(axes[i]-1)))) {
             continue;
         }
         if (!HAVE_PAYLOAD_SPACE(chan, PID_TUNING)) {
@@ -314,16 +314,16 @@ void GCS_MAVLINK_Copter::send_pid_tuning()
         const AP_PIDInfo *pid_info = nullptr;
         switch (axes[i]) {
         case PID_TUNING_ROLL:
-            pid_info = &copter.attitude_control->get_rate_roll_pid().get_pid_info();
+            pid_info = &soleon.attitude_control->get_rate_roll_pid().get_pid_info();
             break;
         case PID_TUNING_PITCH:
-            pid_info = &copter.attitude_control->get_rate_pitch_pid().get_pid_info();
+            pid_info = &soleon.attitude_control->get_rate_pitch_pid().get_pid_info();
             break;
         case PID_TUNING_YAW:
-            pid_info = &copter.attitude_control->get_rate_yaw_pid().get_pid_info();
+            pid_info = &soleon.attitude_control->get_rate_yaw_pid().get_pid_info();
             break;
         case PID_TUNING_ACCZ:
-            pid_info = &copter.pos_control->get_accel_z_pid().get_pid_info();
+            pid_info = &soleon.pos_control->get_accel_z_pid().get_pid_info();
             break;
         default:
             continue;
@@ -358,20 +358,20 @@ void GCS_MAVLINK_Copter::send_winch_status() const
 
 uint8_t GCS_MAVLINK_Copter::sysid_my_gcs() const
 {
-    return copter.g.sysid_my_gcs;
+    return soleon.g.sysid_my_gcs;
 }
 bool GCS_MAVLINK_Copter::sysid_enforce() const
 {
-    return copter.g2.sysid_enforce;
+    return soleon.g2.sysid_enforce;
 }
 
 uint32_t GCS_MAVLINK_Copter::telem_delay() const
 {
-    return (uint32_t)(copter.g.telem_delay);
+    return (uint32_t)(soleon.g.telem_delay);
 }
 
 bool GCS_Copter::vehicle_initialised() const {
-    return copter.ap.initialised;
+    return soleon.ap.initialised;
 }
 
 // try to send a message, return false if it wasn't sent
@@ -382,7 +382,7 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
     case MSG_TERRAIN:
 #if AP_TERRAIN_AVAILABLE
         CHECK_PAYLOAD_SIZE(TERRAIN_REQUEST);
-        copter.terrain.send_request(chan);
+        soleon.terrain.send_request(chan);
 #endif
         break;
 
@@ -402,7 +402,7 @@ bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
 
 #if HAL_ADSB_ENABLED
         CHECK_PAYLOAD_SIZE(ADSB_VEHICLE);
-        copter.adsb.send_adsb_vehicle(chan);
+        soleon.adsb.send_adsb_vehicle(chan);
 #endif
 #if AC_OAPATHPLANNER_ENABLED == ENABLED
         AP_OADatabase *oadb = AP_OADatabase::get_singleton();
@@ -633,7 +633,7 @@ const struct GCS_MAVLINK::stream_entries GCS_MAVLINK::all_stream_entries[] = {
 
 MISSION_STATE GCS_MAVLINK_Copter::mission_state(const class AP_Mission &mission) const
 {/* HaRe MODE_AUTO_ENABLED 
-    if (copter.mode_auto.paused()) {
+    if (soleon.mode_auto.paused()) {
         return MISSION_STATE_PAUSED;
     }*/
     return GCS_MAVLINK::mission_state(mission);
@@ -642,7 +642,7 @@ MISSION_STATE GCS_MAVLINK_Copter::mission_state(const class AP_Mission &mission)
 bool GCS_MAVLINK_Copter::handle_guided_request(AP_Mission::Mission_Command &cmd)
 {
 #if MODE_AUTO_ENABLED == ENABLED
-    return copter.mode_auto.do_guided(cmd);
+    return soleon.mode_auto.do_guided(cmd);
 #else
     return false;
 #endif
@@ -654,15 +654,15 @@ void GCS_MAVLINK_Copter::packetReceived(const mavlink_status_t &status,
     // we handle these messages here to avoid them being blocked by mavlink routing code
 /* HaRe
 #if HAL_ADSB_ENABLED
-    if (copter.g2.dev_options.get() & DevOptionADSBMAVLink) {
+    if (soleon.g2.dev_options.get() & DevOptionADSBMAVLink) {
         // optional handling of GLOBAL_POSITION_INT as a MAVLink based avoidance source
-        copter.avoidance_adsb.handle_msg(msg);
+        soleon.avoidance_adsb.handle_msg(msg);
     }
 #endif
 */
 #if MODE_FOLLOW_ENABLED == ENABLED
     // pass message to follow library
-    copter.g2.follow.handle_msg(msg);
+    soleon.g2.follow.handle_msg(msg);
 #endif
     GCS_MAVLINK::packetReceived(status, msg);
 }
@@ -676,24 +676,24 @@ bool GCS_MAVLINK_Copter::params_ready() const
     // if we have not yet initialised (including allocating the motors
     // object) we drop this request. That prevents the GCS from getting
     // a confusing parameter count during bootup
-    return copter.ap.initialised_params;
+    return soleon.ap.initialised_params;
 }
 
 void GCS_MAVLINK_Copter::send_banner()
 {
     GCS_MAVLINK::send_banner();
-    if (copter.motors == nullptr) {
+    if (soleon.motors == nullptr) {
         send_text(MAV_SEVERITY_INFO, "motors not allocated");
         return;
     }
     char frame_and_type_string[30];
-    copter.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
+    soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
     send_text(MAV_SEVERITY_INFO, "%s", frame_and_type_string);
 }
 
 void GCS_MAVLINK_Copter::handle_command_ack(const mavlink_message_t &msg)
 {
-    copter.command_ack_counter++;
+    soleon.command_ack_counter++;
     GCS_MAVLINK::handle_command_ack(msg);
 }
 
@@ -703,7 +703,7 @@ void GCS_MAVLINK_Copter::handle_command_ack(const mavlink_message_t &msg)
 void GCS_MAVLINK_Copter::handle_landing_target(const mavlink_landing_target_t &packet, uint32_t timestamp_ms)
 {
 #if AC_PRECLAND_ENABLED
-    copter.precland.handle_msg(packet, timestamp_ms);
+    soleon.precland.handle_msg(packet, timestamp_ms);
 #endif
 }
 
@@ -712,7 +712,7 @@ MAV_RESULT GCS_MAVLINK_Copter::_handle_command_preflight_calibration(const mavli
     /*Hare
     if (is_equal(packet.param6,1.0f)) {
         // compassmot calibration
-        return copter.mavlink_compassmot(*this);
+        return soleon.mavlink_compassmot(*this);
     }*/
 
     return GCS_MAVLINK::_handle_command_preflight_calibration(packet, msg);
@@ -724,14 +724,14 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_do_set_roi(const Location &roi_loc
     if (!roi_loc.check_latlng()) {
         return MAV_RESULT_FAILED;
     }
-   //HaRe copter.flightmode->auto_yaw.set_roi(roi_loc);
+   //HaRe soleon.flightmode->auto_yaw.set_roi(roi_loc);
     return MAV_RESULT_ACCEPTED;
 }
 
 MAV_RESULT GCS_MAVLINK_Copter::handle_preflight_reboot(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
     // reject reboot if user has also specified they want the "Auto" ESC calibration on next reboot
-    if (copter.g.esc_calibrate == (uint8_t)Copter::ESCCalibrationModes::ESCCAL_AUTO) {
+    if (soleon.g.esc_calibrate == (uint8_t)Soleon::ESCCalibrationModes::ESCCAL_AUTO) {
         send_text(MAV_SEVERITY_CRITICAL, "Reboot rejected, ESC cal on reboot");
         return MAV_RESULT_FAILED;
     }
@@ -741,17 +741,17 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_preflight_reboot(const mavlink_command_lon
 }
 
 bool GCS_MAVLINK_Copter::set_home_to_current_location(bool _lock) {
-    return copter.set_home_to_current_location(_lock);
+    return soleon.set_home_to_current_location(_lock);
 }
 bool GCS_MAVLINK_Copter::set_home(const Location& loc, bool _lock) {
-    return copter.set_home(loc, _lock);
+    return soleon.set_home(loc, _lock);
 }
 
 MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_do_reposition(const mavlink_command_int_t &packet)
 {
 #if MODE_GUIDED_ENABLED == ENABLED
     const bool change_modes = ((int32_t)packet.param2 & MAV_DO_REPOSITION_FLAGS_CHANGE_MODE) == MAV_DO_REPOSITION_FLAGS_CHANGE_MODE;
-    if (!copter.flightmode->in_guided_mode() && !change_modes) {
+    if (!soleon.flightmode->in_guided_mode() && !change_modes) {
         return MAV_RESULT_DENIED;
     }
 
@@ -765,22 +765,22 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_do_reposition(const mavlink_co
         return MAV_RESULT_DENIED;
     }
 
-    if (request_location.sanitize(copter.current_loc)) {
+    if (request_location.sanitize(soleon.current_loc)) {
         // if the location wasn't already sane don't load it
         return MAV_RESULT_DENIED; // failed as the location is not valid
     }
 
     // we need to do this first, as we don't want to change the flight mode unless we can also set the target
-    if (!copter.mode_guided.set_destination(request_location, false, 0, false, 0)) {
+    if (!soleon.mode_guided.set_destination(request_location, false, 0, false, 0)) {
         return MAV_RESULT_FAILED;
     }
 
-    if (!copter.flightmode->in_guided_mode()) {
-        if (!copter.set_mode(Mode::Number::GUIDED, ModeReason::GCS_COMMAND)) {
+    if (!soleon.flightmode->in_guided_mode()) {
+        if (!soleon.set_mode(Mode::Number::GUIDED, ModeReason::GCS_COMMAND)) {
             return MAV_RESULT_FAILED;
         }
         // the position won't have been loaded if we had to change the flight mode, so load it again
-        if (!copter.mode_guided.set_destination(request_location, false, 0, false, 0)) {
+        if (!soleon.mode_guided.set_destination(request_location, false, 0, false, 0)) {
             return MAV_RESULT_FAILED;
         }
     }
@@ -798,7 +798,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_packet(const mavlink_command_i
     case MAV_CMD_DO_FOLLOW:
         // param1: sysid of target to follow
         if ((packet.param1 > 0) && (packet.param1 <= 255)) {
-            copter.g2.follow.set_target_sysid((uint8_t)packet.param1);
+            soleon.g2.follow.set_target_sysid((uint8_t)packet.param1);
             return MAV_RESULT_ACCEPTED;
         }
         return MAV_RESULT_DENIED;
@@ -823,9 +823,9 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_mount(const mavlink_command_long_t
     case MAV_CMD_DO_MOUNT_CONTROL:
         /*HaRe
         // if vehicle has a camera mount but it doesn't do pan control then yaw the entire vehicle instead
-        if ((copter.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
-            !copter.camera_mount.has_pan_control()) {
-            copter.flightmode->auto_yaw.set_yaw_angle_rate((float)packet.param3, 0.0f);
+        if ((soleon.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
+            !soleon.camera_mount.has_pan_control()) {
+            soleon.flightmode->auto_yaw.set_yaw_angle_rate((float)packet.param3, 0.0f);
         }*/
         break;
     default:
@@ -862,7 +862,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 
         float takeoff_alt = packet.param7 * 100;      // Convert m to cm
 
-        if (!copter.flightmode->do_user_takeoff(takeoff_alt, is_zero(packet.param3))) {
+        if (!soleon.flightmode->do_user_takeoff(takeoff_alt, is_zero(packet.param3))) {
             return MAV_RESULT_FAILED;
         }
         return MAV_RESULT_ACCEPTED;
@@ -870,27 +870,27 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 
 #if MODE_AUTO_ENABLED == ENABLED
     case MAV_CMD_DO_LAND_START:
-        if (copter.mode_auto.jump_to_landing_sequence_auto_RTL(ModeReason::GCS_COMMAND)) {
+        if (soleon.mode_auto.jump_to_landing_sequence_auto_RTL(ModeReason::GCS_COMMAND)) {
             return MAV_RESULT_ACCEPTED;
         }
         return MAV_RESULT_FAILED;
 #endif
 
     case MAV_CMD_NAV_LOITER_UNLIM:
-        if (!copter.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
+        if (!soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
             return MAV_RESULT_FAILED;
         }
         return MAV_RESULT_ACCEPTED;
 
     case MAV_CMD_NAV_RETURN_TO_LAUNCH:
-        if (!copter.set_mode(Mode::Number::RTL, ModeReason::GCS_COMMAND)) {
+        if (!soleon.set_mode(Mode::Number::RTL, ModeReason::GCS_COMMAND)) {
             return MAV_RESULT_FAILED;
         }
         return MAV_RESULT_ACCEPTED;
 
     case MAV_CMD_NAV_VTOL_LAND:
     case MAV_CMD_NAV_LAND:
-        if (!copter.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND)) {
+        if (!soleon.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND)) {
             return MAV_RESULT_FAILED;
         }
         return MAV_RESULT_ACCEPTED;
@@ -905,7 +905,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         if ((packet.param1 >= 0.0f)   &&
             (packet.param1 <= 360.0f) &&
             (is_zero(packet.param4) || is_equal(packet.param4,1.0f))) {
-            copter.flightmode->auto_yaw.set_fixed_yaw(
+            soleon.flightmode->auto_yaw.set_fixed_yaw(
                 packet.param1,
                 packet.param2,
                 (int8_t)packet.param3,
@@ -922,17 +922,17 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         // param4 : unused
         if (packet.param2 > 0.0f) {
             if (packet.param1 > 2.9f) { // 3 = speed down
-                if (copter.flightmode->set_speed_down(packet.param2 * 100.0f)) {
+                if (soleon.flightmode->set_speed_down(packet.param2 * 100.0f)) {
                     return MAV_RESULT_ACCEPTED;
                 }
                 return MAV_RESULT_FAILED;
             } else if (packet.param1 > 1.9f) { // 2 = speed up
-                if (copter.flightmode->set_speed_up(packet.param2 * 100.0f)) {
+                if (soleon.flightmode->set_speed_up(packet.param2 * 100.0f)) {
                     return MAV_RESULT_ACCEPTED;
                 }
                 return MAV_RESULT_FAILED;
             } else {
-                if (copter.flightmode->set_speed_xy(packet.param2 * 100.0f)) {
+                if (soleon.flightmode->set_speed_xy(packet.param2 * 100.0f)) {
                     return MAV_RESULT_ACCEPTED;
                 }
                 return MAV_RESULT_FAILED;
@@ -942,10 +942,10 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 
 #if MODE_AUTO_ENABLED == ENABLED
     case MAV_CMD_MISSION_START:
-        if (copter.set_mode(Mode::Number::AUTO, ModeReason::GCS_COMMAND)) {
-            copter.set_auto_armed(true);
-            if (copter.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
-                copter.mode_auto.mission.start_or_resume();
+        if (soleon.set_mode(Mode::Number::AUTO, ModeReason::GCS_COMMAND)) {
+            soleon.set_auto_armed(true);
+            if (soleon.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
+                soleon.mode_auto.mission.start_or_resume();
             }
             return MAV_RESULT_ACCEPTED;
         }
@@ -957,14 +957,14 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         // configure or release parachute
         switch ((uint16_t)packet.param1) {
         case PARACHUTE_DISABLE:
-            copter.parachute.enabled(false);
+            soleon.parachute.enabled(false);
             return MAV_RESULT_ACCEPTED;
         case PARACHUTE_ENABLE:
-            copter.parachute.enabled(true);
+            soleon.parachute.enabled(true);
             return MAV_RESULT_ACCEPTED;
         case PARACHUTE_RELEASE:
             // treat as a manual release which performs some additional check of altitude
-            copter.parachute_manual_release();
+            soleon.parachute_manual_release();
             return MAV_RESULT_ACCEPTED;
         }
         return MAV_RESULT_FAILED;
@@ -978,7 +978,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         // param4 : timeout (in seconds)
         // param5 : num_motors (in sequence)
         // param6 : motor test order
-        return copter.mavlink_motor_test_start(*this,
+        return soleon.mavlink_motor_test_start(*this,
                                                (uint8_t)packet.param1,
                                                (uint8_t)packet.param2,
                                                packet.param3,
@@ -989,19 +989,19 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
     case MAV_CMD_DO_WINCH:
         // param1 : winch number (ignored)
         // param2 : action (0=relax, 1=relative length control, 2=rate control). See WINCH_ACTIONS enum.
-        if (!copter.g2.winch.enabled()) {
+        if (!soleon.g2.winch.enabled()) {
             return MAV_RESULT_FAILED;
         }
         switch ((uint8_t)packet.param2) {
         case WINCH_RELAXED:
-            copter.g2.winch.relax();
+            soleon.g2.winch.relax();
             return MAV_RESULT_ACCEPTED;
         case WINCH_RELATIVE_LENGTH_CONTROL: {
-            copter.g2.winch.release_length(packet.param3);
+            soleon.g2.winch.release_length(packet.param3);
             return MAV_RESULT_ACCEPTED;
         }
         case WINCH_RATE_CONTROL:
-            copter.g2.winch.set_desired_rate(packet.param4);
+            soleon.g2.winch.set_desired_rate(packet.param4);
             return MAV_RESULT_ACCEPTED;
         default:
             break;
@@ -1011,13 +1011,13 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
 */
         /* Solo user presses Fly button */
     case MAV_CMD_SOLO_BTN_FLY_CLICK: {
-        if (copter.failsafe.radio) {
+        if (soleon.failsafe.radio) {
             return MAV_RESULT_ACCEPTED;
         }
 
         // set mode to Loiter or fall back to AltHold
-        if (!copter.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
-            copter.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
+        if (!soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
+            soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
         }
         return MAV_RESULT_ACCEPTED;
     }
@@ -1026,21 +1026,21 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         /* Solo user holds down Fly button for a couple of seconds */
     /*HaRe
     case MAV_CMD_SOLO_BTN_FLY_HOLD: {
-        if (copter.failsafe.radio) {
+        if (soleon.failsafe.radio) {
             return MAV_RESULT_ACCEPTED;
         }
 
-        if (!copter.motors->armed()) {
+        if (!soleon.motors->armed()) {
             // if disarmed, arm motors
-            copter.arming.arm(AP_Arming::Method::MAVLINK);
-        } else if (copter.ap.land_complete) {
+            soleon.arming.arm(AP_Arming::Method::MAVLINK);
+        } else if (soleon.ap.land_complete) {
             // if armed and landed, takeoff
-            if (copter.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
-                copter.flightmode->do_user_takeoff(packet.param1*100, true);
+            if (soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
+                soleon.flightmode->do_user_takeoff(packet.param1*100, true);
             }
         } else {
             // if flying, land
-            copter.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND);
+            soleon.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND);
         }
         return MAV_RESULT_ACCEPTED;
     }*/
@@ -1048,28 +1048,28 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
         /* Solo user presses pause button */
     /*HaRe
     case MAV_CMD_SOLO_BTN_PAUSE_CLICK: {
-        if (copter.failsafe.radio) {
+        if (soleon.failsafe.radio) {
             return MAV_RESULT_ACCEPTED;
         }
 
-        if (copter.motors->armed()) {
-            if (copter.ap.land_complete) {
+        if (soleon.motors->armed()) {
+            if (soleon.ap.land_complete) {
                 // if landed, disarm motors
-                copter.arming.disarm(AP_Arming::Method::SOLOPAUSEWHENLANDED);
+                soleon.arming.disarm(AP_Arming::Method::SOLOPAUSEWHENLANDED);
             } else {
                 // assume that shots modes are all done in guided.
                 // NOTE: this may need to change if we add a non-guided shot mode
-                bool shot_mode = (!is_zero(packet.param1) && (copter.flightmode->mode_number() == Mode::Number::GUIDED || copter.flightmode->mode_number() == Mode::Number::GUIDED_NOGPS));
+                bool shot_mode = (!is_zero(packet.param1) && (soleon.flightmode->mode_number() == Mode::Number::GUIDED || soleon.flightmode->mode_number() == Mode::Number::GUIDED_NOGPS));
 
                 if (!shot_mode) {
 #if MODE_BRAKE_ENABLED == ENABLED
-                    if (copter.set_mode(Mode::Number::BRAKE, ModeReason::GCS_COMMAND)) {
-                        copter.mode_brake.timeout_to_loiter_ms(2500);
+                    if (soleon.set_mode(Mode::Number::BRAKE, ModeReason::GCS_COMMAND)) {
+                        soleon.mode_brake.timeout_to_loiter_ms(2500);
                     } else {
-                        copter.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
+                        soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
                     }
 #else
-                    copter.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
+                    soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
 #endif
                 } else {
                     // SoloLink is expected to handle pause in shots
@@ -1089,7 +1089,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_comma
     /*HaRe
     // requested pause
     if ((uint8_t) packet.param1 == 0) {
-        if (copter.flightmode->pause()) {
+        if (soleon.flightmode->pause()) {
             return MAV_RESULT_ACCEPTED;
         }
         send_text(MAV_SEVERITY_INFO, "Failed to pause");
@@ -1098,7 +1098,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_comma
 
     // requested resume
     if ((uint8_t) packet.param1 == 1) {
-        if (copter.flightmode->resume()) {
+        if (soleon.flightmode->resume()) {
             return MAV_RESULT_ACCEPTED;
         }
         send_text(MAV_SEVERITY_INFO, "Failed to resume");
@@ -1113,10 +1113,10 @@ void GCS_MAVLINK_Copter::handle_mount_message(const mavlink_message_t &msg)
     switch (msg.msgid) {
     case MAVLINK_MSG_ID_MOUNT_CONTROL:
         // if vehicle has a camera mount but it doesn't do pan control then yaw the entire vehicle instead
-        if ((copter.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
-            !copter.camera_mount.has_pan_control()) {
+        if ((soleon.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
+            !soleon.camera_mount.has_pan_control()) {
             /*Hare 
-            copter.flightmode->auto_yaw.set_yaw_angle_rate(
+            soleon.flightmode->auto_yaw.set_yaw_angle_rate(
                 mavlink_msg_mount_control_get_input_c(&msg) * 0.01f,
                 0.0f);
             */
@@ -1137,10 +1137,10 @@ void GCS_MAVLINK_Copter::handle_manual_control_axes(const mavlink_manual_control
         return;
     }
 
-    manual_override(copter.channel_roll, packet.y, 1000, 2000, tnow);
-    manual_override(copter.channel_pitch, packet.x, 1000, 2000, tnow, true);
-    manual_override(copter.channel_throttle, packet.z, 0, 1000, tnow);
-    manual_override(copter.channel_yaw, packet.r, 1000, 2000, tnow);
+    manual_override(soleon.channel_roll, packet.y, 1000, 2000, tnow);
+    manual_override(soleon.channel_pitch, packet.x, 1000, 2000, tnow, true);
+    manual_override(soleon.channel_throttle, packet.z, 0, 1000, tnow);
+    manual_override(soleon.channel_yaw, packet.r, 1000, 2000, tnow);
 }
 
 // sanity check velocity or acceleration vector components are numbers
@@ -1194,7 +1194,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
         mavlink_msg_set_attitude_target_decode(&msg, &packet);
 
         // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!copter.flightmode->in_guided_mode()) {
+        if (!soleon.flightmode->in_guided_mode()) {
             break;
         }
 
@@ -1225,7 +1225,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
         }
 
         // check if the message's thrust field should be interpreted as a climb rate or as thrust
-        const bool use_thrust = copter.mode_guided.set_attitude_target_provides_thrust();
+        const bool use_thrust = soleon.mode_guided.set_attitude_target_provides_thrust();
 
         float climb_rate_or_thrust;
         if (use_thrust) {
@@ -1238,10 +1238,10 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
                 climb_rate_or_thrust = 0.0f;
             } else if (packet.thrust > 0.5f) {
                 // climb at up to WPNAV_SPEED_UP
-                climb_rate_or_thrust = (packet.thrust - 0.5f) * 2.0f * copter.wp_nav->get_default_speed_up();
+                climb_rate_or_thrust = (packet.thrust - 0.5f) * 2.0f * soleon.wp_nav->get_default_speed_up();
             } else {
                 // descend at up to WPNAV_SPEED_DN
-                climb_rate_or_thrust = (0.5f - packet.thrust) * 2.0f * -copter.wp_nav->get_default_speed_down();
+                climb_rate_or_thrust = (0.5f - packet.thrust) * 2.0f * -soleon.wp_nav->get_default_speed_down();
             }
         }
 
@@ -1256,7 +1256,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             ang_vel.z = packet.body_yaw_rate;
         }
 
-        copter.mode_guided.set_angle(attitude_quat, ang_vel,
+        soleon.mode_guided.set_angle(attitude_quat, ang_vel,
                 climb_rate_or_thrust, use_thrust);
 
         break;
@@ -1269,7 +1269,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
         mavlink_msg_set_position_target_local_ned_decode(&msg, &packet);
 
         // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!copter.flightmode->in_guided_mode()) {
+        if (!soleon.flightmode->in_guided_mode()) {
             break;
         }
 
@@ -1279,7 +1279,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             packet.coordinate_frame != MAV_FRAME_BODY_NED &&
             packet.coordinate_frame != MAV_FRAME_BODY_OFFSET_NED) {
             // input is not valid so stop
-            copter.mode_guided.init(true);
+            soleon.mode_guided.init(true);
             break;
         }
 
@@ -1304,13 +1304,13 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             // rotate to body-frame if necessary
             if (packet.coordinate_frame == MAV_FRAME_BODY_NED ||
                 packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                copter.rotate_body_frame_to_NE(pos_vector.x, pos_vector.y);
+                soleon.rotate_body_frame_to_NE(pos_vector.x, pos_vector.y);
             }
             // add body offset if necessary
             if (packet.coordinate_frame == MAV_FRAME_LOCAL_OFFSET_NED ||
                 packet.coordinate_frame == MAV_FRAME_BODY_NED ||
                 packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                pos_vector += copter.inertial_nav.get_position_neu_cm();
+                pos_vector += soleon.inertial_nav.get_position_neu_cm();
             }
         }
 
@@ -1320,13 +1320,13 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             vel_vector = Vector3f{packet.vx, packet.vy, -packet.vz};
             if (!sane_vel_or_acc_vector(vel_vector)) {
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 return;
             }
             vel_vector *= 100;  // m/s -> cm/s
             // rotate to body-frame if necessary
             if (packet.coordinate_frame == MAV_FRAME_BODY_NED || packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                copter.rotate_body_frame_to_NE(vel_vector.x, vel_vector.y);
+                soleon.rotate_body_frame_to_NE(vel_vector.x, vel_vector.y);
             }
         }
 
@@ -1337,7 +1337,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             accel_vector = Vector3f(packet.afx * 100.0f, packet.afy * 100.0f, -packet.afz * 100.0f);
             // rotate to body-frame if necessary
             if (packet.coordinate_frame == MAV_FRAME_BODY_NED || packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                copter.rotate_body_frame_to_NE(accel_vector.x, accel_vector.y);
+                soleon.rotate_body_frame_to_NE(accel_vector.x, accel_vector.y);
             }
         }
 
@@ -1355,16 +1355,16 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
 
         // send request
         if (!pos_ignore && !vel_ignore) {
-            copter.mode_guided.set_destination_posvelaccel(pos_vector, vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
+            soleon.mode_guided.set_destination_posvelaccel(pos_vector, vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
         } else if (pos_ignore && !vel_ignore) {
-            copter.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
+            soleon.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
         } else if (pos_ignore && vel_ignore && !acc_ignore) {
-            copter.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
+            soleon.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
         } else if (!pos_ignore && vel_ignore && acc_ignore) {
-            copter.mode_guided.set_destination(pos_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative, false);
+            soleon.mode_guided.set_destination(pos_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative, false);
         } else {
             // input is not valid so stop
-            copter.mode_guided.init(true);
+            soleon.mode_guided.init(true);
         }
 
         break;
@@ -1377,7 +1377,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
         mavlink_msg_set_position_target_global_int_decode(&msg, &packet);
 
         // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!copter.flightmode->in_guided_mode()) {
+        if (!soleon.flightmode->in_guided_mode()) {
             break;
         }
 
@@ -1402,14 +1402,14 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             // sanity check location
             if (!check_latlng(packet.lat_int, packet.lon_int)) {
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 break;
             }
             Location::AltFrame frame;
             if (!mavlink_coordinate_frame_to_location_alt_frame((MAV_FRAME)packet.coordinate_frame, frame)) {
                 // unknown coordinate frame
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 break;
             }
             loc = {packet.lat_int, packet.lon_int, int32_t(packet.alt*100), frame};
@@ -1421,7 +1421,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             vel_vector = Vector3f{packet.vx, packet.vy, -packet.vz};
             if (!sane_vel_or_acc_vector(vel_vector)) {
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 return;
             }
             vel_vector *= 100;  // m/s -> cm/s
@@ -1450,25 +1450,25 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
             if (loc.get_alt_frame() == Location::AltFrame::ABOVE_TERRAIN) {
                 // posvel controller does not support alt-above-terrain
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 break;
             }
             Vector3f pos_neu_cm;
             if (!loc.get_vector_from_origin_NEU(pos_neu_cm)) {
                 // input is not valid so stop
-                copter.mode_guided.init(true);
+                soleon.mode_guided.init(true);
                 break;
             }
-            copter.mode_guided.set_destination_posvel(pos_neu_cm, vel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
+            soleon.mode_guided.set_destination_posvel(pos_neu_cm, vel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
         } else if (pos_ignore && !vel_ignore) {
-            copter.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
+            soleon.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
         } else if (pos_ignore && vel_ignore && !acc_ignore) {
-            copter.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
+            soleon.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
         } else if (!pos_ignore && vel_ignore && acc_ignore) {
-            copter.mode_guided.set_destination(loc, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
+            soleon.mode_guided.set_destination(loc, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
         } else {
             // input is not valid so stop
-            copter.mode_guided.init(true);
+            soleon.mode_guided.init(true);
         }
 
         break;
@@ -1478,20 +1478,20 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
     case MAVLINK_MSG_ID_RADIO:
     case MAVLINK_MSG_ID_RADIO_STATUS:       // MAV ID: 109
     {
-        handle_radio_status(msg, copter.should_log(MASK_LOG_PM));
+        handle_radio_status(msg, soleon.should_log(MASK_LOG_PM));
         break;
     }
 
     case MAVLINK_MSG_ID_TERRAIN_DATA:
     case MAVLINK_MSG_ID_TERRAIN_CHECK:
 #if AP_TERRAIN_AVAILABLE
-        copter.terrain.handle_data(chan, msg);
+        soleon.terrain.handle_data(chan, msg);
 #endif
         break;
 
 #if TOY_MODE_ENABLED == ENABLED
     case MAVLINK_MSG_ID_NAMED_VALUE_INT:
-        copter.g2.toy_mode.handle_message(msg);
+        soleon.g2.toy_mode.handle_message(msg);
         break;
 #endif
         
@@ -1510,7 +1510,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_flight_termination(const mavlink_command_l
 #endif
  /*HaRe
     if (packet.param1 > 0.5f) {
-        copter.arming.disarm(AP_Arming::Method::TERMINATION);
+        soleon.arming.disarm(AP_Arming::Method::TERMINATION);
         return MAV_RESULT_ACCEPTED;
     }
 
@@ -1520,10 +1520,10 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_flight_termination(const mavlink_command_l
 
 float GCS_MAVLINK_Copter::vfr_hud_alt() const
 {
-    if (copter.g2.dev_options.get() & DevOptionVFR_HUDRelativeAlt) {
+    if (soleon.g2.dev_options.get() & DevOptionVFR_HUDRelativeAlt) {
         // compatibility option for older mavlink-aware devices that
         // assume Copter returns a relative altitude in VFR_HUD.alt
-        return copter.current_loc.alt * 0.01f;
+        return soleon.current_loc.alt * 0.01f;
     }
     return GCS_MAVLINK::vfr_hud_alt();
 }
@@ -1538,21 +1538,21 @@ uint64_t GCS_MAVLINK_Copter::capabilities() const
             MAV_PROTOCOL_CAPABILITY_FLIGHT_TERMINATION |
             MAV_PROTOCOL_CAPABILITY_SET_ATTITUDE_TARGET |
 #if AP_TERRAIN_AVAILABLE
-            (copter.terrain.enabled() ? MAV_PROTOCOL_CAPABILITY_TERRAIN : 0) |
+            (soleon.terrain.enabled() ? MAV_PROTOCOL_CAPABILITY_TERRAIN : 0) |
 #endif
             GCS_MAVLINK::capabilities());
 }
 
 MAV_LANDED_STATE GCS_MAVLINK_Copter::landed_state() const
 {
-    if (copter.ap.land_complete) {
+    if (soleon.ap.land_complete) {
         return MAV_LANDED_STATE_ON_GROUND;
     }
     /*HaRe
-    if (copter.flightmode->is_landing()) {
+    if (soleon.flightmode->is_landing()) {
         return MAV_LANDED_STATE_LANDING;
     }
-    if (copter.flightmode->is_taking_off()) {
+    if (soleon.flightmode->is_taking_off()) {
         return MAV_LANDED_STATE_TAKEOFF;
     }*/
     return MAV_LANDED_STATE_IN_AIR;
@@ -1563,7 +1563,7 @@ void GCS_MAVLINK_Copter::send_wind() const
     Vector3f airspeed_vec_bf;
     if (!AP::ahrs().airspeed_vector_true(airspeed_vec_bf)) {
         // if we don't have an airspeed estimate then we don't have a
-        // valid wind estimate on copters
+        // valid wind estimate on soleons
         return;
     }
     const Vector3f wind = AP::ahrs().wind_estimate();
@@ -1583,8 +1583,8 @@ int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const
     UNUSED_RESULT(ahrs.get_location(global_position_current));
 
     //return units are m
-    if (copter.ap.initialised) {
-        return 0.01 * (global_position_current.alt + copter.pos_control->get_pos_error_z_cm());
+    if (soleon.ap.initialised) {
+        return 0.01 * (global_position_current.alt + soleon.pos_control->get_pos_error_z_cm());
     }
     return 0;
     
@@ -1593,9 +1593,9 @@ int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const
 uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
 {
     /*HaRe
-    if (copter.ap.initialised) {
+    if (soleon.ap.initialised) {
         // return units are deg/2
-        const Mode *flightmode = copter.flightmode;
+        const Mode *flightmode = soleon.flightmode;
         // need to convert -18000->18000 to 0->360/2
         return wrap_360_cd(flightmode->wp_bearing()) / 200;
     }*/
@@ -1605,9 +1605,9 @@ uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
 uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
 {
     /*HaRe
-    if (copter.ap.initialised) {
+    if (soleon.ap.initialised) {
         // return units are dm
-        const Mode *flightmode = copter.flightmode;
+        const Mode *flightmode = soleon.flightmode;
         return MIN(flightmode->wp_distance() * 1.0e-2, UINT16_MAX) / 10;
     }*/
     return 0;
@@ -1615,9 +1615,9 @@ uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
 
 uint8_t GCS_MAVLINK_Copter::high_latency_tgt_airspeed() const
 {
-    if (copter.ap.initialised) {
+    if (soleon.ap.initialised) {
         // return units are m/s*5
-        return MIN(copter.pos_control->get_vel_target_cms().length() * 5.0e-2, UINT8_MAX);
+        return MIN(soleon.pos_control->get_vel_target_cms().length() * 5.0e-2, UINT8_MAX);
     }
     return 0;  
 }

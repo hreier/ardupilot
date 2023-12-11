@@ -5,7 +5,7 @@
 
 class GCS_Copter : public GCS
 {
-    friend class Copter; // for access to _chan in parameter declarations
+    friend class Soleon; // for access to _chan in parameter declarations
 
 public:
 

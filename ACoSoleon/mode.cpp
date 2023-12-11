@@ -9,24 +9,24 @@
   constructor for Mode object
  */
 Mode::Mode(void) :
-    g(copter.g),
-    g2(copter.g2),
-    wp_nav(copter.wp_nav),
-    loiter_nav(copter.loiter_nav),
-    pos_control(copter.pos_control),
-    inertial_nav(copter.inertial_nav),
-    ahrs(copter.ahrs),
-    /*HaRe attitude_control(copter.attitude_control), */
-    motors(copter.motors),
-    channel_roll(copter.channel_roll),
-    channel_pitch(copter.channel_pitch),
-    channel_throttle(copter.channel_throttle),
-    channel_yaw(copter.channel_yaw),
-    G_Dt(copter.G_Dt)
+    g(soleon.g),
+    g2(soleon.g2),
+    wp_nav(soleon.wp_nav),
+    loiter_nav(soleon.loiter_nav),
+    pos_control(soleon.pos_control),
+    inertial_nav(soleon.inertial_nav),
+    ahrs(soleon.ahrs),
+    /*HaRe attitude_control(soleon.attitude_control), */
+    motors(soleon.motors),
+    channel_roll(soleon.channel_roll),
+    channel_pitch(soleon.channel_pitch),
+    channel_throttle(soleon.channel_throttle),
+    channel_yaw(soleon.channel_yaw),
+    G_Dt(soleon.G_Dt)
 { };
 
 // return the static controller object corresponding to supplied mode
-Mode *Copter::mode_from_mode_num(const Mode::Number mode)
+Mode *Soleon::mode_from_mode_num(const Mode::Number mode)
 {
     Mode *ret = nullptr;
 
@@ -188,18 +188,18 @@ Mode *Copter::mode_from_mode_num(const Mode::Number mode)
 
 
 // called when an attempt to change into a mode is unsuccessful:
-void Copter::mode_change_failed(const Mode *mode, const char *reason)
+void Soleon::mode_change_failed(const Mode *mode, const char *reason)
 {
     gcs().send_text(MAV_SEVERITY_WARNING, "Mode change to %s failed: %s", mode->name(), reason);
     AP::logger().Write_Error(LogErrorSubsystem::FLIGHT_MODE, LogErrorCode(mode->mode_number()));
     // make sad noise
-    if (copter.ap.initialised) {
+    if (soleon.ap.initialised) {
         AP_Notify::events.user_mode_change_failed = 1;
     }
 }
 
 // Check if this mode can be entered from the GCS
-bool Copter::gcs_mode_enabled(const Mode::Number mode_num)
+bool Soleon::gcs_mode_enabled(const Mode::Number mode_num)
 {
     // List of modes that can be blocked, index is bit number in parameter bitmask
     static const uint8_t mode_list [] {
@@ -248,7 +248,7 @@ bool Copter::gcs_mode_enabled(const Mode::Number mode_num)
 // optional force parameter used to force the flight mode change (used only first time mode is set)
 // returns true if mode was successfully set
 // ACRO, STABILIZE, ALTHOLD, LAND, DRIFT and SPORT can always be set successfully but the return state of other flight modes should be checked and the caller should deal with failures appropriately
-bool Copter::set_mode(Mode::Number mode, ModeReason reason)
+bool Soleon::set_mode(Mode::Number mode, ModeReason reason)
 {
     /*HaRe
     // update last reason
@@ -263,7 +263,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
             attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
         }
         // make happy noise
-        if (copter.ap.initialised && (reason != last_reason)) {
+        if (soleon.ap.initialised && (reason != last_reason)) {
             AP_Notify::events.user_mode_change = 1;
         }
         return true;
@@ -323,8 +323,8 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     if (!ignore_checks &&
         ap.land_complete &&
         user_throttle &&
-        !copter.flightmode->has_manual_throttle() &&
-        new_flightmode->get_pilot_desired_throttle() > copter.get_non_takeoff_throttle()) {
+        !soleon.flightmode->has_manual_throttle() &&
+        new_flightmode->get_pilot_desired_throttle() > soleon.get_non_takeoff_throttle()) {
         mode_change_failed(new_flightmode, "throttle too high");
         return false;
     }
@@ -332,7 +332,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
 
     if (!ignore_checks &&
         new_flightmode->requires_GPS() &&
-        !copter.position_ok()) {
+        !soleon.position_ok()) {
         mode_change_failed(new_flightmode, "requires position");
         return false;
     }
@@ -340,7 +340,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     // check for valid altitude if old mode did not require it but new one does
     // we only want to stop changing modes if it could make things worse
     if (!ignore_checks &&
-        !copter.ekf_alt_ok() &&
+        !soleon.ekf_alt_ok() &&
         flightmode->has_manual_throttle() &&
         !new_flightmode->has_manual_throttle()) {
         mode_change_failed(new_flightmode, "need alt estimate");
@@ -396,7 +396,7 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     notify_flight_mode();
 
     // make happy noise
-    if (copter.ap.initialised) {
+    if (soleon.ap.initialised) {
         AP_Notify::events.user_mode_change = 1;
     }
 */
@@ -404,21 +404,21 @@ bool Copter::set_mode(Mode::Number mode, ModeReason reason)
     return true;
 }
 
-bool Copter::set_mode(const uint8_t new_mode, const ModeReason reason)
+bool Soleon::set_mode(const uint8_t new_mode, const ModeReason reason)
 {
     static_assert(sizeof(Mode::Number) == sizeof(new_mode), "The new mode can't be mapped to the vehicles mode number");
 #ifdef DISALLOW_GCS_MODE_CHANGE_DURING_RC_FAILSAFE
-    if (reason == ModeReason::GCS_COMMAND && copter.failsafe.radio) {
+    if (reason == ModeReason::GCS_COMMAND && soleon.failsafe.radio) {
         // don't allow mode changes while in radio failsafe
         return false;
     }
 #endif
-    return copter.set_mode(static_cast<Mode::Number>(new_mode), reason);
+    return soleon.set_mode(static_cast<Mode::Number>(new_mode), reason);
 }
 
 // update_flight_mode - calls the appropriate attitude controllers based on flight mode
 // called at 100hz or more
-void Copter::update_flight_mode()
+void Soleon::update_flight_mode()
 {
    /*HaRe surface_tracking.invalidate_for_logging();  // invalidate surface tracking alt, flight mode will set to true if used
 
@@ -426,7 +426,7 @@ void Copter::update_flight_mode()
 }
 
 // exit_mode - high level call to organise cleanup as a flight mode is exited
-void Copter::exit_mode(Mode *&old_flightmode,
+void Soleon::exit_mode(Mode *&old_flightmode,
                        Mode *&new_flightmode)
 {
     /*HaRe
@@ -463,7 +463,7 @@ void Copter::exit_mode(Mode *&old_flightmode,
 }
 
 // notify_flight_mode - sets notify object based on current flight mode.  Only used for OreoLED notify device
-void Copter::notify_flight_mode() {
+void Soleon::notify_flight_mode() {
     /*HaRe
     AP_Notify::flags.autopilot_mode = flightmode->is_autopilot();
     AP_Notify::flags.flight_mode = (uint8_t)flightmode->mode_number();
@@ -476,7 +476,7 @@ void Copter::notify_flight_mode() {
 void Mode::get_pilot_desired_lean_angles(float &roll_out_cd, float &pitch_out_cd, float angle_max_cd, float angle_limit_cd) const
 {
     // throttle failsafe check
-    if (copter.failsafe.radio || !copter.ap.rc_receiver_present) {
+    if (soleon.failsafe.radio || !soleon.ap.rc_receiver_present) {
         roll_out_cd = 0.0;
         pitch_out_cd = 0.0;
         return;
@@ -498,7 +498,7 @@ Vector2f Mode::get_pilot_desired_velocity(float vel_max) const
     Vector2f vel;
 
     // throttle failsafe check
-    if (copter.failsafe.radio || !copter.ap.rc_receiver_present) {
+    if (soleon.failsafe.radio || !soleon.ap.rc_receiver_present) {
         return vel;
     }
     // fetch roll and pitch inputs
@@ -515,7 +515,7 @@ Vector2f Mode::get_pilot_desired_velocity(float vel_max) const
     if (vel.is_zero()) {
         return vel;
     }
- //HaRe   copter.rotate_body_frame_to_NE(vel.x, vel.y);
+ //HaRe   soleon.rotate_body_frame_to_NE(vel.x, vel.y);
 
     // Transform square input range to circular output
     // vel_scaler is the vector to the edge of the +- 1.0 square in the direction of the current input
@@ -527,7 +527,7 @@ Vector2f Mode::get_pilot_desired_velocity(float vel_max) const
 
 bool Mode::_TakeOff::triggered(const float target_climb_rate) const
 {
-    if (!copter.ap.land_complete) {
+    if (!soleon.ap.land_complete) {
         // can't take off if we're already flying
         return false;
     }
@@ -536,7 +536,7 @@ bool Mode::_TakeOff::triggered(const float target_climb_rate) const
         return false;
     }
 
-    if (copter.motors->get_spool_state() != AP_Motors::SpoolState::THROTTLE_UNLIMITED) {
+    if (soleon.motors->get_spool_state() != AP_Motors::SpoolState::THROTTLE_UNLIMITED) {
         // hold aircraft on the ground until rotor speed runup has finished
         return false;
     }
@@ -546,7 +546,7 @@ bool Mode::_TakeOff::triggered(const float target_climb_rate) const
 
 bool Mode::is_disarmed_or_landed() const
 {
-    if (!motors->armed() || !copter.ap.auto_armed || copter.ap.land_complete) {
+    if (!motors->armed() || !soleon.ap.auto_armed || soleon.ap.land_complete) {
         return true;
     }
     return false;
@@ -561,7 +561,7 @@ void Mode::zero_throttle_and_relax_ac(bool spool_up)
         motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::GROUND_IDLE);
     }
     attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(0.0f, 0.0f, 0.0f);
-    attitude_control->set_throttle_out(0.0f, false, copter.g.throttle_filt);
+    attitude_control->set_throttle_out(0.0f, false, soleon.g.throttle_filt);
     */
 }
 
@@ -570,7 +570,7 @@ void Mode::zero_throttle_and_hold_attitude()
     /*HaRe
     // run attitude controller
     attitude_control->input_rate_bf_roll_pitch_yaw(0.0f, 0.0f, 0.0f);
-    attitude_control->set_throttle_out(0.0f, false, copter.g.throttle_filt);
+    attitude_control->set_throttle_out(0.0f, false, soleon.g.throttle_filt);
     */
 }
 
@@ -622,18 +622,18 @@ void Mode::make_safe_ground_handling(bool force_throttle_unlimited)
 int32_t Mode::get_alt_above_ground_cm(void)
 {
     int32_t alt_above_ground_cm;
-    if (copter.get_rangefinder_height_interpolated_cm(alt_above_ground_cm)) {
+    if (soleon.get_rangefinder_height_interpolated_cm(alt_above_ground_cm)) {
         return alt_above_ground_cm;
     }
     if (!pos_control->is_active_xy()) {
-        return copter.current_loc.alt;
+        return soleon.current_loc.alt;
     }
-    if (copter.current_loc.get_alt_cm(Location::AltFrame::ABOVE_TERRAIN, alt_above_ground_cm)) {
+    if (soleon.current_loc.get_alt_cm(Location::AltFrame::ABOVE_TERRAIN, alt_above_ground_cm)) {
         return alt_above_ground_cm;
     }
 
     // Assume the Earth is flat:
-    return copter.current_loc.alt;
+    return soleon.current_loc.alt;
 }
 
 void Mode::land_run_vertical_control(bool pause_descent)
@@ -643,7 +643,7 @@ void Mode::land_run_vertical_control(bool pause_descent)
     if (!pause_descent) {
 
         // do not ignore limits until we have slowed down for landing
-        ignore_descent_limit = (MAX(g2.land_alt_low,100) > get_alt_above_ground_cm()) || copter.ap.land_complete_maybe;
+        ignore_descent_limit = (MAX(g2.land_alt_low,100) > get_alt_above_ground_cm()) || soleon.ap.land_complete_maybe;
 
         float max_land_descent_velocity;
         if (g.land_speed_high > 0) {
@@ -663,21 +663,21 @@ void Mode::land_run_vertical_control(bool pause_descent)
 
 #if AC_PRECLAND_ENABLED
         const bool navigating = pos_control->is_active_xy();
-        bool doing_precision_landing = !copter.ap.land_repo_active && copter.precland.target_acquired() && navigating;
+        bool doing_precision_landing = !soleon.ap.land_repo_active && soleon.precland.target_acquired() && navigating;
 
         if (doing_precision_landing) {
             // prec landing is active
             Vector2f target_pos;
             float target_error_cm = 0.0f;
-            if (copter.precland.get_target_position_cm(target_pos)) {
+            if (soleon.precland.get_target_position_cm(target_pos)) {
                 const Vector2f current_pos = inertial_nav.get_position_xy_cm();
                 // target is this many cm away from the vehicle
                 target_error_cm = (target_pos - current_pos).length();
             }
             // check if we should descend or not
-            const float max_horiz_pos_error_cm = copter.precland.get_max_xy_error_before_descending_cm();
+            const float max_horiz_pos_error_cm = soleon.precland.get_max_xy_error_before_descending_cm();
             Vector3f target_pos_meas;
-            copter.precland.get_target_position_measurement_cm(target_pos_meas);
+            soleon.precland.get_target_position_measurement_cm(target_pos_meas);
             if (target_error_cm > max_horiz_pos_error_cm && !is_zero(max_horiz_pos_error_cm)) {
                 // doing precland but too far away from the obstacle
                 // do not descend
@@ -706,13 +706,13 @@ void Mode::land_run_horizontal_control()
     Vector2f vel_correction;
 
     // relax loiter target if we might be landed
-    if (copter.ap.land_complete_maybe) {
+    if (soleon.ap.land_complete_maybe) {
         pos_control->soften_for_landing_xy();
     }
 
     // process pilot inputs
-    if (!copter.failsafe.radio) {
-        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && copter.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
+    if (!soleon.failsafe.radio) {
+        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && soleon.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
             AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
             // exit land if throttle is high
             if (!set_mode(Mode::Number::LOITER, ModeReason::THROTTLE_LAND_ESCAPE)) {
@@ -732,15 +732,15 @@ void Mode::land_run_horizontal_control()
 
             // record if pilot has overridden roll or pitch
             if (!vel_correction.is_zero()) {
-                if (!copter.ap.land_repo_active) {
+                if (!soleon.ap.land_repo_active) {
                     AP::logger().Write_Event(LogEvent::LAND_REPO_ACTIVE);
                 }
-                copter.ap.land_repo_active = true;
+                soleon.ap.land_repo_active = true;
 #if AC_PRECLAND_ENABLED
             } else {
                 // no override right now, check if we should allow precland
-                if (copter.precland.allow_precland_after_reposition()) {
-                    copter.ap.land_repo_active = false;
+                if (soleon.precland.allow_precland_after_reposition()) {
+                    soleon.ap.land_repo_active = false;
                 }
 #endif
             }
@@ -748,17 +748,17 @@ void Mode::land_run_horizontal_control()
     }
 
     // this variable will be updated if prec land target is in sight and pilot isn't trying to reposition the vehicle
-    copter.ap.prec_land_active = false;
+    soleon.ap.prec_land_active = false;
 #if AC_PRECLAND_ENABLED
-    copter.ap.prec_land_active = !copter.ap.land_repo_active && copter.precland.target_acquired();
+    soleon.ap.prec_land_active = !soleon.ap.land_repo_active && soleon.precland.target_acquired();
     // run precision landing
-    if (copter.ap.prec_land_active) {
+    if (soleon.ap.prec_land_active) {
         Vector2f target_pos, target_vel;
-        if (!copter.precland.get_target_position_cm(target_pos)) {
+        if (!soleon.precland.get_target_position_cm(target_pos)) {
             target_pos = inertial_nav.get_position_xy_cm();
         }
          // get the velocity of the target
-        copter.precland.get_target_velocity_cms(inertial_nav.get_velocity_xy_cms(), target_vel);
+        soleon.precland.get_target_velocity_cms(inertial_nav.get_velocity_xy_cms(), target_vel);
 
         Vector2f zero;
         Vector2p landing_pos = target_pos.topostype();
@@ -767,7 +767,7 @@ void Mode::land_run_horizontal_control()
     }
 #endif
 
-    if (!copter.ap.prec_land_active) {
+    if (!soleon.ap.prec_land_active) {
         Vector2f accel;
         pos_control->input_vel_accel_xy(vel_correction, accel);
     }
@@ -783,7 +783,7 @@ void Mode::land_run_horizontal_control()
         // there is any position estimate drift after touchdown. We
         // limit attitude to 7 degrees below this limit and linearly
         // interpolate for 1m above that
-        const float attitude_limit_cd = linear_interpolate(700, copter.aparm.angle_max, get_alt_above_ground_cm(),
+        const float attitude_limit_cd = linear_interpolate(700, soleon.aparm.angle_max, get_alt_above_ground_cm(),
                                                      g2.wp_navalt_min*100U, (g2.wp_navalt_min+1)*100U);
         const float thrust_vector_max = sinf(radians(attitude_limit_cd * 0.01f)) * GRAVITY_MSS * 100.0f;
         const float thrust_vector_mag = thrust_vector.xy().length();
@@ -808,7 +808,7 @@ void Mode::land_run_horizontal_control()
 void Mode::land_run_normal_or_precland(bool pause_descent)
 {
 #if AC_PRECLAND_ENABLED
-    if (pause_descent || !copter.precland.enabled()) {
+    if (pause_descent || !soleon.precland.enabled()) {
         // we don't want to start descending immediately or prec land is disabled
         // in both cases just run simple land controllers
         land_run_horiz_and_vert_control(pause_descent);
@@ -828,8 +828,8 @@ void Mode::land_run_normal_or_precland(bool pause_descent)
 void Mode::precland_retry_position(const Vector3f &retry_pos)
 {
     /*HaRe
-    if (!copter.failsafe.radio) {
-        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && copter.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
+    if (!soleon.failsafe.radio) {
+        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && soleon.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
             AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
             // exit land if throttle is high
             if (!set_mode(Mode::Number::LOITER, ModeReason::THROTTLE_LAND_ESCAPE)) {
@@ -847,11 +847,11 @@ void Mode::precland_retry_position(const Vector3f &retry_pos)
 
             // record if pilot has overridden roll or pitch
             if (!is_zero(target_roll) || !is_zero(target_pitch)) {
-                if (!copter.ap.land_repo_active) {
+                if (!soleon.ap.land_repo_active) {
                     AP::logger().Write_Event(LogEvent::LAND_REPO_ACTIVE);
                 }
                 // this flag will be checked by prec land state machine later and any further landing retires will be cancelled
-                copter.ap.land_repo_active = true;
+                soleon.ap.land_repo_active = true;
             }
         }
     }
@@ -876,11 +876,11 @@ void Mode::precland_retry_position(const Vector3f &retry_pos)
 void Mode::precland_run()
 {
     // if user is taking control, we will not run the statemachine, and simply land (may or may not be on target)
-    if (!copter.ap.land_repo_active) {
+    if (!soleon.ap.land_repo_active) {
         // This will get updated later to a retry pos if needed
         Vector3f retry_pos;
 
-        switch (copter.precland_statemachine.update(retry_pos)) {
+        switch (soleon.precland_statemachine.update(retry_pos)) {
         case AC_PrecLand_StateMachine::Status::RETRYING:
             // we want to retry landing by going to another position
             precland_retry_position(retry_pos);
@@ -888,7 +888,7 @@ void Mode::precland_run()
 
         case AC_PrecLand_StateMachine::Status::FAILSAFE: {
             // we have hit a failsafe. Failsafe can only mean two things, we either want to stop permanently till user takes over or land
-            switch (copter.precland_statemachine.get_failsafe_actions()) {
+            switch (soleon.precland_statemachine.get_failsafe_actions()) {
             case AC_PrecLand_StateMachine::FailSafeAction::DESCEND:
                 // descend normally, prec land target is definitely not in sight
                 land_run_horiz_and_vert_control();
@@ -931,7 +931,7 @@ float Mode::get_pilot_desired_throttle() const
     const float thr_mid = throttle_hover();
     int16_t throttle_control = channel_throttle->get_control_in();
 
-    int16_t mid_stick = copter.get_throttle_mid();
+    int16_t mid_stick = soleon.get_throttle_mid();
     // protect against unlikely divide by zero
     if (mid_stick <= 0) {
         mid_stick = 500;
@@ -995,9 +995,9 @@ Mode::AltHoldModeState Mode::get_alt_hold_state(float target_climb_rate_cms)
         // the aircraft should progress through the take off procedure
         return AltHold_Takeoff;
 
-    } else if (!copter.ap.auto_armed || copter.ap.land_complete) {
+    } else if (!soleon.ap.auto_armed || soleon.ap.land_complete) {
         // the aircraft is armed and landed
-        if (target_climb_rate_cms < 0.0f && !copter.ap.using_interlock) {
+        if (target_climb_rate_cms < 0.0f && !soleon.ap.using_interlock) {
             // the aircraft should move to a ground idle state
             motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::GROUND_IDLE);
 
@@ -1027,7 +1027,7 @@ Mode::AltHoldModeState Mode::get_alt_hold_state(float target_climb_rate_cms)
 float Mode::get_pilot_desired_yaw_rate(float yaw_in)
 {
     // throttle failsafe check
-    if (copter.failsafe.radio || !copter.ap.rc_receiver_present) {
+    if (soleon.failsafe.radio || !soleon.ap.rc_receiver_present) {
         return 0.0f;
     }
 
@@ -1041,37 +1041,37 @@ float Mode::get_pilot_desired_yaw_rate(float yaw_in)
 // class.
 float Mode::get_pilot_desired_climb_rate(float throttle_control)
 {
-//HaRe    return copter.get_pilot_desired_climb_rate(throttle_control);
+//HaRe    return soleon.get_pilot_desired_climb_rate(throttle_control);
 return 0.0; //-- HaRe
 }
 
 float Mode::get_non_takeoff_throttle()
 {
- //HaRe       return copter.get_non_takeoff_throttle();
+ //HaRe       return soleon.get_non_takeoff_throttle();
  return 0.0; //-- HaRe
 }
 
 void Mode::update_simple_mode(void) {
-    copter.update_simple_mode();
+    soleon.update_simple_mode();
 }
 
 bool Mode::set_mode(Mode::Number mode, ModeReason reason)
 {
-    return copter.set_mode(mode, reason);
+    return soleon.set_mode(mode, reason);
 }
 
 void Mode::set_land_complete(bool b)
 {
- //HaRe   return copter.set_land_complete(b);
+ //HaRe   return soleon.set_land_complete(b);
 }
 
 GCS_Copter &Mode::gcs()
 {
-    return copter.gcs();
+    return soleon.gcs();
 }
 
 uint16_t Mode::get_pilot_speed_dn()
 {
-//HaRe    return copter.get_pilot_speed_dn();
+//HaRe    return soleon.get_pilot_speed_dn();
 return 0;
 }

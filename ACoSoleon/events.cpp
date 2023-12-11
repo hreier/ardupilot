@@ -5,12 +5,12 @@
  *       boolean failsafe reflects the current state
  */
 
-bool Copter::failsafe_option(FailsafeOption opt) const
+bool Soleon::failsafe_option(FailsafeOption opt) const
 {
     return (g2.fs_options & (uint32_t)opt);
 }
 
-void Copter::failsafe_radio_on_event()
+void Soleon::failsafe_radio_on_event()
 {
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_RADIO, LogErrorCode::FAILSAFE_OCCURRED);
 
@@ -80,7 +80,7 @@ void Copter::failsafe_radio_on_event()
 }
 
 // failsafe_off_event - respond to radio contact being regained
-void Copter::failsafe_radio_off_event()
+void Soleon::failsafe_radio_off_event()
 {
     // no need to do anything except log the error as resolved
     // user can now override roll, pitch, yaw and throttle and even use flight mode switch to restore previous flight mode
@@ -88,7 +88,7 @@ void Copter::failsafe_radio_off_event()
     gcs().send_text(MAV_SEVERITY_WARNING, "Radio Failsafe Cleared");
 }
 
-void Copter::announce_failsafe(const char *type, const char *action_undertaken)
+void Soleon::announce_failsafe(const char *type, const char *action_undertaken)
 {
     if (action_undertaken != nullptr) {
         gcs().send_text(MAV_SEVERITY_WARNING, "%s Failsafe - %s", type, action_undertaken);
@@ -97,7 +97,7 @@ void Copter::announce_failsafe(const char *type, const char *action_undertaken)
     }
 }
 
-void Copter::handle_battery_failsafe(const char *type_str, const int8_t action)
+void Soleon::handle_battery_failsafe(const char *type_str, const int8_t action)
 {
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_BATT, LogErrorCode::FAILSAFE_OCCURRED);
 
@@ -125,7 +125,7 @@ void Copter::handle_battery_failsafe(const char *type_str, const int8_t action)
 }
 
 // failsafe_gcs_check - check for ground station failsafe
-void Copter::failsafe_gcs_check()
+void Soleon::failsafe_gcs_check()
 {
     // Bypass GCS failsafe checks if disabled or GCS never connected
     if (g.failsafe_gcs == FS_GCS_DISABLED) {
@@ -164,7 +164,7 @@ void Copter::failsafe_gcs_check()
 }
 
 // failsafe_gcs_on_event - actions to take when GCS contact is lost
-void Copter::failsafe_gcs_on_event(void)
+void Soleon::failsafe_gcs_on_event(void)
 {
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_GCS, LogErrorCode::FAILSAFE_OCCURRED);
     RC_Channels::clear_overrides();
@@ -240,14 +240,14 @@ void Copter::failsafe_gcs_on_event(void)
 }
 
 // failsafe_gcs_off_event - actions to take when GCS contact is restored
-void Copter::failsafe_gcs_off_event(void)
+void Soleon::failsafe_gcs_off_event(void)
 {
     gcs().send_text(MAV_SEVERITY_WARNING, "GCS Failsafe Cleared");
     AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_GCS, LogErrorCode::FAILSAFE_RESOLVED);
 }
 
 // executes terrain failsafe if data is missing for longer than a few seconds
-void Copter::failsafe_terrain_check()
+void Soleon::failsafe_terrain_check()
 {
    /*HaRe // trigger within <n> milliseconds of failures while in various modes
     bool timeout = (failsafe.terrain_last_failure_ms - failsafe.terrain_first_failure_ms) > FS_TERRAIN_TIMEOUT_MS;
@@ -265,7 +265,7 @@ void Copter::failsafe_terrain_check()
 }
 
 // set terrain data status (found or not found)
-void Copter::failsafe_terrain_set_status(bool data_ok)
+void Soleon::failsafe_terrain_set_status(bool data_ok)
 {
     uint32_t now = millis();
 
@@ -285,7 +285,7 @@ void Copter::failsafe_terrain_set_status(bool data_ok)
 }
 
 // terrain failsafe action
-void Copter::failsafe_terrain_on_event()
+void Soleon::failsafe_terrain_on_event()
 {
     failsafe.terrain = true;
     gcs().send_text(MAV_SEVERITY_CRITICAL,"Failsafe: Terrain data missing");
@@ -303,7 +303,7 @@ void Copter::failsafe_terrain_on_event()
 }
 
 // check for gps glitch failsafe
-void Copter::gpsglitch_check()
+void Soleon::gpsglitch_check()
 {
     // get filter status
     nav_filter_status filt_status = inertial_nav.get_filter_status();
@@ -323,7 +323,7 @@ void Copter::gpsglitch_check()
 }
 
 // dead reckoning alert and failsafe
-void Copter::failsafe_deadreckon_check()
+void Soleon::failsafe_deadreckon_check()
 {
     // update dead reckoning state
     const char* dr_prefix_str = "Dead Reckoning";
@@ -366,7 +366,7 @@ void Copter::failsafe_deadreckon_check()
         failsafe.deadreckon = ekf_dead_reckoning;
 
         // only take action in modes requiring position estimate
-        if (failsafe.deadreckon && copter.flightmode->requires_GPS()) {
+        if (failsafe.deadreckon && soleon.flightmode->requires_GPS()) {
 
             // log error
             AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_DEADRECKON, LogErrorCode::FAILSAFE_OCCURRED);
@@ -387,7 +387,7 @@ void Copter::failsafe_deadreckon_check()
 
 // set_mode_RTL_or_land_with_pause - sets mode to RTL if possible or LAND with 4 second delay before descent starts
 //  this is always called from a failsafe so we trigger notification to pilot
-void Copter::set_mode_RTL_or_land_with_pause(ModeReason reason)
+void Soleon::set_mode_RTL_or_land_with_pause(ModeReason reason)
 {
     // attempt to switch to RTL, if this fails then switch to Land
     if (!set_mode(Mode::Number::RTL, reason)) {
@@ -401,7 +401,7 @@ void Copter::set_mode_RTL_or_land_with_pause(ModeReason reason)
 
 // set_mode_SmartRTL_or_land_with_pause - sets mode to SMART_RTL if possible or LAND with 4 second delay before descent starts
 // this is always called from a failsafe so we trigger notification to pilot
-void Copter::set_mode_SmartRTL_or_land_with_pause(ModeReason reason)
+void Soleon::set_mode_SmartRTL_or_land_with_pause(ModeReason reason)
 {
     // attempt to switch to SMART_RTL, if this failed then switch to Land
     if (!set_mode(Mode::Number::SMART_RTL, reason)) {
@@ -414,7 +414,7 @@ void Copter::set_mode_SmartRTL_or_land_with_pause(ModeReason reason)
 
 // set_mode_SmartRTL_or_RTL - sets mode to SMART_RTL if possible or RTL if possible or LAND with 4 second delay before descent starts
 // this is always called from a failsafe so we trigger notification to pilot
-void Copter::set_mode_SmartRTL_or_RTL(ModeReason reason)
+void Soleon::set_mode_SmartRTL_or_RTL(ModeReason reason)
 {
     // attempt to switch to SmartRTL, if this failed then attempt to RTL
     // if that fails, then land
@@ -428,7 +428,7 @@ void Copter::set_mode_SmartRTL_or_RTL(ModeReason reason)
 
 // Sets mode to Auto and jumps to DO_LAND_START, as set with AUTO_RTL param
 // This can come from failsafe or RC option
-void Copter::set_mode_auto_do_land_start_or_RTL(ModeReason reason)
+void Soleon::set_mode_auto_do_land_start_or_RTL(ModeReason reason)
 {
 #if MODE_AUTO_ENABLED == ENABLED
     if (set_mode(Mode::Number::AUTO_RTL, reason)) {
@@ -443,7 +443,7 @@ void Copter::set_mode_auto_do_land_start_or_RTL(ModeReason reason)
 
 // Sets mode to Brake or LAND with 4 second delay before descent starts
 // This can come from failsafe or RC option
-void Copter::set_mode_brake_or_land_with_pause(ModeReason reason)
+void Soleon::set_mode_brake_or_land_with_pause(ModeReason reason)
 {
 #if MODE_BRAKE_ENABLED == ENABLED
     if (set_mode(Mode::Number::BRAKE, reason)) {
@@ -456,7 +456,7 @@ void Copter::set_mode_brake_or_land_with_pause(ModeReason reason)
    //HaRe set_mode_land_with_pause(reason);
 }
 
-bool Copter::should_disarm_on_failsafe() {
+bool Soleon::should_disarm_on_failsafe() {
     if (ap.in_arming_delay) {
         return true;
     }
@@ -480,7 +480,7 @@ bool Copter::should_disarm_on_failsafe() {
 }
 
 
-void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
+void Soleon::do_failsafe_action(FailsafeAction action, ModeReason reason){
 
     // Execute the specified desired_action
     switch (action) {
@@ -516,7 +516,7 @@ void Copter::do_failsafe_action(FailsafeAction action, ModeReason reason){
 
 #if AP_GRIPPER_ENABLED
     if (failsafe_option(FailsafeOption::RELEASE_GRIPPER)) {
-        copter.g2.gripper.release();
+        soleon.g2.gripper.release();
     }
 #endif
 }

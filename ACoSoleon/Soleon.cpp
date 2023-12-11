@@ -28,8 +28,8 @@
 
 const AP_HAL::HAL& hal = AP_HAL::get_HAL();
 
-#define SCHED_TASK(func, _interval_ticks, _max_time_micros, _prio) SCHED_TASK_CLASS(Copter, &copter, func, _interval_ticks, _max_time_micros, _prio)
-#define FAST_TASK(func) FAST_TASK_CLASS(Copter, &copter, func)
+#define SCHED_TASK(func, _interval_ticks, _max_time_micros, _prio) SCHED_TASK_CLASS(Soleon, &soleon, func, _interval_ticks, _max_time_micros, _prio)
+#define FAST_TASK(func) FAST_TASK_CLASS(Soleon, &soleon, func)
 
 /*
   scheduler table - all tasks should be listed here.
@@ -55,9 +55,9 @@ SCHED_TASK_CLASS arguments:
  - priority (0 through 255, lower number meaning higher priority)
 
  */
-const AP_Scheduler::Task Copter::scheduler_tasks[] = {
+const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     // update INS immediately to get current gyro data populated
-    FAST_TASK_CLASS(AP_InertialSensor, &copter.ins, update),
+    FAST_TASK_CLASS(AP_InertialSensor, &soleon.ins, update),
     // run low level rate controllers that only require IMU data
  //HaRe   FAST_TASK(run_rate_controller),
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
@@ -85,21 +85,21 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 //HaRe    FAST_TASK(update_rangefinder_terrain_offset),
 #if HAL_MOUNT_ENABLED
     // camera mount's fast update
-    FAST_TASK_CLASS(AP_Mount, &copter.camera_mount, update_fast),
+    FAST_TASK_CLASS(AP_Mount, &soleon.camera_mount, update_fast),
 #endif
     FAST_TASK(Log_Video_Stabilisation),
 
     SCHED_TASK(rc_loop,              250,    130,  3),
     SCHED_TASK(throttle_loop,         50,     75,  6),
-    SCHED_TASK_CLASS(AP_GPS,               &copter.gps,                 update,          50, 200,   9),
+    SCHED_TASK_CLASS(AP_GPS,               &soleon.gps,                 update,          50, 200,   9),
 #if AP_OPTICALFLOW_ENABLED
-    SCHED_TASK_CLASS(AP_OpticalFlow,          &copter.optflow,             update,         200, 160,  12),
+    SCHED_TASK_CLASS(AP_OpticalFlow,          &soleon.optflow,             update,         200, 160,  12),
 #endif
     SCHED_TASK(update_batt_compass,   10,    120, 15),
-    SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&copter.g2.rc_channels, read_aux_all,    10,  50,  18),
+    SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&soleon.g2.rc_channels, read_aux_all,    10,  50,  18),
 //HaRe    SCHED_TASK(arm_motors_check,      10,     50, 21),
 #if TOY_MODE_ENABLED == ENABLED
-    SCHED_TASK_CLASS(ToyMode,              &copter.g2.toy_mode,         update,          10,  50,  24),
+    SCHED_TASK_CLASS(ToyMode,              &soleon.g2.toy_mode,         update,          10,  50,  24),
 #endif
 //HaRe    SCHED_TASK(auto_disarm_check,     10,     50,  27),
     SCHED_TASK(auto_trim,             10,     75,  30),
@@ -107,26 +107,26 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(read_rangefinder,      20,    100,  33),
 #endif
 #if HAL_PROXIMITY_ENABLED
-    SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         200,  50,  36),
+    SCHED_TASK_CLASS(AP_Proximity,         &soleon.g2.proximity,        update,         200,  50,  36),
 #endif
 #if AP_BEACON_ENABLED
-    SCHED_TASK_CLASS(AP_Beacon,            &copter.g2.beacon,           update,         400,  50,  39),
+    SCHED_TASK_CLASS(AP_Beacon,            &soleon.g2.beacon,           update,         400,  50,  39),
 #endif
     SCHED_TASK(update_altitude,       10,    100,  42),
 //HaRe    SCHED_TASK(run_nav_updates,       50,    100,  45),
 //HaRe    SCHED_TASK(update_throttle_hover,100,     90,  48),
 #if MODE_SMARTRTL_ENABLED == ENABLED
-    SCHED_TASK_CLASS(ModeSmartRTL,         &copter.mode_smartrtl,       save_position,    3, 100,  51),
+    SCHED_TASK_CLASS(ModeSmartRTL,         &soleon.mode_smartrtl,       save_position,    3, 100,  51),
 #endif
 #if HAL_SPRAYER_ENABLED
-    SCHED_TASK_CLASS(AC_Sprayer,           &copter.sprayer,               update,         3,  90,  54),
+    SCHED_TASK_CLASS(AC_Sprayer,           &soleon.sprayer,               update,         3,  90,  54),
 #endif
-    SCHED_TASK_CLASS(SO_TankSupervision,     &copter.TankSupervision,       update,        10,  90,  54),
+    SCHED_TASK_CLASS(SO_TankSupervision,     &soleon.TankSupervision,       update,        10,  90,  54),
     SCHED_TASK(three_hz_loop,          3,     75, 57),
 #if AP_SERVORELAYEVENTS_ENABLED
-    SCHED_TASK_CLASS(AP_ServoRelayEvents,  &copter.ServoRelayEvents,      update_events, 50,  75,  60),
+    SCHED_TASK_CLASS(AP_ServoRelayEvents,  &soleon.ServoRelayEvents,      update_events, 50,  75,  60),
 #endif
-    SCHED_TASK_CLASS(AP_Baro,              &copter.barometer,             accumulate,    50,  90,  63),
+    SCHED_TASK_CLASS(AP_Baro,              &soleon.barometer,             accumulate,    50,  90,  63),
 #if AC_PRECLAND_ENABLED
     SCHED_TASK(update_precland,      400,     50,  69),
 #endif
@@ -146,26 +146,26 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 //#endif
 //    SCHED_TASK(standby_update,        100,    75,  96),
 //HaRe    SCHED_TASK(lost_vehicle_check,    10,     50,  99),
-    SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_receive, 400, 180, 102),
-    SCHED_TASK_CLASS(GCS,                  (GCS*)&copter._gcs,          update_send,    400, 550, 105),
+    SCHED_TASK_CLASS(GCS,                  (GCS*)&soleon._gcs,          update_receive, 400, 180, 102),
+    SCHED_TASK_CLASS(GCS,                  (GCS*)&soleon._gcs,          update_send,    400, 550, 105),
 #if HAL_MOUNT_ENABLED
-    SCHED_TASK_CLASS(AP_Mount,             &copter.camera_mount,        update,          50,  75, 108),
+    SCHED_TASK_CLASS(AP_Mount,             &soleon.camera_mount,        update,          50,  75, 108),
 #endif
 #if AP_CAMERA_ENABLED
-    SCHED_TASK_CLASS(AP_Camera,            &copter.camera,              update,          50,  75, 111),
+    SCHED_TASK_CLASS(AP_Camera,            &soleon.camera,              update,          50,  75, 111),
 #endif
 #if LOGGING_ENABLED == ENABLED
     SCHED_TASK(ten_hz_logging_loop,   10,    350, 114),
     SCHED_TASK(twentyfive_hz_logging, 25,    110, 117),
-    SCHED_TASK_CLASS(AP_Logger,            &copter.logger,              periodic_tasks, 400, 300, 120),
+    SCHED_TASK_CLASS(AP_Logger,            &soleon.logger,              periodic_tasks, 400, 300, 120),
 #endif
-    SCHED_TASK_CLASS(AP_InertialSensor,    &copter.ins,                 periodic,       400,  50, 123),
+    SCHED_TASK_CLASS(AP_InertialSensor,    &soleon.ins,                 periodic,       400,  50, 123),
 
-    SCHED_TASK_CLASS(AP_Scheduler,         &copter.scheduler,           update_logging, 0.1,  75, 126),
+    SCHED_TASK_CLASS(AP_Scheduler,         &soleon.scheduler,           update_logging, 0.1,  75, 126),
 #if AP_RPM_ENABLED
-    SCHED_TASK_CLASS(AP_RPM,               &copter.rpm_sensor,          update,          40, 200, 129),
+    SCHED_TASK_CLASS(AP_RPM,               &soleon.rpm_sensor,          update,          40, 200, 129),
 #endif
-    SCHED_TASK_CLASS(AP_TempCalibration,   &copter.g2.temp_calibration, update,          10, 100, 135),
+    SCHED_TASK_CLASS(AP_TempCalibration,   &soleon.g2.temp_calibration, update,          10, 100, 135),
 /* HaRe
 #if HAL_ADSB_ENABLED
     SCHED_TASK(avoidance_adsb_update, 10,    100, 138),
@@ -180,10 +180,10 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
 */
 #if AP_GRIPPER_ENABLED
-    SCHED_TASK_CLASS(AP_Gripper,           &copter.g2.gripper,          update,          10,  75, 147),
+    SCHED_TASK_CLASS(AP_Gripper,           &soleon.g2.gripper,          update,          10,  75, 147),
 #endif
 #if AP_WINCH_ENABLED
-    SCHED_TASK_CLASS(AP_Winch,             &copter.g2.winch,            update,          50,  50, 150),
+    SCHED_TASK_CLASS(AP_Winch,             &soleon.g2.winch,            update,          50,  50, 150),
 #endif
 #ifdef USERHOOK_FASTLOOP
     SCHED_TASK(userhook_FastLoop,    100,     75, 153),
@@ -201,14 +201,14 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(userhook_SuperSlowLoop, 1,     75, 165),
 #endif
 #if HAL_BUTTON_ENABLED
-    SCHED_TASK_CLASS(AP_Button,            &copter.button,              update,           5, 100, 168),
+    SCHED_TASK_CLASS(AP_Button,            &soleon.button,              update,           5, 100, 168),
 #endif
 #if STATS_ENABLED == ENABLED
-    SCHED_TASK_CLASS(AP_Stats,             &copter.g2.stats,            update,           1, 100, 171),
+    SCHED_TASK_CLASS(AP_Stats,             &soleon.g2.stats,            update,           1, 100, 171),
 #endif
 };
 
-void Copter::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
+void Soleon::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
                                  uint8_t &task_count,
                                  uint32_t &log_bit)
 {
@@ -217,12 +217,12 @@ void Copter::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
     log_bit = MASK_LOG_PM;
 }
 
-constexpr int8_t Copter::_failsafe_priorities[7];
+constexpr int8_t Soleon::_failsafe_priorities[7];
 
 #if AP_SCRIPTING_ENABLED
 #if MODE_GUIDED_ENABLED == ENABLED
 // start takeoff to given altitude (for use by scripting)
-bool Copter::start_takeoff(float alt)
+bool Soleon::start_takeoff(float alt)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -230,14 +230,14 @@ bool Copter::start_takeoff(float alt)
     }
 
     if (mode_guided.do_user_takeoff_start(alt * 100.0f)) {
-        copter.set_auto_armed(true);
+        soleon.set_auto_armed(true);
         return true;
     }
     return false;
 }
 
 // set target location (for use by scripting)
-bool Copter::set_target_location(const Location& target_loc)
+bool Soleon::set_target_location(const Location& target_loc)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -248,7 +248,7 @@ bool Copter::set_target_location(const Location& target_loc)
 }
 
 // set target position (for use by scripting)
-bool Copter::set_target_pos_NED(const Vector3f& target_pos, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool yaw_relative, bool terrain_alt)
+bool Soleon::set_target_pos_NED(const Vector3f& target_pos, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool yaw_relative, bool terrain_alt)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -261,7 +261,7 @@ bool Copter::set_target_pos_NED(const Vector3f& target_pos, bool use_yaw, float 
 }
 
 // set target position and velocity (for use by scripting)
-bool Copter::set_target_posvel_NED(const Vector3f& target_pos, const Vector3f& target_vel)
+bool Soleon::set_target_posvel_NED(const Vector3f& target_pos, const Vector3f& target_vel)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -275,7 +275,7 @@ bool Copter::set_target_posvel_NED(const Vector3f& target_pos, const Vector3f& t
 }
 
 // set target position, velocity and acceleration (for use by scripting)
-bool Copter::set_target_posvelaccel_NED(const Vector3f& target_pos, const Vector3f& target_vel, const Vector3f& target_accel, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool yaw_relative)
+bool Soleon::set_target_posvelaccel_NED(const Vector3f& target_pos, const Vector3f& target_vel, const Vector3f& target_accel, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool yaw_relative)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -289,7 +289,7 @@ bool Copter::set_target_posvelaccel_NED(const Vector3f& target_pos, const Vector
     return mode_guided.set_destination_posvelaccel(pos_neu_cm, vel_neu_cms, accel_neu_cms, use_yaw, yaw_deg * 100.0, use_yaw_rate, yaw_rate_degs * 100.0, yaw_relative);
 }
 
-bool Copter::set_target_velocity_NED(const Vector3f& vel_ned)
+bool Soleon::set_target_velocity_NED(const Vector3f& vel_ned)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -303,7 +303,7 @@ bool Copter::set_target_velocity_NED(const Vector3f& vel_ned)
 }
 
 // set target velocity and acceleration (for use by scripting)
-bool Copter::set_target_velaccel_NED(const Vector3f& target_vel, const Vector3f& target_accel, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool relative_yaw)
+bool Soleon::set_target_velaccel_NED(const Vector3f& target_vel, const Vector3f& target_accel, bool use_yaw, float yaw_deg, bool use_yaw_rate, float yaw_rate_degs, bool relative_yaw)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -318,7 +318,7 @@ bool Copter::set_target_velaccel_NED(const Vector3f& target_vel, const Vector3f&
     return true;
 }
 
-bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
+bool Soleon::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, float yaw_deg, float climb_rate_ms, bool use_yaw_rate, float yaw_rate_degs)
 {
     // exit if vehicle is not in Guided mode or Auto-Guided mode
     if (!flightmode->in_guided_mode()) {
@@ -335,13 +335,13 @@ bool Copter::set_target_angle_and_climbrate(float roll_deg, float pitch_deg, flo
 
 #if MODE_CIRCLE_ENABLED == ENABLED
 // circle mode controls
-bool Copter::get_circle_radius(float &radius_m)
+bool Soleon::get_circle_radius(float &radius_m)
 {
     radius_m = circle_nav->get_radius() * 0.01f;
     return true;
 }
 
-bool Copter::set_circle_rate(float rate_dps)
+bool Soleon::set_circle_rate(float rate_dps)
 {
     circle_nav->set_rate(rate_dps);
     return true;
@@ -349,7 +349,7 @@ bool Copter::set_circle_rate(float rate_dps)
 #endif
 
 // set desired speed (m/s). Used for scripting.
-bool Copter::set_desired_speed(float speed)
+bool Soleon::set_desired_speed(float speed)
 {
     /*HaRe
     // exit if vehicle is not in auto mode
@@ -363,13 +363,13 @@ bool Copter::set_desired_speed(float speed)
 
 #if MODE_AUTO_ENABLED == ENABLED
 // returns true if mode supports NAV_SCRIPT_TIME mission commands
-bool Copter::nav_scripting_enable(uint8_t mode)
+bool Soleon::nav_scripting_enable(uint8_t mode)
 {
     return mode == (uint8_t)mode_auto.mode_number();
 }
 
 // lua scripts use this to retrieve the contents of the active command
-bool Copter::nav_script_time(uint16_t &id, uint8_t &cmd, float &arg1, float &arg2, int16_t &arg3, int16_t &arg4)
+bool Soleon::nav_script_time(uint16_t &id, uint8_t &cmd, float &arg1, float &arg2, int16_t &arg3, int16_t &arg4)
 {
     if (flightmode != &mode_auto) {
         return false;
@@ -379,7 +379,7 @@ bool Copter::nav_script_time(uint16_t &id, uint8_t &cmd, float &arg1, float &arg
 }
 
 // lua scripts use this to indicate when they have complete the command
-void Copter::nav_script_time_done(uint16_t id)
+void Soleon::nav_script_time_done(uint16_t id)
 {
     if (flightmode != &mode_auto) {
         return;
@@ -390,7 +390,7 @@ void Copter::nav_script_time_done(uint16_t id)
 #endif
 
 // returns true if the EKF failsafe has triggered.  Only used by Lua scripts
-bool Copter::has_ekf_failsafed() const
+bool Soleon::has_ekf_failsafed() const
 {
     return failsafe.ekf;
 }
@@ -398,20 +398,20 @@ bool Copter::has_ekf_failsafed() const
 #endif // AP_SCRIPTING_ENABLED
 
 // returns true if vehicle is landing. Only used by Lua scripts
-bool Copter::is_landing() const
+bool Soleon::is_landing() const
 {
     //HaRe return flightmode->is_landing();
     return false; //HaRe
 }
 
 // returns true if vehicle is taking off. Only used by Lua scripts
-bool Copter::is_taking_off() const
+bool Soleon::is_taking_off() const
 {
     //HaRe return flightmode->is_taking_off();
     return false; //HaRe
 }
 
-bool Copter::current_mode_requires_mission() const
+bool Soleon::current_mode_requires_mission() const
 {
 #if MODE_AUTO_ENABLED == ENABLED
         return flightmode == &mode_auto;
@@ -422,7 +422,7 @@ bool Copter::current_mode_requires_mission() const
 
 // rc_loops - reads user input from transmitter/receiver
 // called at 100hz
-void Copter::rc_loop()
+void Soleon::rc_loop()
 {
     // Read radio and 3-position switch on radio
     // -----------------------------------------
@@ -432,7 +432,7 @@ void Copter::rc_loop()
 
 // throttle_loop - should be run at 50 hz
 // ---------------------------
-void Copter::throttle_loop()
+void Soleon::throttle_loop()
 {
     // update throttle_low_comp value (controls priority of throttle vs attitude control)
  //HaRe   update_throttle_mix();
@@ -455,7 +455,7 @@ void Copter::throttle_loop()
 
 // update_batt_compass - read battery and compass
 // should be called at 10hz
-void Copter::update_batt_compass(void)
+void Soleon::update_batt_compass(void)
 {
     // read battery before compass because it may be used for motor interference compensation
     battery.read();
@@ -470,10 +470,10 @@ void Copter::update_batt_compass(void)
 
 // Full rate logging of attitude, rate and pid loops
 // should be run at loop rate
-void Copter::loop_rate_logging()
+void Soleon::loop_rate_logging()
 {
     /*HaRe
-    if (should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
+    if (should_log(MASK_LOG_ATTITUDE_FAST) && !soleon.flightmode->logs_attitude()) {
         Log_Write_Attitude();
         Log_Write_PIDS(); // only logs if PIDS bitmask is set
     }
@@ -487,14 +487,14 @@ void Copter::loop_rate_logging()
 
 // ten_hz_logging_loop
 // should be run at 10hz
-void Copter::ten_hz_logging_loop()
+void Soleon::ten_hz_logging_loop()
 {
     /*HaRe
     // log attitude data if we're not already logging at the higher rate
-    if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
+    if (should_log(MASK_LOG_ATTITUDE_MED) && !should_log(MASK_LOG_ATTITUDE_FAST) && !soleon.flightmode->logs_attitude()) {
         Log_Write_Attitude();
     }
-    if (!should_log(MASK_LOG_ATTITUDE_FAST) && !copter.flightmode->logs_attitude()) {
+    if (!should_log(MASK_LOG_ATTITUDE_FAST) && !soleon.flightmode->logs_attitude()) {
     // log at 10Hz if PIDS bitmask is selected, even if no ATT bitmask is selected; logs at looprate if ATT_FAST and PIDS bitmask set
         Log_Write_PIDS();
     }*/
@@ -548,7 +548,7 @@ void Copter::ten_hz_logging_loop()
 }
 
 // twentyfive_hz_logging - should be run at 25hz
-void Copter::twentyfive_hz_logging()
+void Soleon::twentyfive_hz_logging()
 {
     if (should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_EKF_POS();
@@ -572,7 +572,7 @@ void Copter::twentyfive_hz_logging()
 }
 
 // three_hz_loop - 3hz loop
-void Copter::three_hz_loop()
+void Soleon::three_hz_loop()
 {
     // check if we've lost contact with the ground station
     failsafe_gcs_check();
@@ -595,7 +595,7 @@ void Copter::three_hz_loop()
 }
 
 // one_hz_loop - runs at 1Hz
-void Copter::one_hz_loop()
+void Soleon::one_hz_loop()
 {
     if (should_log(MASK_LOG_ANY)) {
         Log_Write_Data(LogDataID::AP_STATE, ap.value);
@@ -627,7 +627,7 @@ void Copter::one_hz_loop()
     AP_Notify::flags.flying = !ap.land_complete;
 }
 
-void Copter::init_simple_bearing()
+void Soleon::init_simple_bearing()
 {
     // capture current cos_yaw and sin_yaw values
     simple_cos_yaw = ahrs.cos_yaw();
@@ -645,7 +645,7 @@ void Copter::init_simple_bearing()
 }
 
 // update_simple_mode - rotates pilot input if we are in simple mode
-void Copter::update_simple_mode(void)
+void Soleon::update_simple_mode(void)
 {
     float rollx, pitchx;
 
@@ -675,7 +675,7 @@ void Copter::update_simple_mode(void)
 /*HaRe
 // update_super_simple_bearing - adjusts simple bearing based on location
 // should be called after home_bearing has been updated
-void Copter::update_super_simple_bearing(bool force_update)
+void Soleon::update_super_simple_bearing(bool force_update)
 {
     if (!force_update) {
         if (simple_mode != SimpleMode::SUPERSIMPLE) {
@@ -699,14 +699,14 @@ void Copter::update_super_simple_bearing(bool force_update)
     super_simple_sin_yaw = sinf(angle_rad);
 }*/
 
-void Copter::read_AHRS(void)
+void Soleon::read_AHRS(void)
 {
     // we tell AHRS to skip INS update as we have already done it in fast_loop()
     ahrs.update(true);
 }
 
 // read baro and log control tuning
-void Copter::update_altitude()
+void Soleon::update_altitude()
 {
     // read in baro altitude
     read_barometer();
@@ -723,35 +723,35 @@ void Copter::update_altitude()
 }
 
 // vehicle specific waypoint info helpers
-bool Copter::get_wp_distance_m(float &distance) const
+bool Soleon::get_wp_distance_m(float &distance) const
 {
-    // see GCS_MAVLINK_Copter::send_nav_controller_output()
+    // see GCS_MAVLINK_Soleon::send_nav_controller_output()
 //HaRe    distance = flightmode->wp_distance() * 0.01;
     return true;
 }
 
 // vehicle specific waypoint info helpers
-bool Copter::get_wp_bearing_deg(float &bearing) const
+bool Soleon::get_wp_bearing_deg(float &bearing) const
 {
-    // see GCS_MAVLINK_Copter::send_nav_controller_output()
+    // see GCS_MAVLINK_SoleonSoleon::send_nav_controller_output()
 //HaRe    bearing = flightmode->wp_bearing() * 0.01;
     return true;
 }
 
 // vehicle specific waypoint info helpers
-bool Copter::get_wp_crosstrack_error_m(float &xtrack_error) const
+bool Soleon::get_wp_crosstrack_error_m(float &xtrack_error) const
 {
-    // see GCS_MAVLINK_Copter::send_nav_controller_output()
+    // see GCS_MAVLINK_Soleon::send_nav_controller_output()
 //HaRe    xtrack_error = flightmode->crosstrack_error() * 0.01;
     return true;
 }
 
 // get the target earth-frame angular velocities in rad/s (Z-axis component used by some gimbals)
-bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
+bool Soleon::get_rate_ef_targets(Vector3f& rate_ef_targets) const
 {
     /*HaRe
     // always returns zero vector if landed or disarmed
-    if (copter.ap.land_complete) {
+    if (soleon.ap.land_complete) {
         rate_ef_targets.zero();
     } else {
         rate_ef_targets = attitude_control->get_rate_ef_targets();
@@ -761,9 +761,9 @@ bool Copter::get_rate_ef_targets(Vector3f& rate_ef_targets) const
 }
 
 /*
-  constructor for main Copter class
+  constructor for main Soleon class
  */
-Copter::Copter(void)
+Soleon::Soleon(void)
     : logger(g.log_bitmask),
     flight_modes(&g.flight_mode1),
     simple_cos_yaw(1.0f),
@@ -777,7 +777,7 @@ Copter::Copter(void)
 }
 
 
-Copter copter;
-AP_Vehicle& vehicle = copter;
+Soleon soleon;
+AP_Vehicle& vehicle = soleon;
 
-AP_HAL_MAIN_CALLBACKS(&copter);
+AP_HAL_MAIN_CALLBACKS(&soleon);

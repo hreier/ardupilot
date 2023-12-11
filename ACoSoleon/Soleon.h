@@ -182,7 +182,7 @@
 #include "mode.h"
 #include "soTankSupervision.h"
 
-class Copter : public AP_Vehicle {
+class Soleon : public AP_Vehicle {
 public:
     friend class GCS_MAVLINK_Copter;
     friend class GCS_Copter;
@@ -229,7 +229,7 @@ public:
   //HaRe  friend class ModeTurtle;
     friend class SO_TankSupervision;
 
-    Copter(void);
+    Soleon(void);
 
 private:
 
@@ -449,7 +449,7 @@ private:
 
     // Battery Sensors
     AP_BattMonitor battery{MASK_LOG_CURRENT,
-                           FUNCTOR_BIND_MEMBER(&Copter::handle_battery_failsafe, void, const char*, const int8_t),
+                           FUNCTOR_BIND_MEMBER(&Soleon::handle_battery_failsafe, void, const char*, const int8_t),
                            _failsafe_priorities};
 
 #if OSD_ENABLED || OSD_PARAM_ENABLED
@@ -1062,7 +1062,7 @@ public:
     void failsafe_check();      // failsafe.cpp
 };
 
-extern Copter copter;
+extern Soleon soleon;
 
 using AP_HAL::millis;
 using AP_HAL::micros;

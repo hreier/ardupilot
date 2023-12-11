@@ -15,7 +15,7 @@ static bool in_failsafe;
 //
 // failsafe_enable - enable failsafe
 //
-void Copter::failsafe_enable()
+void Soleon::failsafe_enable()
 {
     failsafe_enabled = true;
     failsafe_last_timestamp = micros();
@@ -24,7 +24,7 @@ void Copter::failsafe_enable()
 //
 // failsafe_disable - used when we know we are going to delay the mainloop significantly
 //
-void Copter::failsafe_disable()
+void Soleon::failsafe_disable()
 {
     failsafe_enabled = false;
 }
@@ -32,7 +32,7 @@ void Copter::failsafe_disable()
 //
 //  failsafe_check - this function is called from the core timer interrupt at 1kHz.
 //
-void Copter::failsafe_check()
+void Soleon::failsafe_check()
 {
     uint32_t tnow = AP_HAL::micros();
 
@@ -76,7 +76,7 @@ void Copter::failsafe_check()
 /*
   check for AFS failsafe check
 */
-void Copter::afs_fs_check(void)
+void Soleon::afs_fs_check(void)
 {
     // perform AFS failsafe checks
     g2.afs.check(last_radio_update_ms);

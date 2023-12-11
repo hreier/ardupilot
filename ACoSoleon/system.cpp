@@ -10,10 +10,10 @@
 
 static void failsafe_check_static()
 {
-    copter.failsafe_check();
+    soleon.failsafe_check();
 }
 
-void Copter::init_ardupilot()
+void Soleon::init_ardupilot()
 {
 
 #if STATS_ENABLED == ENABLED
@@ -76,7 +76,7 @@ void Copter::init_ardupilot()
 
     // initialise surface to be tracked in SurfaceTracking
     // must be before rc init to not override initial switch position
-//HaRe    surface_tracking.init((SurfaceTracking::Surface)copter.g2.surftrak_mode.get());
+//HaRe    surface_tracking.init((SurfaceTracking::Surface)soleon.g2.surftrak_mode.get());
 
     // allocate the motors class
     allocate_motors();
@@ -184,7 +184,7 @@ void Copter::init_ardupilot()
 #endif
 
     // initialise AP_Logger library
-    logger.setVehicle_Startup_Writer(FUNCTOR_BIND(&copter, &Copter::Log_Write_Vehicle_Startup_Messages, void));
+    logger.setVehicle_Startup_Writer(FUNCTOR_BIND(&soleon, &Soleon::Log_Write_Vehicle_Startup_Messages, void));
 
     startup_INS_ground();
 
@@ -222,7 +222,7 @@ void Copter::init_ardupilot()
 //******************************************************************************
 //This function does all the calibrations, etc. that we need during a ground start
 //******************************************************************************
-void Copter::startup_INS_ground()
+void Soleon::startup_INS_ground()
 {
     // initialise ahrs (may push imu calibration into the mpu6000 if using that device).
     ahrs.init();
@@ -236,7 +236,7 @@ void Copter::startup_INS_ground()
 }
 
 // position_ok - returns true if the horizontal absolute position is ok and home position is set
-bool Copter::position_ok() const
+bool Soleon::position_ok() const
 {
     // return false if ekf failsafe has triggered
     if (failsafe.ekf) {
@@ -248,7 +248,7 @@ bool Copter::position_ok() const
 }
 
 // ekf_has_absolute_position - returns true if the EKF can provide an absolute WGS-84 position estimate
-bool Copter::ekf_has_absolute_position() const
+bool Soleon::ekf_has_absolute_position() const
 {
     if (!ahrs.have_inertial_nav()) {
         // do not allow navigation with dcm position
@@ -268,7 +268,7 @@ bool Copter::ekf_has_absolute_position() const
 }
 
 // ekf_has_relative_position - returns true if the EKF can provide a position estimate relative to it's starting position
-bool Copter::ekf_has_relative_position() const
+bool Soleon::ekf_has_relative_position() const
 {
     // return immediately if EKF not used
     if (!ahrs.have_inertial_nav()) {
@@ -306,7 +306,7 @@ bool Copter::ekf_has_relative_position() const
 }
 
 // returns true if the ekf has a good altitude estimate (required for modes which do AltHold)
-bool Copter::ekf_alt_ok() const
+bool Soleon::ekf_alt_ok() const
 {
     if (!ahrs.have_inertial_nav()) {
         // do not allow alt control with only dcm
@@ -321,7 +321,7 @@ bool Copter::ekf_alt_ok() const
 }
 
 // update_auto_armed - update status of auto_armed flag
-void Copter::update_auto_armed()
+void Soleon::update_auto_armed()
 {
     /*HaRe
     // disarm checks
@@ -358,7 +358,7 @@ void Copter::update_auto_armed()
 /*
   should we log a message type now?
  */
-bool Copter::should_log(uint32_t mask)
+bool Soleon::should_log(uint32_t mask)
 {
 #if LOGGING_ENABLED == ENABLED
     ap.logging_started = logger.logging_started();
@@ -371,7 +371,7 @@ bool Copter::should_log(uint32_t mask)
 /*
   allocate the motors class
  */
-void Copter::allocate_motors(void)
+void Soleon::allocate_motors(void)
 {
     switch ((AP_Motors::motor_frame_class)g2.frame_class.get()) {
 #if FRAME_CONFIG != HELI_FRAME
@@ -384,54 +384,54 @@ void Copter::allocate_motors(void)
         case AP_Motors::MOTOR_FRAME_DECA:
         case AP_Motors::MOTOR_FRAME_SCRIPTING_MATRIX:
         default:
-            motors = new AP_MotorsMatrix(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsMatrix(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsMatrix::var_info;
             break;
         case AP_Motors::MOTOR_FRAME_TRI:
-            motors = new AP_MotorsTri(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsTri(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsTri::var_info;
             AP_Param::set_frame_type_flags(AP_PARAM_FRAME_TRICOPTER);
             break;
         case AP_Motors::MOTOR_FRAME_SINGLE:
-            motors = new AP_MotorsSingle(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsSingle(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsSingle::var_info;
             break;
         case AP_Motors::MOTOR_FRAME_COAX:
-            motors = new AP_MotorsCoax(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsCoax(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsCoax::var_info;
             break;
         case AP_Motors::MOTOR_FRAME_TAILSITTER:
-            motors = new AP_MotorsTailsitter(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsTailsitter(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsTailsitter::var_info;
             break;
         case AP_Motors::MOTOR_FRAME_6DOF_SCRIPTING:
 #if AP_SCRIPTING_ENABLED
-            motors = new AP_MotorsMatrix_6DoF_Scripting(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsMatrix_6DoF_Scripting(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsMatrix_6DoF_Scripting::var_info;
 #endif // AP_SCRIPTING_ENABLED
             break;
         case AP_Motors::MOTOR_FRAME_DYNAMIC_SCRIPTING_MATRIX:
 #if AP_SCRIPTING_ENABLED
-            motors = new AP_MotorsMatrix_Scripting_Dynamic(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsMatrix_Scripting_Dynamic(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsMatrix_Scripting_Dynamic::var_info;
 #endif // AP_SCRIPTING_ENABLED
             break;
 #else // FRAME_CONFIG == HELI_FRAME
         case AP_Motors::MOTOR_FRAME_HELI_DUAL:
-            motors = new AP_MotorsHeli_Dual(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsHeli_Dual(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsHeli_Dual::var_info;
             AP_Param::set_frame_type_flags(AP_PARAM_FRAME_HELI);
             break;
 
         case AP_Motors::MOTOR_FRAME_HELI_QUAD:
-            motors = new AP_MotorsHeli_Quad(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsHeli_Quad(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsHeli_Quad::var_info;
             AP_Param::set_frame_type_flags(AP_PARAM_FRAME_HELI);
             break;
             
         case AP_Motors::MOTOR_FRAME_HELI:
         default:
-            motors = new AP_MotorsHeli_Single(copter.scheduler.get_loop_rate_hz());
+            motors = new AP_MotorsHeli_Single(soleon.scheduler.get_loop_rate_hz());
             motors_var_info = AP_MotorsHeli_Single::var_info;
             AP_Param::set_frame_type_flags(AP_PARAM_FRAME_HELI);
             break;
@@ -542,7 +542,7 @@ void Copter::allocate_motors(void)
     AP_Param::invalidate_count();
 }
 
-bool Copter::is_tradheli() const
+bool Soleon::is_tradheli() const
 {
 #if FRAME_CONFIG == HELI_FRAME
     return true;
