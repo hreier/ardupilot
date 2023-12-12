@@ -5,7 +5,7 @@
 class Parameters;
 class ParametersG2;
 
-class GCS_Copter;
+class GCS_Soleon;
 
 class Mode {
 
@@ -324,7 +324,7 @@ public:
     void update_simple_mode(void);
     bool set_mode(Mode::Number mode, ModeReason reason);
     void set_land_complete(bool b);
-    GCS_Copter &gcs();
+    GCS_Soleon &gcs();
     uint16_t get_pilot_speed_dn(void);
     // end pass-through functions
 };

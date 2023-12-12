@@ -4,7 +4,7 @@
 #include <AP_RPM/AP_RPM_config.h>
 #include <AP_EFI/AP_EFI_config.h>
 
-MAV_TYPE GCS_Copter::frame_type() const
+MAV_TYPE GCS_Soleon::frame_type() const
 {
     /*
       for GCS don't give MAV_TYPE_GENERIC as the GCS would have no
@@ -26,7 +26,7 @@ MAV_TYPE GCS_Copter::frame_type() const
     return mav_type;
 }
 
-MAV_MODE GCS_MAVLINK_Copter::base_mode() const
+MAV_MODE GCS_MAVLINK_Soleon::base_mode() const
 {
     uint8_t _base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
     /*HaRe
@@ -75,14 +75,14 @@ MAV_MODE GCS_MAVLINK_Copter::base_mode() const
     return (MAV_MODE)_base_mode;
 }
 
-uint32_t GCS_Copter::custom_mode() const
+uint32_t GCS_Soleon::custom_mode() const
 {
     /*HaRe
     return (uint32_t)soleon.flightmode->mode_number();*/
     return 0;
 }
 
-MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
+MAV_STATE GCS_MAVLINK_Soleon::vehicle_system_status() const
 {
     // set system as critical if any failsafe have triggered
     if (soleon.any_failsafe_triggered())  {
@@ -97,7 +97,7 @@ MAV_STATE GCS_MAVLINK_Copter::vehicle_system_status() const
 }
 
 
-void GCS_MAVLINK_Copter::send_attitude_target()
+void GCS_MAVLINK_Soleon::send_attitude_target()
 {
     /*HaRe
     const Quaternion quat  = soleon.attitude_control->get_attitude_target_quat();
@@ -123,7 +123,7 @@ void GCS_MAVLINK_Copter::send_attitude_target()
     */
 }
 
-void GCS_MAVLINK_Copter::send_position_target_global_int()
+void GCS_MAVLINK_Soleon::send_position_target_global_int()
 {
     Location target;
     /*HaRe
@@ -157,7 +157,7 @@ void GCS_MAVLINK_Copter::send_position_target_global_int()
         0.0f); // yaw_rate
 }
 
-void GCS_MAVLINK_Copter::send_position_target_local_ned()
+void GCS_MAVLINK_Soleon::send_position_target_local_ned()
 {
 #if MODE_GUIDED_ENABLED == ENABLED
     if (!soleon.flightmode->in_guided_mode()) {
@@ -223,7 +223,7 @@ void GCS_MAVLINK_Copter::send_position_target_local_ned()
 
 //-- sends the status of the Soleon AirController
 //int temp;
-void GCS_MAVLINK_Copter::send_so_status(void) const
+void GCS_MAVLINK_Soleon::send_so_status(void) const
 {
 //    if (temp++> 4){
 //        gcs().send_text(MAV_SEVERITY_INFO, "Update Tanklevel = %f", SO::TankSupervision()->get_level());  ///-HaRe debug
@@ -242,7 +242,7 @@ void GCS_MAVLINK_Copter::send_so_status(void) const
 }
 
 
-void GCS_MAVLINK_Copter::send_nav_controller_output() const
+void GCS_MAVLINK_Soleon::send_nav_controller_output() const
 {
     /*HaRe
     if (!soleon.ap.initialised) {
@@ -263,7 +263,7 @@ void GCS_MAVLINK_Copter::send_nav_controller_output() const
     */
 }
 
-float GCS_MAVLINK_Copter::vfr_hud_airspeed() const
+float GCS_MAVLINK_Soleon::vfr_hud_airspeed() const
 {
 #if AP_AIRSPEED_ENABLED
     // airspeed sensors are best. While the AHRS airspeed_estimate
@@ -284,7 +284,7 @@ float GCS_MAVLINK_Copter::vfr_hud_airspeed() const
     return AP::gps().ground_speed();
 }
 
-int16_t GCS_MAVLINK_Copter::vfr_hud_throttle() const
+int16_t GCS_MAVLINK_Soleon::vfr_hud_throttle() const
 {
     if (soleon.motors == nullptr) {
         return 0;
@@ -295,7 +295,7 @@ int16_t GCS_MAVLINK_Copter::vfr_hud_throttle() const
 /*
   send PID tuning message
  */
-void GCS_MAVLINK_Copter::send_pid_tuning()
+void GCS_MAVLINK_Soleon::send_pid_tuning()
 {
     /*HaRe
     static const PID_TUNING_AXIS axes[] = {
@@ -345,7 +345,7 @@ void GCS_MAVLINK_Copter::send_pid_tuning()
 }
 
 // send winch status message
-void GCS_MAVLINK_Copter::send_winch_status() const
+void GCS_MAVLINK_Soleon::send_winch_status() const
 {
 #if AP_WINCH_ENABLED
     AP_Winch *winch = AP::winch();
@@ -356,26 +356,26 @@ void GCS_MAVLINK_Copter::send_winch_status() const
 #endif
 }
 
-uint8_t GCS_MAVLINK_Copter::sysid_my_gcs() const
+uint8_t GCS_MAVLINK_Soleon::sysid_my_gcs() const
 {
     return soleon.g.sysid_my_gcs;
 }
-bool GCS_MAVLINK_Copter::sysid_enforce() const
+bool GCS_MAVLINK_Soleon::sysid_enforce() const
 {
     return soleon.g2.sysid_enforce;
 }
 
-uint32_t GCS_MAVLINK_Copter::telem_delay() const
+uint32_t GCS_MAVLINK_Soleon::telem_delay() const
 {
     return (uint32_t)(soleon.g.telem_delay);
 }
 
-bool GCS_Copter::vehicle_initialised() const {
+bool GCS_Soleon::vehicle_initialised() const {
     return soleon.ap.initialised;
 }
 
 // try to send a message, return false if it wasn't sent
-bool GCS_MAVLINK_Copter::try_send_message(enum ap_message id)
+bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
 {
     switch(id) {
 /*HaRe
@@ -631,7 +631,7 @@ const struct GCS_MAVLINK::stream_entries GCS_MAVLINK::all_stream_entries[] = {
     MAV_STREAM_TERMINATOR // must have this at end of stream_entries
 };
 
-MISSION_STATE GCS_MAVLINK_Copter::mission_state(const class AP_Mission &mission) const
+MISSION_STATE GCS_MAVLINK_Soleon::mission_state(const class AP_Mission &mission) const
 {/* HaRe MODE_AUTO_ENABLED 
     if (soleon.mode_auto.paused()) {
         return MISSION_STATE_PAUSED;
@@ -639,7 +639,7 @@ MISSION_STATE GCS_MAVLINK_Copter::mission_state(const class AP_Mission &mission)
     return GCS_MAVLINK::mission_state(mission);
 }
 
-bool GCS_MAVLINK_Copter::handle_guided_request(AP_Mission::Mission_Command &cmd)
+bool GCS_MAVLINK_Soleon::handle_guided_request(AP_Mission::Mission_Command &cmd)
 {
 #if MODE_AUTO_ENABLED == ENABLED
     return soleon.mode_auto.do_guided(cmd);
@@ -648,7 +648,7 @@ bool GCS_MAVLINK_Copter::handle_guided_request(AP_Mission::Mission_Command &cmd)
 #endif
 }
 
-void GCS_MAVLINK_Copter::packetReceived(const mavlink_status_t &status,
+void GCS_MAVLINK_Soleon::packetReceived(const mavlink_status_t &status,
                                         const mavlink_message_t &msg)
 {
     // we handle these messages here to avoid them being blocked by mavlink routing code
@@ -667,7 +667,7 @@ void GCS_MAVLINK_Copter::packetReceived(const mavlink_status_t &status,
     GCS_MAVLINK::packetReceived(status, msg);
 }
 
-bool GCS_MAVLINK_Copter::params_ready() const
+bool GCS_MAVLINK_Soleon::params_ready() const
 {
     if (AP_BoardConfig::in_config_error()) {
         // we may never have parameters "initialised" in this case
@@ -679,7 +679,7 @@ bool GCS_MAVLINK_Copter::params_ready() const
     return soleon.ap.initialised_params;
 }
 
-void GCS_MAVLINK_Copter::send_banner()
+void GCS_MAVLINK_Soleon::send_banner()
 {
     GCS_MAVLINK::send_banner();
     if (soleon.motors == nullptr) {
@@ -691,7 +691,7 @@ void GCS_MAVLINK_Copter::send_banner()
     send_text(MAV_SEVERITY_INFO, "%s", frame_and_type_string);
 }
 
-void GCS_MAVLINK_Copter::handle_command_ack(const mavlink_message_t &msg)
+void GCS_MAVLINK_Soleon::handle_command_ack(const mavlink_message_t &msg)
 {
     soleon.command_ack_counter++;
     GCS_MAVLINK::handle_command_ack(msg);
@@ -700,14 +700,14 @@ void GCS_MAVLINK_Copter::handle_command_ack(const mavlink_message_t &msg)
 /*
   handle a LANDING_TARGET command. The timestamp has been jitter corrected
 */
-void GCS_MAVLINK_Copter::handle_landing_target(const mavlink_landing_target_t &packet, uint32_t timestamp_ms)
+void GCS_MAVLINK_Soleon::handle_landing_target(const mavlink_landing_target_t &packet, uint32_t timestamp_ms)
 {
 #if AC_PRECLAND_ENABLED
     soleon.precland.handle_msg(packet, timestamp_ms);
 #endif
 }
 
-MAV_RESULT GCS_MAVLINK_Copter::_handle_command_preflight_calibration(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
+MAV_RESULT GCS_MAVLINK_Soleon::_handle_command_preflight_calibration(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
     /*Hare
     if (is_equal(packet.param6,1.0f)) {
@@ -719,7 +719,7 @@ MAV_RESULT GCS_MAVLINK_Copter::_handle_command_preflight_calibration(const mavli
 }
 
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_do_set_roi(const Location &roi_loc)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_do_set_roi(const Location &roi_loc)
 {
     if (!roi_loc.check_latlng()) {
         return MAV_RESULT_FAILED;
@@ -728,7 +728,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_do_set_roi(const Location &roi_loc
     return MAV_RESULT_ACCEPTED;
 }
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_preflight_reboot(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_preflight_reboot(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
     // reject reboot if user has also specified they want the "Auto" ESC calibration on next reboot
     if (soleon.g.esc_calibrate == (uint8_t)Soleon::ESCCalibrationModes::ESCCAL_AUTO) {
@@ -740,14 +740,14 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_preflight_reboot(const mavlink_command_lon
     return GCS_MAVLINK::handle_preflight_reboot(packet, msg);
 }
 
-bool GCS_MAVLINK_Copter::set_home_to_current_location(bool _lock) {
+bool GCS_MAVLINK_Soleon::set_home_to_current_location(bool _lock) {
     return soleon.set_home_to_current_location(_lock);
 }
-bool GCS_MAVLINK_Copter::set_home(const Location& loc, bool _lock) {
+bool GCS_MAVLINK_Soleon::set_home(const Location& loc, bool _lock) {
     return soleon.set_home(loc, _lock);
 }
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_do_reposition(const mavlink_command_int_t &packet)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_do_reposition(const mavlink_command_int_t &packet)
 {
 #if MODE_GUIDED_ENABLED == ENABLED
     const bool change_modes = ((int32_t)packet.param2 & MAV_DO_REPOSITION_FLAGS_CHANGE_MODE) == MAV_DO_REPOSITION_FLAGS_CHANGE_MODE;
@@ -791,7 +791,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_do_reposition(const mavlink_co
 #endif
 }
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_packet(const mavlink_command_int_t &packet)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_int_t &packet)
 {
     switch(packet.command) {
 #if MODE_FOLLOW_ENABLED == ENABLED
@@ -817,7 +817,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_int_packet(const mavlink_command_i
 }
 
 #if HAL_MOUNT_ENABLED
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_mount(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_mount(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
     switch (packet.command) {
     case MAV_CMD_DO_MOUNT_CONTROL:
@@ -835,7 +835,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_mount(const mavlink_command_long_t
 }
 #endif
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_long_t &packet)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_long_t &packet)
 {
     switch(packet.command) {
 
@@ -1084,7 +1084,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_long_packet(const mavlink_command_
     }
 }
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_command_int_t &packet)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_command_pause_continue(const mavlink_command_int_t &packet)
 {
     /*HaRe
     // requested pause
@@ -1108,7 +1108,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_command_pause_continue(const mavlink_comma
 }
 
 #if HAL_MOUNT_ENABLED
-void GCS_MAVLINK_Copter::handle_mount_message(const mavlink_message_t &msg)
+void GCS_MAVLINK_Soleon::handle_mount_message(const mavlink_message_t &msg)
 {
     switch (msg.msgid) {
     case MAVLINK_MSG_ID_MOUNT_CONTROL:
@@ -1131,7 +1131,7 @@ void GCS_MAVLINK_Copter::handle_mount_message(const mavlink_message_t &msg)
 // this is called on receipt of a MANUAL_CONTROL packet and is
 // expected to call manual_override to override RC input on desired
 // axes.
-void GCS_MAVLINK_Copter::handle_manual_control_axes(const mavlink_manual_control_t &packet, const uint32_t tnow)
+void GCS_MAVLINK_Soleon::handle_manual_control_axes(const mavlink_manual_control_t &packet, const uint32_t tnow)
 {
     if (packet.z < 0) { // Copter doesn't do negative thrust
         return;
@@ -1146,7 +1146,7 @@ void GCS_MAVLINK_Copter::handle_manual_control_axes(const mavlink_manual_control
 // sanity check velocity or acceleration vector components are numbers
 // (e.g. not NaN) and below 1000. vec argument units are in meters/second or
 // metres/second/second
-bool GCS_MAVLINK_Copter::sane_vel_or_acc_vector(const Vector3f &vec) const
+bool GCS_MAVLINK_Soleon::sane_vel_or_acc_vector(const Vector3f &vec) const
 {
     for (uint8_t i=0; i<3; i++) {
         // consider velocity invalid if any component nan or >1000(m/s or m/s/s)
@@ -1157,7 +1157,7 @@ bool GCS_MAVLINK_Copter::sane_vel_or_acc_vector(const Vector3f &vec) const
     return true;
 }
 
-void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
+void GCS_MAVLINK_Soleon::handleMessage(const mavlink_message_t &msg)
 {
 #if MODE_GUIDED_ENABLED == ENABLED
     // for mavlink SET_POSITION_TARGET messages
@@ -1502,7 +1502,7 @@ void GCS_MAVLINK_Copter::handleMessage(const mavlink_message_t &msg)
 } // end handle mavlink
 
 
-MAV_RESULT GCS_MAVLINK_Copter::handle_flight_termination(const mavlink_command_long_t &packet) {
+MAV_RESULT GCS_MAVLINK_Soleon::handle_flight_termination(const mavlink_command_long_t &packet) {
 #if ADVANCED_FAILSAFE == ENABLED
     if (GCS_MAVLINK::handle_flight_termination(packet) == MAV_RESULT_ACCEPTED) {
         return MAV_RESULT_ACCEPTED;
@@ -1518,7 +1518,7 @@ MAV_RESULT GCS_MAVLINK_Copter::handle_flight_termination(const mavlink_command_l
     return MAV_RESULT_ACCEPTED; //-HaRe
 }
 
-float GCS_MAVLINK_Copter::vfr_hud_alt() const
+float GCS_MAVLINK_Soleon::vfr_hud_alt() const
 {
     if (soleon.g2.dev_options.get() & DevOptionVFR_HUDRelativeAlt) {
         // compatibility option for older mavlink-aware devices that
@@ -1528,7 +1528,7 @@ float GCS_MAVLINK_Copter::vfr_hud_alt() const
     return GCS_MAVLINK::vfr_hud_alt();
 }
 
-uint64_t GCS_MAVLINK_Copter::capabilities() const
+uint64_t GCS_MAVLINK_Soleon::capabilities() const
 {
     return (MAV_PROTOCOL_CAPABILITY_MISSION_FLOAT |
             MAV_PROTOCOL_CAPABILITY_MISSION_INT |
@@ -1543,7 +1543,7 @@ uint64_t GCS_MAVLINK_Copter::capabilities() const
             GCS_MAVLINK::capabilities());
 }
 
-MAV_LANDED_STATE GCS_MAVLINK_Copter::landed_state() const
+MAV_LANDED_STATE GCS_MAVLINK_Soleon::landed_state() const
 {
     if (soleon.ap.land_complete) {
         return MAV_LANDED_STATE_ON_GROUND;
@@ -1558,7 +1558,7 @@ MAV_LANDED_STATE GCS_MAVLINK_Copter::landed_state() const
     return MAV_LANDED_STATE_IN_AIR;
 }
 /*HaRe
-void GCS_MAVLINK_Copter::send_wind() const
+void GCS_MAVLINK_Soleon::send_wind() const
 {
     Vector3f airspeed_vec_bf;
     if (!AP::ahrs().airspeed_vector_true(airspeed_vec_bf)) {
@@ -1576,7 +1576,7 @@ void GCS_MAVLINK_Copter::send_wind() const
 */
 
 #if HAL_HIGH_LATENCY2_ENABLED
-int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const
+int16_t GCS_MAVLINK_Soleon::high_latency_target_altitude() const
 {
     AP_AHRS &ahrs = AP::ahrs();
     Location global_position_current;
@@ -1590,7 +1590,7 @@ int16_t GCS_MAVLINK_Copter::high_latency_target_altitude() const
     
 }
 
-uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
+uint8_t GCS_MAVLINK_Soleon::high_latency_tgt_heading() const
 {
     /*HaRe
     if (soleon.ap.initialised) {
@@ -1602,7 +1602,7 @@ uint8_t GCS_MAVLINK_Copter::high_latency_tgt_heading() const
     return 0;     
 }
     
-uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
+uint16_t GCS_MAVLINK_Soleon::high_latency_tgt_dist() const
 {
     /*HaRe
     if (soleon.ap.initialised) {
@@ -1613,7 +1613,7 @@ uint16_t GCS_MAVLINK_Copter::high_latency_tgt_dist() const
     return 0;
 }
 
-uint8_t GCS_MAVLINK_Copter::high_latency_tgt_airspeed() const
+uint8_t GCS_MAVLINK_Soleon::high_latency_tgt_airspeed() const
 {
     if (soleon.ap.initialised) {
         // return units are m/s*5
@@ -1622,7 +1622,7 @@ uint8_t GCS_MAVLINK_Copter::high_latency_tgt_airspeed() const
     return 0;  
 }
 
-uint8_t GCS_MAVLINK_Copter::high_latency_wind_speed() const
+uint8_t GCS_MAVLINK_Soleon::high_latency_wind_speed() const
 {
     Vector3f airspeed_vec_bf;
     Vector3f wind;
@@ -1634,7 +1634,7 @@ uint8_t GCS_MAVLINK_Copter::high_latency_wind_speed() const
     return 0; 
 }
 
-uint8_t GCS_MAVLINK_Copter::high_latency_wind_direction() const
+uint8_t GCS_MAVLINK_Soleon::high_latency_wind_direction() const
 {
     Vector3f airspeed_vec_bf;
     Vector3f wind;

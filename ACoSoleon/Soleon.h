@@ -184,8 +184,8 @@
 
 class Soleon : public AP_Vehicle {
 public:
-    friend class GCS_MAVLINK_Copter;
-    friend class GCS_Copter;
+    friend class GCS_MAVLINK_Soleon;
+    friend class GCS_Soleon;
     friend class Parameters;
     friend class ParametersG2;
     friend class AP_Avoidance_Copter;  
@@ -195,8 +195,8 @@ public:
 #endif
     friend class AP_Arming_Soleon;
     friend class ToyMode;
-    friend class RC_Channel_Copter;
-    friend class RC_Channels_Copter;
+    friend class RC_Channel_Soleon;
+    friend class RC_Channels_Soleon;
 
     friend class AutoTune;
 
@@ -338,8 +338,8 @@ private:
     uint32_t takeoff_check_warning_ms;  // system time user was last warned of takeoff check failure
 
     // GCS selection
-    GCS_Copter _gcs; // avoid using this; use gcs()
-    GCS_Copter &gcs() { return _gcs; }
+    GCS_Soleon _gcs; // avoid using this; use gcs()
+    GCS_Soleon &gcs() { return _gcs; }
 
     // User variables
 #ifdef USERHOOK_VARIABLES

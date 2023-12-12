@@ -863,7 +863,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // @Group: RC
     // @Path: ../libraries/RC_Channel/RC_Channels_VarInfo.h
-    AP_SUBGROUPINFO(rc_channels, "RC", 17, ParametersG2, RC_Channels_Copter),
+    AP_SUBGROUPINFO(rc_channels, "RC", 17, ParametersG2, RC_Channels_Soleon),
 
     // 18 was used by AP_VisualOdom
 

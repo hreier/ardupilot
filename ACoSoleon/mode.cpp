@@ -1065,7 +1065,7 @@ void Mode::set_land_complete(bool b)
  //HaRe   return soleon.set_land_complete(b);
 }
 
-GCS_Copter &Mode::gcs()
+GCS_Soleon &Mode::gcs()
 {
     return soleon.gcs();
 }

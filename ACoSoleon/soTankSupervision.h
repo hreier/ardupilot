@@ -9,7 +9,7 @@
 //class Parameters;
 //class ParametersG2;
 
-//class GCS_Copter;
+//class GCS_Soleon;
 //#define MAVLINK_MSG_ID_SCALED_PRESSURE 29
 //#define MAVLINK_MSG_ID_MCU_STATUS 11039
 

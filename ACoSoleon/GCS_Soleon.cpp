@@ -2,12 +2,12 @@
 
 #include "Soleon.h"
 
-uint8_t GCS_Copter::sysid_this_mav() const
+uint8_t GCS_Soleon::sysid_this_mav() const
 {
     return soleon.g.sysid_this_mav;
 }
 
-const char* GCS_Copter::frame_string() const
+const char* GCS_Soleon::frame_string() const
 {
     if (soleon.motors == nullptr) {
         return "MultiCopter";
@@ -15,17 +15,17 @@ const char* GCS_Copter::frame_string() const
     return soleon.motors->get_frame_string();
 }
 
-bool GCS_Copter::simple_input_active() const
+bool GCS_Soleon::simple_input_active() const
 {
     return soleon.simple_mode == Soleon::SimpleMode::SIMPLE;
 }
 
-bool GCS_Copter::supersimple_input_active() const
+bool GCS_Soleon::supersimple_input_active() const
 {
     return soleon.simple_mode == Soleon::SimpleMode::SUPERSIMPLE;
 }
 
-void GCS_Copter::update_vehicle_sensor_status_flags(void)
+void GCS_Soleon::update_vehicle_sensor_status_flags(void)
 {
     control_sensors_present |=
         MAV_SYS_STATUS_SENSOR_ANGULAR_RATE_CONTROL |

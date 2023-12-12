@@ -3,7 +3,7 @@
 #include <GCS_MAVLink/GCS.h>
 #include "GCS_Mavlink.h"
 
-class GCS_Copter : public GCS
+class GCS_Soleon : public GCS
 {
     friend class Soleon; // for access to _chan in parameter declarations
 
@@ -14,7 +14,7 @@ public:
     // offset ofs.  These are of the form:
     // GCS_MAVLINK_XXXX *chan(const uint8_t ofs) override;
     // const GCS_MAVLINK_XXXX *chan(const uint8_t ofs) override const;
-    GCS_MAVLINK_CHAN_METHOD_DEFINITIONS(GCS_MAVLINK_Copter);
+    GCS_MAVLINK_CHAN_METHOD_DEFINITIONS(GCS_MAVLINK_Soleon);
 
     void update_vehicle_sensor_status_flags(void) override;
 
@@ -41,10 +41,10 @@ protected:
         return 250;
     }
 
-    GCS_MAVLINK_Copter *new_gcs_mavlink_backend(GCS_MAVLINK_Parameters &params,
+    GCS_MAVLINK_Soleon *new_gcs_mavlink_backend(GCS_MAVLINK_Parameters &params,
                                                 AP_HAL::UARTDriver &uart) override {
         mavlink_system.compid = MAV_COMP_ID_USER60;    //Set the ComponentID
-        return new GCS_MAVLINK_Copter(params, uart);
+        return new GCS_MAVLINK_Soleon(params, uart);
     }
 
 };

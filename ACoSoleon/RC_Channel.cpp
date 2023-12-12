@@ -4,17 +4,17 @@
 
 
 // defining these two macros and including the RC_Channels_VarInfo header defines the parameter information common to all vehicle types
-#define RC_CHANNELS_SUBCLASS RC_Channels_Copter
-#define RC_CHANNEL_SUBCLASS RC_Channel_Copter
+#define RC_CHANNELS_SUBCLASS RC_Channels_Soleon
+#define RC_CHANNEL_SUBCLASS RC_Channel_Soleon
 
 #include <RC_Channel/RC_Channels_VarInfo.h>
 
-int8_t RC_Channels_Copter::flight_mode_channel_number() const
+int8_t RC_Channels_Soleon::flight_mode_channel_number() const
 {
     return soleon.g.flight_mode_chan.get();
 }
 
-void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
+void RC_Channel_Soleon::mode_switch_changed(modeswitch_pos_t new_pos)
 {
     if (new_pos < 0 || (uint8_t)new_pos > soleon.num_flight_modes) {
         // should not have been called
@@ -38,12 +38,12 @@ void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
     }
 }
 
-bool RC_Channels_Copter::in_rc_failsafe() const
+bool RC_Channels_Soleon::in_rc_failsafe() const
 {
     return soleon.failsafe.radio;
 }
 
-bool RC_Channels_Copter::has_valid_input() const
+bool RC_Channels_Soleon::has_valid_input() const
 {
     if (in_rc_failsafe()) {
         return false;
@@ -55,7 +55,7 @@ bool RC_Channels_Copter::has_valid_input() const
 }
 
 // returns true if throttle arming checks should be run
-bool RC_Channels_Copter::arming_check_throttle() const {
+bool RC_Channels_Soleon::arming_check_throttle() const {
     if ((soleon.g.throttle_behavior & THR_BEHAVE_FEEDBACK_FROM_MID_STICK) != 0) {
         // center sprung throttle configured, dont run AP_Arming check
         // Copter already checks this case in its own arming checks
@@ -64,13 +64,13 @@ bool RC_Channels_Copter::arming_check_throttle() const {
     return RC_Channels::arming_check_throttle();
 }
 
-RC_Channel * RC_Channels_Copter::get_arming_channel(void) const
+RC_Channel * RC_Channels_Soleon::get_arming_channel(void) const
 {
     return soleon.channel_yaw;
 }
 
 // init_aux_switch_function - initialize aux functions
-void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::init_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
 {
     // init channel options
     switch(ch_option) {
@@ -138,7 +138,7 @@ void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxS
 
 // do_aux_function_change_mode - change mode based on an aux switch
 // being moved
-void RC_Channel_Copter::do_aux_function_change_mode(const Mode::Number mode,
+void RC_Channel_Soleon::do_aux_function_change_mode(const Mode::Number mode,
                                                     const AuxSwitchPos ch_flag)
 { 
     /*HaRe
@@ -160,7 +160,7 @@ void RC_Channel_Copter::do_aux_function_change_mode(const Mode::Number mode,
 }
 
 // do_aux_function - implement the function invoked by auxiliary switches
-bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
+bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
 {
     switch(ch_option) {
         case AUX_FUNC::FLIP:
@@ -657,7 +657,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 }
 
 // change air-mode status
-void RC_Channel_Copter::do_aux_function_change_air_mode(const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::do_aux_function_change_air_mode(const AuxSwitchPos ch_flag)
 {
     switch (ch_flag) {
     case AuxSwitchPos::HIGH:
@@ -672,7 +672,7 @@ void RC_Channel_Copter::do_aux_function_change_air_mode(const AuxSwitchPos ch_fl
 }
 
 // change force flying status
-void RC_Channel_Copter::do_aux_function_change_force_flying(const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::do_aux_function_change_force_flying(const AuxSwitchPos ch_flag)
 {
     switch (ch_flag) {
     case AuxSwitchPos::HIGH:

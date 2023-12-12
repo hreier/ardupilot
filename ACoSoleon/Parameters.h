@@ -597,7 +597,7 @@ public:
     AP_Int8 frame_class;
 
     // RC input channels
-    RC_Channels_Copter rc_channels;
+    RC_Channels_Soleon rc_channels;
     
     // control over servo output ranges
     SRV_Channels servo_channels;
