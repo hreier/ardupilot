@@ -4,14 +4,6 @@
 #include <AP_Param/AP_Param.h>
 
 
-//#include "Soleon.h"
-//#include <AP_Math/chirp.h>
-//class Parameters;
-//class ParametersG2;
-
-//class GCS_Soleon;
-//#define MAVLINK_MSG_ID_SCALED_PRESSURE 29
-//#define MAVLINK_MSG_ID_MCU_STATUS 11039
 
 #define MAVLINK_MSG_ID_SO_STATUS  50080
 
@@ -30,6 +22,9 @@ public:
         return _singleton;
     }
 
+    //---- from missionplan ----
+    float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate;
+    uint8_t  _mp_cmd; uint8_t  _mp_status;
 
 protected:
 
@@ -43,6 +38,7 @@ private:
     uint32_t _timeout_ms;
 
     static SO_TankSupervision *_singleton;
+    
 
 };
 

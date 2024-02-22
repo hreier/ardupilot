@@ -29,8 +29,16 @@ void SO_TankSupervision::set(float val)
 // brake_init - initialise brake controller
 bool SO_TankSupervision::init(bool ignore_checks)
 {
-    _fill_level = 100.0f;
+    _fill_level = 30.0f;
     _delta_fill = 0.0f;
+    _mp_status = 0;
+    _mp_cmd = 0;
+    _mp_liter_ha =0;
+    _mp_line_dist =0;
+    _mp_planned_spd =0;
+    _mp_dist_waypoint =0;
+    _mp_sprayrate =0;
+
 
   /*  // initialise pos controller speed and acceleration
     pos_control->set_max_speed_accel_xy(inertial_nav.get_velocity_neu_cms().length(), BRAKE_MODE_DECEL_RATE);
@@ -57,12 +65,47 @@ int temp2;
 void SO_TankSupervision::update()
 {
     _fill_level -= _delta_fill;
-    if (_fill_level < 0.0f) _fill_level = 100.0f;
+    if (_fill_level < 0.0f) _fill_level = 30.0f;
     
-    if (temp2++> 30){  //-- debugging
+   /* if (temp2++> 30){  //-- debugging
         gcs().send_text(MAV_SEVERITY_INFO, "ACo Tanklevel = %f", _fill_level);  ///-HaRe debug
         temp2=0;
+    }*/
+    _mp_sprayrate = _delta_fill;
+
+    if (_mp_liter_ha != 0.0f){
+    _mp_status |= 0x04;
+
+    switch (_mp_cmd) {
+        case 0:
+            _mp_status = (_mp_status & 0xfc);
+            _delta_fill = 0;
+            break;
+        
+        case 1:
+            _mp_status = (_mp_status & 0xfc) | 0x1;
+            _delta_fill = 0.001;
+            break;
+
+        case 2:
+            _mp_status = (_mp_status & 0xfc) | 0x2;
+             _delta_fill = 0.05;
+           break;
+
+        case 3:
+            _mp_status = (_mp_status & 0xfc) | 0x3;
+            _delta_fill = 0.1;
+            break;
+
+        default:
+            gcs().send_text(MAV_SEVERITY_WARNING, "illegal mp-cmd: %d", _mp_cmd);
+            break;
+        }
+    } 
+    else{
+        _mp_status = 0;
     }
+
 
 };
 
@@ -71,39 +114,6 @@ void SO_TankSupervision::update()
 void SO_TankSupervision::run()
 {
 ;
- /*   // if not armed set throttle to zero and exit immediately
-    if (is_disarmed_or_landed()) {
-        make_safe_ground_handling();
-        pos_control->relax_z_controller(0.0f);
-        return;
-    }
-
-    // set motors to full range
-    motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
-
-    // relax stop target if we might be landed
-    if (copter.ap.land_complete_maybe) {
-        pos_control->soften_for_landing_xy();
-    }
-
-    // use position controller to stop
-    Vector2f vel;
-    Vector2f accel;
-    pos_control->input_vel_accel_xy(vel, accel);
-    pos_control->update_xy_controller();
-
-    // call attitude controller
-    attitude_control->input_thrust_vector_rate_heading(pos_control->get_thrust_vector(), 0.0f);
-
-    pos_control->set_pos_target_z_from_climb_rate_cm(0.0f);
-    pos_control->update_z_controller();
-
-    // MAV_CMD_SOLO_BTN_PAUSE_CLICK (Solo only) is used to set the timeout.
-    if (_timeout_ms != 0 && millis()-_timeout_start >= _timeout_ms) {
-        if (!copter.set_mode(Mode::Number::LOITER, ModeReason::BRAKE_TIMEOUT)) {
-            copter.set_mode(Mode::Number::ALT_HOLD, ModeReason::BRAKE_TIMEOUT);
-        }
-    } */
 }
 
 /*

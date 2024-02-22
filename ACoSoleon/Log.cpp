@@ -364,6 +364,7 @@ struct PACKED log_Guided_Attitude_Target {
     float climb_rate;
 };
 
+/*
 // Write a Guided mode position target
 // pos_target is lat, lon, alt OR offset from ekf origin in cm
 // terrain should be 0 if pos_target.z is alt-above-ekf-origin, 1 if alt-above-terrain
@@ -410,6 +411,7 @@ void Soleon::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, f
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
+*/
 
 // type and unit information can be found in
 // libraries/AP_Logger/Logstructure.h; search for "log_Units" for

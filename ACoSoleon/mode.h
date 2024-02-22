@@ -329,7 +329,7 @@ public:
     // end pass-through functions
 };
 
-
+/*
 #if MODE_ACRO_ENABLED == ENABLED
 class ModeAcro : public Mode {
 
@@ -393,6 +393,7 @@ protected:
 private:
 };
 #endif
+*/
 
 /*HaRe
 class ModeAltHold : public Mode {
@@ -425,6 +426,7 @@ private:
 };*/
 
 
+/*
 class ModeAuto : public Mode {
 
 public:
@@ -680,6 +682,8 @@ private:
         uint32_t start_ms;  // system time that nav attitude time command was received (used for timeout)
     } nav_attitude_time;
 };
+*/
+
 
 #if AUTOTUNE_ENABLED == ENABLED
 /*
@@ -738,7 +742,7 @@ private:
 };
 #endif
 
-
+/*
 class ModeBrake : public Mode {
 
 public:
@@ -865,6 +869,7 @@ private:
     int8_t    roll_dir;            // roll direction (-1 = roll left, 1 = roll right)
     int8_t    pitch_dir;           // pitch direction (-1 = pitch forward, 1 = pitch back)
 };
+*/
 
 
 #if MODE_FLOWHOLD_ENABLED == ENABLED
@@ -958,7 +963,7 @@ private:
 #endif // MODE_FLOWHOLD_ENABLED
 
 
-
+/*
 class ModeGuided : public Mode {
 
 public:
@@ -1099,8 +1104,10 @@ private:
     // guided mode is paused or not
     bool _paused;
 };
+*/
 
 
+/*
 class ModeGuidedNoGPS : public ModeGuided {
 
 public:
@@ -1122,7 +1129,7 @@ protected:
 
 private:
 
-};
+};*/
 
 /*HaRe
 class ModeLand : public Mode {
@@ -1166,6 +1173,7 @@ private:
 };*/
 
 
+/*
 class ModeLoiter : public Mode {
 
 public:
@@ -1209,8 +1217,10 @@ private:
 #endif
 
 };
+*/
 
 
+/*
 class ModePosHold : public Mode {
 
 public:
@@ -1293,8 +1303,10 @@ private:
     float pitch;  // final pitch angle sent to attitude controller
 
 };
+*/
 
 
+/*
 class ModeRTL : public Mode {
 
 public:
@@ -1406,9 +1418,10 @@ private:
         IgnorePilotYaw    = (1U << 2),
     };
 
-};
+};*/
 
 
+/*
 class ModeSmartRTL : public ModeRTL {
 
 public:
@@ -1463,8 +1476,10 @@ private:
     // may choose to land the vehicle.
     uint32_t path_follow_last_pop_fail_ms;
 };
+*/
 
 
+/*
 class ModeSport : public Mode {
 
 public:
@@ -1490,7 +1505,7 @@ protected:
 
 private:
 
-};
+};*/
 
 /*HaRe
 class ModeStabilize : public Mode {
@@ -1517,7 +1532,7 @@ protected:
 
 private:
 
-};*/
+};
 
 #if FRAME_CONFIG == HELI_FRAME
 class ModeStabilize_Heli : public ModeStabilize {
@@ -1535,7 +1550,9 @@ private:
 
 };
 #endif
+*/
 
+/*
 class ModeSystemId : public Mode {
 
 public:
@@ -1660,7 +1677,8 @@ private:
     bool nextmode_attempted;
     uint32_t free_fall_start_ms;    // system time free fall was detected
     float free_fall_start_velz;     // vertical velocity when free fall was detected
-};
+};*/
+
 
 /*HaRe
 #if MODE_TURTLE_ENABLED == ENABLED
@@ -1726,6 +1744,7 @@ private:
 
 }; */
 
+/*
 #if AP_FOLLOW_ENABLED
 class ModeFollow : public ModeGuided {
 
@@ -1756,8 +1775,9 @@ protected:
 
     uint32_t last_log_ms;   // system time of last time desired velocity was logging
 };
-#endif
+#endif */
 
+/*
 class ModeZigZag : public Mode {        
 
 public:
@@ -1853,7 +1873,7 @@ private:
     uint16_t line_count = 0;        // current line number
     int16_t line_num = 0;           // target line number
     bool is_suspended;              // true if zigzag auto is suspended
-};
+};*/
 
 #if MODE_AUTOROTATE_ENABLED == ENABLED
 class ModeAutorotate : public Mode {

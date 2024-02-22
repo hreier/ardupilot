@@ -334,11 +334,11 @@ const AP_Param::Info Soleon::var_info[] = {
     // @User: Standard
     // @RebootRequired: True
     GSCALAR(frame_type, "FRAME_TYPE", HAL_FRAME_TYPE_DEFAULT),
-/*HaRe
+
     // @Group: ARMING_
     // @Path: ../libraries/AP_Arming/AP_Arming.cpp
-    GOBJECT(arming,                 "ARMING_", AP_Arming_Copter),
-*/
+    GOBJECT(arming,                 "ARMING_", AP_Arming_Soleon),
+
     // @Param: DISARM_DELAY
     // @DisplayName: Disarm delay
     // @Description: Delay before automatic disarm in seconds after landing touchdown detection. A value of zero disables auto disarm. If Emergency Motor stop active, delay time is half this value.
@@ -695,12 +695,26 @@ const AP_Param::Info Soleon::var_info[] = {
     GSCALAR(throw_motor_start, "THROW_MOT_START", (float)ModeThrow::PreThrowMotorState::STOPPED),
 #endif
 
-    // @Param: SO_SPRAYERMODE
-    // @DisplayName: Solarion sprayer mode
-    // @Description: Defines the configuration mode of the sprayer controller
-    // @Values: 0:disabled, 1:mission, 2:pressure, 3:flow
+    // @Param: SO_CONTROLMODE
+    // @DisplayName: Soleon control mode
+    // @Description: Defines the configuration mode of the soleon controller
+    // @Values: 0:disabled, 1:ppm, 3:flow, 2:pressure
     // @User: Standard
-    GSCALAR(so_sprayermode, "SO_SPRAYERMODE", SO_SPRAYERMODE_DEF),
+    GSCALAR(so_controlmode, "SO_CONTROLMODE", SO_CONTROLMODE_DEF),
+
+    // @Param: SO_SERVO_OUT_SPRAYING
+    // @DisplayName: Servo outvalue spraying
+    // @Description: Servo out value if spraying (SO_SPRAYERMODE == mission_ppm) 
+    // @Range: 800 2200
+    // @User: Advanced
+    GSCALAR(so_servo_out_spraying, "SO_SRV_SPRAYING", SO_SERVO_OUT_SPRAYING_DEF),
+    
+    // @Param: SO_SERVO_OUT_NOSPRAYING
+    // @DisplayName: Servo outvalue not spraying
+    // @Description: Servo out value if not spraying (SO_SPRAYERMODE == mission_ppm) 
+    // @Range: 800 2200
+    // @User: Advanced
+    GSCALAR(so_servo_out_nospraying, "SO_SRV_NOSPRAY", SO_SERVO_OUT_NOSPRAYING_DEF),
 
     // @Param: SO_FLOWSENSOR
     // @DisplayName: Solarion flow sensor configuration
@@ -709,7 +723,7 @@ const AP_Param::Info Soleon::var_info[] = {
     // @User: Advanced
     GSCALAR(so_flow_sensor, "SO_FLOWSENSOR", SO_FLOWSENSOR_DEF),
 
-    // @Param: SO_PRESSURESENS
+    // @Param: PRESSURESENS
     // @DisplayName: Solarion pressure sensor
     // @Description: Defines the configuration mode of the sprayer controller
     // @Values: 0:disabled, 1:analog1, 2:analog2

@@ -387,12 +387,14 @@ public:
         //
         // 300: Area for Soleon Parameters
         //
-        k_param_so_sprayermode = 300,
+        k_param_so_controlmode = 300,
+        k_param_so_servo_out_spraying,
+        k_param_so_servo_out_nospraying,
         k_param_so_flow_sensor,
         k_param_so_pressure_sensor,
         k_param_so_arming,
         k_param_so_pid_pressure,
-    //    k_param_so_pid_flow,
+     //    k_param_so_pid_flow,
     //    k_param_so_ref_in,
     //    k_param_so_offset_in,
     //    k_param_so_speed_in,
@@ -484,7 +486,9 @@ public:
 
     // Soleon 
     //
-    AP_Int8         so_sprayermode;
+    AP_Int8         so_controlmode;
+    AP_Int16        so_servo_out_spraying;
+    AP_Int16        so_servo_out_nospraying;
     AP_Int8         so_flow_sensor;
     AP_Int8         so_pressure_sensor;
     AP_Int8         so_arming;

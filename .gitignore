@@ -156,3 +156,4 @@ build.tmp.binaries/
 tasklist.json
 modules/esp_idf
 ACoSoleon/debugging/
+ACoSoleon/openocd/

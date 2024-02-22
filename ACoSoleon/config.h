@@ -610,8 +610,8 @@
 //////////////////////////////////////////////////////////////////////////////
 // Soleon defines
 //
-#ifndef SO_SPRAYERMODE_DEF
-# define SO_SPRAYERMODE_DEF DISABLED
+#ifndef SO_CONTROLMODE_DEF
+# define SO_CONTROLMODE_DEF 1
 #endif
 
 #ifndef SO_FLOWSENSOR_DEF
@@ -628,6 +628,14 @@
 
 #ifndef SO_PRESSURE_PID_DEF
 # define SO_PRESSURE_PID_DEF 0.0
+#endif
+
+#ifndef SO_SERVO_OUT_SPRAYING_DEF  //servo: 800-2200
+# define SO_SERVO_OUT_SPRAYING_DEF 1900
+#endif
+
+#ifndef SO_SERVO_OUT_NOSPRAYING_DEF
+# define SO_SERVO_OUT_NOSPRAYING_DEF 1100
 #endif
 
 

@@ -822,12 +822,14 @@ void Mode::land_run_normal_or_precland(bool pause_descent)
 #endif
 }
 
+
 #if AC_PRECLAND_ENABLED
+/*HaRe
 // Go towards a position commanded by prec land state machine in order to retry landing
 // The passed in location is expected to be NED and in m
 void Mode::precland_retry_position(const Vector3f &retry_pos)
 {
-    /*HaRe
+    
     if (!soleon.failsafe.radio) {
         if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && soleon.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
             AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
@@ -867,10 +869,11 @@ void Mode::precland_retry_position(const Vector3f &retry_pos)
 
     // call attitude controller
     attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
-    */
+    
 
-}
+}  */
 
+/*
 // Run precland statemachine. This function should be called from any mode that wants to do precision landing.
 // This handles everything from prec landing, to prec landing failures, to retries and failsafe measures
 void Mode::precland_run()
@@ -914,8 +917,9 @@ void Mode::precland_run()
         // just land, since user has taken over controls, it does not make sense to run any retries or failsafe measures
         land_run_horiz_and_vert_control();
     }
-}
+} */
 #endif
+
 
 float Mode::throttle_hover() const
 {

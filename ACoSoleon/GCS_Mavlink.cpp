@@ -231,14 +231,23 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
 //    }
     
     
-    mavlink_msg_so_status_send(chan,
+    /*mavlink_msg_so_status_send(chan,
                                 AP_HAL::millis(), 
                                 0,                //-- route to groundstation
                                 SO::TankSupervision()->get_level(),
                                 0,
                                 0,
                                 0,
-                                0);
+                                0);*/
+
+    mavlink_msg_so_status_send(chan,
+                                AP_HAL::millis(), 
+                                SO::TankSupervision()->_mp_status,                //-- 
+                                SO::TankSupervision()->get_level(),
+                                SO::TankSupervision()->_mp_sprayrate,
+                                SO::TankSupervision()->_mp_liter_ha,
+                                SO::TankSupervision()->_mp_line_dist,
+                                SO::TankSupervision()->_mp_planned_spd);
 }
 
 
@@ -840,33 +849,34 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
     switch(packet.command) {
 
     case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
-        if ((uint8_t)packet.param1 != 0)
-        {
-            gcs().send_text(MAV_SEVERITY_INFO, "DO_SEND_SCRIPT_MESSAGE ignored [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
-            return MAV_RESULT_ACCEPTED;
+        switch ((uint8_t)packet.param1){ //--process the selector
+            case 0: //-- only for test - remove it
+                SO::TankSupervision()->set(packet.param2);
+                gcs().send_text(MAV_SEVERITY_INFO, "SprayRateScript = %f", packet.param2);  ///-HaRe debug
+                break;
+
+            case 1: //-- mission plan startup command/configuration
+                SO::TankSupervision()->_mp_liter_ha = packet.param2;
+                SO::TankSupervision()->_mp_line_dist = packet.param3;
+                SO::TankSupervision()->_mp_planned_spd = packet.param4;
+                break;
+            
+            case 2: //-- mission plan command
+                SO::TankSupervision()->_mp_dist_waypoint = packet.param2;
+                SO::TankSupervision()->_mp_cmd  = (uint8_t) packet.param3;
+                break;
+            
+            default:
+                gcs().send_text(MAV_SEVERITY_WARNING, "DO_SEND_SCRIPT_MESSAGE wrong selector [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
+                break;
         }
-        [[fallthrough]]; 
+        return MAV_RESULT_ACCEPTED;
+        
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
-        SO::TankSupervision()->set(packet.param2);
-        gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param2);  ///-HaRe debug
+        SO::TankSupervision()->set(packet.param1);
+        gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
 
-    /*HaRe
-    case MAV_CMD_NAV_VTOL_TAKEOFF:
-    case MAV_CMD_NAV_TAKEOFF: {
-        // param3 : horizontal navigation by pilot acceptable
-        // param4 : yaw angle   (not supported)
-        // param5 : latitude    (not supported)
-        // param6 : longitude   (not supported)
-        // param7 : altitude [metres]
-
-        float takeoff_alt = packet.param7 * 100;      // Convert m to cm
-
-        if (!soleon.flightmode->do_user_takeoff(takeoff_alt, is_zero(packet.param3))) {
-            return MAV_RESULT_FAILED;
-        }
-        return MAV_RESULT_ACCEPTED;
-    }*/
 
 #if MODE_AUTO_ENABLED == ENABLED
     case MAV_CMD_DO_LAND_START:
