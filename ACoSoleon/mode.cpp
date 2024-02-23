@@ -16,7 +16,6 @@ Mode::Mode(void) :
     pos_control(soleon.pos_control),
     inertial_nav(soleon.inertial_nav),
     ahrs(soleon.ahrs),
-    /*HaRe attitude_control(soleon.attitude_control), */
     motors(soleon.motors),
     channel_roll(soleon.channel_roll),
     channel_pitch(soleon.channel_pitch),
@@ -31,117 +30,6 @@ Mode *Soleon::mode_from_mode_num(const Mode::Number mode)
     Mode *ret = nullptr;
 
     switch (mode) {
-#if MODE_ACRO_ENABLED == ENABLED
-        case Mode::Number::ACRO:
-            ret = &mode_acro;
-            break;
-#endif
-/*HaRe
-        case Mode::Number::STABILIZE:
-        mode_stabilize    ret = &mode_stabilize;
-            break;
-
-        case Mode::Number::ALT_HOLD:
-        //HaRe    ret = &mode_althold;
-            break;*/
-
-#if MODE_AUTO_ENABLED == ENABLED
-        case Mode::Number::AUTO:
-            ret = &mode_auto;
-            break;
-#endif
-
-#if MODE_CIRCLE_ENABLED == ENABLED
-        case Mode::Number::CIRCLE:
-            ret = &mode_circle;
-            break;
-#endif
-
-#if MODE_LOITER_ENABLED == ENABLED
-        case Mode::Number::LOITER:
-            ret = &mode_loiter;
-            break;
-#endif
-
-#if MODE_GUIDED_ENABLED == ENABLED
-        case Mode::Number::GUIDED:
-            ret = &mode_guided;
-            break;
-#endif
-/*HaRe
-        case Mode::Number::LAND:
-            ret = &mode_land;
-            break; 
-*/
-
-#if MODE_RTL_ENABLED == ENABLED
-        case Mode::Number::RTL:
-            ret = &mode_rtl;
-            break;
-#endif
-
-#if MODE_DRIFT_ENABLED == ENABLED
-        case Mode::Number::DRIFT:
-            ret = &mode_drift;
-            break;
-#endif
-
-#if MODE_SPORT_ENABLED == ENABLED
-        case Mode::Number::SPORT:
-            ret = &mode_sport;
-            break;
-#endif
-
-#if MODE_FLIP_ENABLED == ENABLED
-        case Mode::Number::FLIP:
-            ret = &mode_flip;
-            break;
-#endif
-
-#if AUTOTUNE_ENABLED == ENABLED
-        case Mode::Number::AUTOTUNE:
-            ret = &mode_autotune;
-            break;
-#endif
-
-#if MODE_POSHOLD_ENABLED == ENABLED
-        case Mode::Number::POSHOLD:
-            ret = &mode_poshold;
-            break;
-#endif
-
-#if MODE_BRAKE_ENABLED == ENABLED
-        case Mode::Number::BRAKE:
-            ret = &mode_brake;
-            break;
-#endif
-
-#if MODE_THROW_ENABLED == ENABLED
-        case Mode::Number::THROW:
-            ret = &mode_throw;
-            break;
-#endif
-
-
-/* HaRe
-#if HAL_ADSB_ENABLED
-        case Mode::Number::AVOID_ADSB:
-            ret = &mode_avoid_adsb;
-            break;
-#endif
-*/
-
-#if MODE_GUIDED_NOGPS_ENABLED == ENABLED
-        case Mode::Number::GUIDED_NOGPS:
-            ret = &mode_guided_nogps;
-            break;
-#endif
-
-#if MODE_SMARTRTL_ENABLED == ENABLED
-        case Mode::Number::SMART_RTL:
-            ret = &mode_smartrtl;
-            break;
-#endif
 
 #if MODE_FLOWHOLD_ENABLED == ENABLED
         case Mode::Number::FLOWHOLD:
@@ -149,36 +37,7 @@ Mode *Soleon::mode_from_mode_num(const Mode::Number mode)
             break;
 #endif
 
-#if MODE_FOLLOW_ENABLED == ENABLED
-        case Mode::Number::FOLLOW:
-            ret = &mode_follow;
-            break;
-#endif
 
-#if MODE_ZIGZAG_ENABLED == ENABLED
-        case Mode::Number::ZIGZAG:
-            ret = &mode_zigzag;
-            break;
-#endif
-
-#if MODE_SYSTEMID_ENABLED == ENABLED
-        case Mode::Number::SYSTEMID:
-            ret = (Mode *)g2.mode_systemid_ptr;
-            break;
-#endif
-
-#if MODE_AUTOROTATE_ENABLED == ENABLED
-        case Mode::Number::AUTOROTATE:
-            ret = &mode_autorotate;
-            break;
-#endif
-/*HaRe
-#if MODE_TURTLE_ENABLED == ENABLED
-        case Mode::Number::TURTLE:
-            ret = &mode_turtle;
-            break;
-#endif
-*/
         default:
             break;
     }
@@ -250,156 +109,7 @@ bool Soleon::gcs_mode_enabled(const Mode::Number mode_num)
 // ACRO, STABILIZE, ALTHOLD, LAND, DRIFT and SPORT can always be set successfully but the return state of other flight modes should be checked and the caller should deal with failures appropriately
 bool Soleon::set_mode(Mode::Number mode, ModeReason reason)
 {
-    /*HaRe
-    // update last reason
-    const ModeReason last_reason = _last_reason;
-    _last_reason = reason;
 
-    // return immediately if we are already in the desired mode
-    if (mode == flightmode->mode_number()) {
-        control_mode_reason = reason;
-        // set yaw rate time constant during autopilot startup
-        if (reason == ModeReason::INITIALISED && mode == Mode::Number::STABILIZE) {
-            attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
-        }
-        // make happy noise
-        if (soleon.ap.initialised && (reason != last_reason)) {
-            AP_Notify::events.user_mode_change = 1;
-        }
-        return true;
-    }
-
-    // Check if GCS mode change is disabled via parameter
-    if ((reason == ModeReason::GCS_COMMAND) && !gcs_mode_enabled(mode)) {
-        return false;
-    }
-
-#if MODE_AUTO_ENABLED == ENABLED
-    if (mode == Mode::Number::AUTO_RTL) {
-        // Special case for AUTO RTL, not a true mode, just AUTO in disguise
-        return mode_auto.jump_to_landing_sequence_auto_RTL(reason);
-    }
-#endif
-
-    Mode *new_flightmode = mode_from_mode_num(mode);
-    if (new_flightmode == nullptr) {
-        notify_no_such_mode((uint8_t)mode);
-        return false;
-    }
-
-    bool ignore_checks = !motors->armed();   // allow switching to any mode if disarmed.  We rely on the arming check to perform
-
-#if FRAME_CONFIG == HELI_FRAME
-    // do not allow helis to enter a non-manual throttle mode if the
-    // rotor runup is not complete
-    if (!ignore_checks && !new_flightmode->has_manual_throttle() &&
-        (motors->get_spool_state() == AP_Motors::SpoolState::SPOOLING_UP || motors->get_spool_state() == AP_Motors::SpoolState::SPOOLING_DOWN)) {
-        #if MODE_AUTOROTATE_ENABLED == ENABLED
-            //if the mode being exited is the autorotation mode allow mode change despite rotor not being at
-            //full speed.  This will reduce altitude loss on bail-outs back to non-manual throttle modes
-            bool in_autorotation_check = (flightmode != &mode_autorotate || new_flightmode != &mode_autorotate);
-        #else
-            bool in_autorotation_check = false;
-        #endif
-
-        if (!in_autorotation_check) {
-            mode_change_failed(new_flightmode, "runup not complete");
-            return false;
-        }
-    }
-#endif
-
-#if FRAME_CONFIG != HELI_FRAME
-    // ensure vehicle doesn't leap off the ground if a user switches
-    // into a manual throttle mode from a non-manual-throttle mode
-    // (e.g. user arms in guided, raises throttle to 1300 (not enough to
-    // trigger auto takeoff), then switches into manual):
-    bool user_throttle = new_flightmode->has_manual_throttle();
-#if MODE_DRIFT_ENABLED == ENABLED
-    if (new_flightmode == &mode_drift) {
-        user_throttle = true;
-    }
-#endif
-    if (!ignore_checks &&
-        ap.land_complete &&
-        user_throttle &&
-        !soleon.flightmode->has_manual_throttle() &&
-        new_flightmode->get_pilot_desired_throttle() > soleon.get_non_takeoff_throttle()) {
-        mode_change_failed(new_flightmode, "throttle too high");
-        return false;
-    }
-#endif
-
-    if (!ignore_checks &&
-        new_flightmode->requires_GPS() &&
-        !soleon.position_ok()) {
-        mode_change_failed(new_flightmode, "requires position");
-        return false;
-    }
-
-    // check for valid altitude if old mode did not require it but new one does
-    // we only want to stop changing modes if it could make things worse
-    if (!ignore_checks &&
-        !soleon.ekf_alt_ok() &&
-        flightmode->has_manual_throttle() &&
-        !new_flightmode->has_manual_throttle()) {
-        mode_change_failed(new_flightmode, "need alt estimate");
-        return false;
-    }
-
-    if (!new_flightmode->init(ignore_checks)) {
-        mode_change_failed(new_flightmode, "init failed");
-        return false;
-    }
-
-    // perform any cleanup required by previous flight mode
-    exit_mode(flightmode, new_flightmode);
-
-    // store previous flight mode (only used by tradeheli's autorotation)
-    prev_control_mode = flightmode->mode_number();
-
-    // update flight mode
-    flightmode = new_flightmode;
-    control_mode_reason = reason;
-    logger.Write_Mode((uint8_t)flightmode->mode_number(), reason);
-    gcs().send_message(MSG_HEARTBEAT);
-
-
-#if HAL_ADSB_ENABLED
-    adsb.set_is_auto_mode((mode == Mode::Number::AUTO) || (mode == Mode::Number::RTL) || (mode == Mode::Number::GUIDED));
-#endif
-
-
-#if AP_FENCE_ENABLED
-    // pilot requested flight mode change during a fence breach indicates pilot is attempting to manually recover
-    // this flight mode change could be automatic (i.e. fence, battery, GPS or GCS failsafe)
-    // but it should be harmless to disable the fence temporarily in these situations as well
-    fence.manual_recovery_start();
-#endif
-
-#if AP_CAMERA_ENABLED
-    camera.set_is_auto_mode(flightmode->mode_number() == Mode::Number::AUTO);
-#endif
-
-    // set rate shaping time constants
-#if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
-    attitude_control->set_roll_pitch_rate_tc(g2.command_model_acro_rp.get_rate_tc());
-#endif
-    attitude_control->set_yaw_rate_tc(g2.command_model_pilot.get_rate_tc());
-#if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
-    if (mode== Mode::Number::ACRO || mode== Mode::Number::DRIFT) {
-        attitude_control->set_yaw_rate_tc(g2.command_model_acro_y.get_rate_tc());
-    }
-#endif
-
-    // update notify object
-    notify_flight_mode();
-
-    // make happy noise
-    if (soleon.ap.initialised) {
-        AP_Notify::events.user_mode_change = 1;
-    }
-*/
     // return success
     return true;
 }
@@ -429,12 +139,6 @@ void Soleon::update_flight_mode()
 void Soleon::exit_mode(Mode *&old_flightmode,
                        Mode *&new_flightmode)
 {
-    /*HaRe
-    // smooth throttle transition when switching from manual to automatic flight modes
-    if (old_flightmode->has_manual_throttle() && !new_flightmode->has_manual_throttle() && motors->armed() && !ap.land_complete) {
-        // this assumes all manual flight modes use get_pilot_desired_throttle to translate pilot input to output throttle
-        set_accel_throttle_I_from_pilot_throttle();
-    }*/
 
     // cancel any takeoffs in progress
     old_flightmode->takeoff_stop();
@@ -464,11 +168,6 @@ void Soleon::exit_mode(Mode *&old_flightmode,
 
 // notify_flight_mode - sets notify object based on current flight mode.  Only used for OreoLED notify device
 void Soleon::notify_flight_mode() {
-    /*HaRe
-    AP_Notify::flags.autopilot_mode = flightmode->is_autopilot();
-    AP_Notify::flags.flight_mode = (uint8_t)flightmode->mode_number();
-    notify.set_flight_mode_str(flightmode->name4());
-    */
 }
 
 // get_pilot_desired_angle - transform pilot's roll or pitch input into a desired lean angle
@@ -515,8 +214,7 @@ Vector2f Mode::get_pilot_desired_velocity(float vel_max) const
     if (vel.is_zero()) {
         return vel;
     }
- //HaRe   soleon.rotate_body_frame_to_NE(vel.x, vel.y);
-
+ 
     // Transform square input range to circular output
     // vel_scaler is the vector to the edge of the +- 1.0 square in the direction of the current input
     Vector2f vel_scaler = vel / MAX(fabsf(vel.x), fabsf(vel.y));
@@ -554,24 +252,12 @@ bool Mode::is_disarmed_or_landed() const
 
 void Mode::zero_throttle_and_relax_ac(bool spool_up)
 {
-    /*HaRe
-    if (spool_up) {
-        motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
-    } else {
-        motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::GROUND_IDLE);
-    }
-    attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(0.0f, 0.0f, 0.0f);
-    attitude_control->set_throttle_out(0.0f, false, soleon.g.throttle_filt);
-    */
+
 }
 
 void Mode::zero_throttle_and_hold_attitude()
 {
-    /*HaRe
-    // run attitude controller
-    attitude_control->input_rate_bf_roll_pitch_yaw(0.0f, 0.0f, 0.0f);
-    attitude_control->set_throttle_out(0.0f, false, soleon.g.throttle_filt);
-    */
+
 }
 
 // handle situations where the vehicle is on the ground waiting for takeoff
@@ -582,38 +268,7 @@ void Mode::zero_throttle_and_hold_attitude()
 // ultimately it forces the motor interlock to be obeyed in auto and guided modes when on the ground.
 void Mode::make_safe_ground_handling(bool force_throttle_unlimited)
 {
-    /*HaRe
-    if (force_throttle_unlimited) {
-        // keep rotors turning 
-        motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
-    } else {
-        // spool down to ground idle
-        motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::GROUND_IDLE);
-    }
 
-    // aircraft is landed, integrator terms must be reset regardless of spool state
-    attitude_control->reset_rate_controller_I_terms_smoothly();
- 
-    switch (motors->get_spool_state()) {
-    case AP_Motors::SpoolState::SHUT_DOWN:
-    case AP_Motors::SpoolState::GROUND_IDLE:
-        // reset yaw targets and rates during idle states
-        attitude_control->reset_yaw_target_and_rate();
-        break;
-    case AP_Motors::SpoolState::SPOOLING_UP:
-    case AP_Motors::SpoolState::THROTTLE_UNLIMITED:
-    case AP_Motors::SpoolState::SPOOLING_DOWN:
-        // while transitioning though active states continue to operate normally
-        break;
-    }
-
-    pos_control->relax_velocity_controller_xy();
-    pos_control->update_xy_controller();
-    pos_control->relax_z_controller(0.0f);   // forces throttle output to decay to zero
-    pos_control->update_z_controller();
-    // we may need to move this out
-    attitude_control->input_euler_angle_roll_pitch_euler_rate_yaw(0.0f, 0.0f, 0.0f);
-    */
 }
 
 /*
@@ -702,104 +357,7 @@ void Mode::land_run_vertical_control(bool pause_descent)
 
 void Mode::land_run_horizontal_control()
 {
-    /*HaRe
-    Vector2f vel_correction;
 
-    // relax loiter target if we might be landed
-    if (soleon.ap.land_complete_maybe) {
-        pos_control->soften_for_landing_xy();
-    }
-
-    // process pilot inputs
-    if (!soleon.failsafe.radio) {
-        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && soleon.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
-            AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
-            // exit land if throttle is high
-            if (!set_mode(Mode::Number::LOITER, ModeReason::THROTTLE_LAND_ESCAPE)) {
-                set_mode(Mode::Number::ALT_HOLD, ModeReason::THROTTLE_LAND_ESCAPE);
-            }
-        }
-
-        if (g.land_repositioning) {
-            // apply SIMPLE mode transform to pilot inputs
-            update_simple_mode();
-
-            // convert pilot input to reposition velocity
-            // use half maximum acceleration as the maximum velocity to ensure aircraft will
-            // stop from full reposition speed in less than 1 second.
-            const float max_pilot_vel = wp_nav->get_wp_acceleration() * 0.5;
-            vel_correction = get_pilot_desired_velocity(max_pilot_vel);
-
-            // record if pilot has overridden roll or pitch
-            if (!vel_correction.is_zero()) {
-                if (!soleon.ap.land_repo_active) {
-                    AP::logger().Write_Event(LogEvent::LAND_REPO_ACTIVE);
-                }
-                soleon.ap.land_repo_active = true;
-#if AC_PRECLAND_ENABLED
-            } else {
-                // no override right now, check if we should allow precland
-                if (soleon.precland.allow_precland_after_reposition()) {
-                    soleon.ap.land_repo_active = false;
-                }
-#endif
-            }
-        }
-    }
-
-    // this variable will be updated if prec land target is in sight and pilot isn't trying to reposition the vehicle
-    soleon.ap.prec_land_active = false;
-#if AC_PRECLAND_ENABLED
-    soleon.ap.prec_land_active = !soleon.ap.land_repo_active && soleon.precland.target_acquired();
-    // run precision landing
-    if (soleon.ap.prec_land_active) {
-        Vector2f target_pos, target_vel;
-        if (!soleon.precland.get_target_position_cm(target_pos)) {
-            target_pos = inertial_nav.get_position_xy_cm();
-        }
-         // get the velocity of the target
-        soleon.precland.get_target_velocity_cms(inertial_nav.get_velocity_xy_cms(), target_vel);
-
-        Vector2f zero;
-        Vector2p landing_pos = target_pos.topostype();
-        // target vel will remain zero if landing target is stationary
-        pos_control->input_pos_vel_accel_xy(landing_pos, target_vel, zero);
-    }
-#endif
-
-    if (!soleon.ap.prec_land_active) {
-        Vector2f accel;
-        pos_control->input_vel_accel_xy(vel_correction, accel);
-    }
-
-    // run pos controller
-    pos_control->update_xy_controller();
-    Vector3f thrust_vector = pos_control->get_thrust_vector();
-
-    if (g2.wp_navalt_min > 0) {
-        // user has requested an altitude below which navigation
-        // attitude is limited. This is used to prevent commanded roll
-        // over on landing, which particularly affects helicopters if
-        // there is any position estimate drift after touchdown. We
-        // limit attitude to 7 degrees below this limit and linearly
-        // interpolate for 1m above that
-        const float attitude_limit_cd = linear_interpolate(700, soleon.aparm.angle_max, get_alt_above_ground_cm(),
-                                                     g2.wp_navalt_min*100U, (g2.wp_navalt_min+1)*100U);
-        const float thrust_vector_max = sinf(radians(attitude_limit_cd * 0.01f)) * GRAVITY_MSS * 100.0f;
-        const float thrust_vector_mag = thrust_vector.xy().length();
-        if (thrust_vector_mag > thrust_vector_max) {
-            float ratio = thrust_vector_max / thrust_vector_mag;
-            thrust_vector.x *= ratio;
-            thrust_vector.y *= ratio;
-
-            // tell position controller we are applying an external limit
-            pos_control->set_externally_limited_xy();
-        }
-    }
-
-    // call attitude controller
-    attitude_control->input_thrust_vector_heading(thrust_vector, auto_yaw.get_heading());
-    */
 
 }
 
@@ -822,103 +380,6 @@ void Mode::land_run_normal_or_precland(bool pause_descent)
 #endif
 }
 
-
-#if AC_PRECLAND_ENABLED
-/*HaRe
-// Go towards a position commanded by prec land state machine in order to retry landing
-// The passed in location is expected to be NED and in m
-void Mode::precland_retry_position(const Vector3f &retry_pos)
-{
-    
-    if (!soleon.failsafe.radio) {
-        if ((g.throttle_behavior & THR_BEHAVE_HIGH_THROTTLE_CANCELS_LAND) != 0 && soleon.rc_throttle_control_in_filter.get() > LAND_CANCEL_TRIGGER_THR){
-            AP::logger().Write_Event(LogEvent::LAND_CANCELLED_BY_PILOT);
-            // exit land if throttle is high
-            if (!set_mode(Mode::Number::LOITER, ModeReason::THROTTLE_LAND_ESCAPE)) {
-                set_mode(Mode::Number::ALT_HOLD, ModeReason::THROTTLE_LAND_ESCAPE);
-            }
-        }
-
-        // allow user to take control during repositioning. Note: copied from land_run_horizontal_control()
-        // To-Do: this code exists at several different places in slightly different forms and that should be fixed
-        if (g.land_repositioning) {
-            float target_roll = 0.0f;
-            float target_pitch = 0.0f;
-            // convert pilot input to lean angles
-            get_pilot_desired_lean_angles(target_roll, target_pitch, loiter_nav->get_angle_max_cd(), attitude_control->get_althold_lean_angle_max_cd());
-
-            // record if pilot has overridden roll or pitch
-            if (!is_zero(target_roll) || !is_zero(target_pitch)) {
-                if (!soleon.ap.land_repo_active) {
-                    AP::logger().Write_Event(LogEvent::LAND_REPO_ACTIVE);
-                }
-                // this flag will be checked by prec land state machine later and any further landing retires will be cancelled
-                soleon.ap.land_repo_active = true;
-            }
-        }
-    }
-
-    Vector3p retry_pos_NEU{retry_pos.x, retry_pos.y, retry_pos.z * -1.0f};
-    // pos controller expects input in NEU cm's
-    retry_pos_NEU = retry_pos_NEU * 100.0f;
-    pos_control->input_pos_xyz(retry_pos_NEU, 0.0f, 1000.0f);
-
-    // run position controllers
-    pos_control->update_xy_controller();
-    pos_control->update_z_controller();
-
-    // call attitude controller
-    attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
-    
-
-}  */
-
-/*
-// Run precland statemachine. This function should be called from any mode that wants to do precision landing.
-// This handles everything from prec landing, to prec landing failures, to retries and failsafe measures
-void Mode::precland_run()
-{
-    // if user is taking control, we will not run the statemachine, and simply land (may or may not be on target)
-    if (!soleon.ap.land_repo_active) {
-        // This will get updated later to a retry pos if needed
-        Vector3f retry_pos;
-
-        switch (soleon.precland_statemachine.update(retry_pos)) {
-        case AC_PrecLand_StateMachine::Status::RETRYING:
-            // we want to retry landing by going to another position
-            precland_retry_position(retry_pos);
-            break;
-
-        case AC_PrecLand_StateMachine::Status::FAILSAFE: {
-            // we have hit a failsafe. Failsafe can only mean two things, we either want to stop permanently till user takes over or land
-            switch (soleon.precland_statemachine.get_failsafe_actions()) {
-            case AC_PrecLand_StateMachine::FailSafeAction::DESCEND:
-                // descend normally, prec land target is definitely not in sight
-                land_run_horiz_and_vert_control();
-                break;
-            case AC_PrecLand_StateMachine::FailSafeAction::HOLD_POS:
-                // sending "true" in this argument will stop the descend
-                land_run_horiz_and_vert_control(true);
-                break;
-            }
-            break;
-        }
-        case AC_PrecLand_StateMachine::Status::ERROR:
-            // should never happen, is certainly a bug. Report then descend
-            INTERNAL_ERROR(AP_InternalError::error_t::flow_of_control);
-            FALLTHROUGH;
-        case AC_PrecLand_StateMachine::Status::DESCEND:
-            // run land controller. This will descend towards the target if prec land target is in sight
-            // else it will just descend vertically
-            land_run_horiz_and_vert_control();
-            break;
-        }
-    } else {
-        // just land, since user has taken over controls, it does not make sense to run any retries or failsafe measures
-        land_run_horiz_and_vert_control();
-    }
-} */
-#endif
 
 
 float Mode::throttle_hover() const
@@ -1036,7 +497,6 @@ float Mode::get_pilot_desired_yaw_rate(float yaw_in)
     }
 
     // convert pilot input to the desired yaw rate
-    //HaRereturn g2.command_model_pilot.get_rate() * 100.0 * input_expo(yaw_in, g2.command_model_pilot.get_expo());
     return 0;
 }
 
@@ -1045,14 +505,12 @@ float Mode::get_pilot_desired_yaw_rate(float yaw_in)
 // class.
 float Mode::get_pilot_desired_climb_rate(float throttle_control)
 {
-//HaRe    return soleon.get_pilot_desired_climb_rate(throttle_control);
-return 0.0; //-- HaRe
+return 0.0; 
 }
 
 float Mode::get_non_takeoff_throttle()
 {
- //HaRe       return soleon.get_non_takeoff_throttle();
- return 0.0; //-- HaRe
+ return 0.0; 
 }
 
 void Mode::update_simple_mode(void) {
@@ -1066,7 +524,7 @@ bool Mode::set_mode(Mode::Number mode, ModeReason reason)
 
 void Mode::set_land_complete(bool b)
 {
- //HaRe   return soleon.set_land_complete(b);
+ 
 }
 
 GCS_Soleon &Mode::gcs()
@@ -1076,6 +534,6 @@ GCS_Soleon &Mode::gcs()
 
 uint16_t Mode::get_pilot_speed_dn()
 {
-//HaRe    return soleon.get_pilot_speed_dn();
+
 return 0;
 }

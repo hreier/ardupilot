@@ -121,15 +121,6 @@ void Mode::AutoYaw::set_fixed_yaw(float angle_deg, float turn_rate_ds, int8_t di
         }
     }
 
-    /*HaRe
-    // get turn speed
-    if (!is_positive(turn_rate_ds)) {
-        // default to default slew rate
-        _fixed_yaw_slewrate_cds = soleon.attitude_control->get_slew_yaw_max_degs() * 100.0;
-    } else {
-        _fixed_yaw_slewrate_cds = MIN(soleon.attitude_control->get_slew_yaw_max_degs(), turn_rate_ds) * 100.0;
-    }
-    */
 
     // set yaw mode
     set_mode(Mode::FIXED);
@@ -258,20 +249,9 @@ float Mode::AutoYaw::yaw_cd()
         break;
     }
 
-    /*HaRe
-    case Mode::RATE:
-    case Mode::WEATHERVANE:
-    case Mode::PILOT_RATE:
-        _yaw_angle_cd = soleon.attitude_control->get_att_target_euler_cd().z;
-        break;
-    */
+
     case Mode::LOOK_AT_NEXT_WP:
     default:
-        /*HaRe
-        // point towards next waypoint.
-        // we don't use wp_bearing because we don't want the soleon to turn too much during flight
-        _yaw_angle_cd = soleon.pos_control->get_yaw_cd();
-        */
     break;
     }
     
@@ -315,18 +295,7 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
 {
     // process pilot's yaw input
     _pilot_yaw_rate_cds = 0.0;
-    /*HaRe
-    if (!soleon.failsafe.radio && soleon.flightmode->use_pilot_yaw()) {
-        // get pilot's desired yaw rate
-        _pilot_yaw_rate_cds = soleon.flightmode->get_pilot_desired_yaw_rate(soleon.channel_yaw->norm_input_dz());
-        if (!is_zero(_pilot_yaw_rate_cds)) {
-            auto_yaw.set_mode(AutoYaw::Mode::PILOT_RATE);
-        }
-    } else if (auto_yaw.mode() == AutoYaw::Mode::PILOT_RATE) {
-        // RC failsafe, or disabled make sure not in pilot control
-        auto_yaw.set_mode(AutoYaw::Mode::HOLD);
-    }
-    */
+
 
 #if WEATHERVANE_ENABLED == ENABLED
     update_weathervane(_pilot_yaw_rate_cds);
@@ -362,31 +331,6 @@ AC_AttitudeControl::HeadingCommand Mode::AutoYaw::get_heading()
 #if WEATHERVANE_ENABLED == ENABLED
 void Mode::AutoYaw::update_weathervane(const int16_t pilot_yaw_cds)
 {
-    /*HaRe
-    if (!soleon.flightmode->allows_weathervaning()) {
-        return;
-    }
 
-    float yaw_rate_cds;
-    if (soleon.g2.weathervane.get_yaw_out(yaw_rate_cds, pilot_yaw_cds, soleon.flightmode->get_alt_above_ground_cm()*0.01,
-                                                                       soleon.pos_control->get_roll_cd()-soleon.attitude_control->get_roll_trim_cd(),
-                                                                       soleon.pos_control->get_pitch_cd(),
-                                                                       soleon.flightmode->is_taking_off(),
-                                                                       soleon.flightmode->is_landing())) {
-        set_mode(Mode::WEATHERVANE);
-        _yaw_rate_cds = yaw_rate_cds;
-        return;
-    }
-
-    // if the weathervane controller has previously been activated we need to ensure we return control back to what was previously set
-    if (mode() == Mode::WEATHERVANE) {
-        _yaw_rate_cds = 0.0;
-        if (_last_mode == Mode::HOLD) {
-            set_mode_to_default(false);
-        } else {
-            set_mode(_last_mode);
-        }
-    }
-    */
 }
 #endif // WEATHERVANE_ENABLED == ENABLED

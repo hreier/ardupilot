@@ -270,7 +270,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // Weathervane - allow vehicle to yaw into wind
 #ifndef WEATHERVANE_ENABLED
-//HaRe# define WEATHERVANE_ENABLED ENABLED
 # define WEATHERVANE_ENABLED DISABLED
 #endif
 
@@ -278,22 +277,8 @@
 
 //////////////////////////////////////////////////////////////////////////////
 // Autorotate - autonomous auto-rotation - helicopters only
-/*HaRe
-#ifndef MODE_AUTOROTATE_ENABLED
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
-    #if FRAME_CONFIG == HELI_FRAME
-        #ifndef MODE_AUTOROTATE_ENABLED
-        # define MODE_AUTOROTATE_ENABLED ENABLED
-        #endif
-    #else
-        # define MODE_AUTOROTATE_ENABLED DISABLED
-    #endif
-#else
-    # define MODE_AUTOROTATE_ENABLED DISABLED
-#endif
-#endif
-*/
-# define MODE_AUTOROTATE_ENABLED DISABLED   //-- HaRe
+# define MODE_AUTOROTATE_ENABLED DISABLED 
+
 //////////////////////////////////////////////////////////////////////////////
 // RADIO CONFIGURATION
 //////////////////////////////////////////////////////////////////////////////
@@ -594,11 +579,7 @@
   #error SmartRTL requires ModeRTL which is disabled
 #endif
 
-/* HaRe
-#if HAL_ADSB_ENABLED && !MODE_GUIDED_ENABLED
-  #error ADSB requires ModeGuided which is disabled
-#endif
-*/
+
 #if MODE_FOLLOW_ENABLED && !MODE_GUIDED_ENABLED
   #error Follow requires ModeGuided which is disabled
 #endif

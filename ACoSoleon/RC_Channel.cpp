@@ -29,12 +29,7 @@ void RC_Channel_Soleon::mode_switch_changed(modeswitch_pos_t new_pos)
         !rc().find_channel_for_option(AUX_FUNC::SUPERSIMPLE_MODE)) {
         // if none of the Aux Switches are set to Simple or Super Simple Mode then
         // set Simple Mode using stored parameters from EEPROM
-        /*HaRe
-        if (BIT_IS_SET(soleon.g.super_simple, new_pos)) {
-            soleon.set_simple_mode(Copter::SimpleMode::SUPERSIMPLE);
-        } else {
-            soleon.set_simple_mode(BIT_IS_SET(soleon.g.simple_modes, new_pos) ? Copter::SimpleMode::SIMPLE : Copter::SimpleMode::NONE);
-        }*/
+
     }
 }
 
@@ -141,22 +136,7 @@ void RC_Channel_Soleon::init_aux_function(const aux_func_t ch_option, const AuxS
 void RC_Channel_Soleon::do_aux_function_change_mode(const Mode::Number mode,
                                                     const AuxSwitchPos ch_flag)
 { 
-    /*HaRe
-    switch(ch_flag) {
-    case AuxSwitchPos::HIGH: {
-        // engage mode (if not possible we remain in current flight mode)
-        soleon.set_mode(mode, ModeReason::RC_COMMAND);
-        break;
-    }
-    default:
-       
-        // return to flight mode switch's flight mode if we are currently
-        // in this mode
-        if (soleon.flightmode->mode_number() == mode) {
-            rc().reset_mode_switch();
-       
-    } 
-    }*/
+
 }
 
 // do_aux_function - implement the function invoked by auxiliary switches
@@ -170,28 +150,7 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
             }
             break;
 
-        /*HaRe
-        case AUX_FUNC::SIMPLE_MODE:
-            // low = simple mode off, middle or high position turns simple mode on
-            soleon.set_simple_mode((ch_flag == AuxSwitchPos::LOW) ? Copter::SimpleMode::NONE : Copter::SimpleMode::SIMPLE);
-            break; 
 
-        case AUX_FUNC::SUPERSIMPLE_MODE: {
-            Copter::SimpleMode newmode = Copter::SimpleMode::NONE;
-            switch (ch_flag) {
-            case AuxSwitchPos::LOW:
-                break;
-            case AuxSwitchPos::MIDDLE:
-                newmode = Copter::SimpleMode::SIMPLE;
-                break;
-            case AuxSwitchPos::HIGH:
-                newmode = Copter::SimpleMode::SUPERSIMPLE;
-                break;
-            }
-            soleon.set_simple_mode(newmode);
-            break;
-        
-        }*/
 
         case AUX_FUNC::RTL:
 #if MODE_RTL_ENABLED == ENABLED
@@ -201,7 +160,6 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
 
         case AUX_FUNC::SAVE_TRIM:
             if ((ch_flag == AuxSwitchPos::HIGH) &&
-            //HaRe    (soleon.flightmode->allows_save_trim()) &&
                 (soleon.channel_throttle->get_control_in() == 0)) {
                 soleon.save_trim();
             }
@@ -351,17 +309,6 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
-        /*HaRe
-        case AUX_FUNC::ATTCON_FEEDFWD:
-            // enable or disable feed forward
-            soleon.attitude_control->bf_feedforward(ch_flag == AuxSwitchPos::HIGH);
-            break;
-
-        case AUX_FUNC::ATTCON_ACCEL_LIM:
-            // enable or disable accel limiting by restoring defaults
-            soleon.attitude_control->accel_limiting(ch_flag == AuxSwitchPos::HIGH);
-            break;
-        */
 
         case AUX_FUNC::MOTOR_INTERLOCK:
 #if FRAME_CONFIG == HELI_FRAME
@@ -560,19 +507,6 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
         }
 
-        /*HaRecase AUX_FUNC::SURFACE_TRACKING:
-            switch (ch_flag) {
-            case AuxSwitchPos::LOW:
-                soleon.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::GROUND);
-                break;
-            case AuxSwitchPos::MIDDLE:
-                soleon.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::NONE);
-                break;
-            case AuxSwitchPos::HIGH:
-                soleon.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::CEILING);
-                break;
-            }
-            break; */
 
         case AUX_FUNC::ZIGZAG_Auto:
 #if MODE_ZIGZAG_ENABLED == ENABLED
@@ -606,27 +540,6 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
-/*HaRe
-        case AUX_FUNC::TURTLE:
-#if MODE_TURTLE_ENABLED == ENABLED
-            do_aux_function_change_mode(Mode::Number::TURTLE, ch_flag);
-#endif
-            break;
-
-        case AUX_FUNC::SIMPLE_HEADING_RESET:
-            if (ch_flag == AuxSwitchPos::HIGH) {
-                soleon.init_simple_bearing();
-                gcs().send_text(MAV_SEVERITY_INFO, "Simple heading reset");
-            }
-            break;
-
-        case AUX_FUNC::ARMDISARM_AIRMODE:
-            RC_Channel::do_aux_function_armdisarm(ch_flag);
-            if (soleon.arming.is_armed()) {
-                soleon.ap.armed_with_airmode_switch = true;
-            }
-            break;
-*/
 
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
         case AUX_FUNC::CUSTOM_CONTROLLER:
@@ -709,12 +622,6 @@ void Soleon::auto_trim_cancel()
 void Soleon::auto_trim()
 {
     if (auto_trim_counter > 0) {
-        /*HaRe
-        if (soleon.flightmode != &soleon.mode_stabilize ||
-            !soleon.motors->armed()) {
-            auto_trim_cancel();
-            return;
-        }*/
 
         // flash the leds
         AP_Notify::flags.save_trim = true;

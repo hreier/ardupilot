@@ -688,8 +688,6 @@ public:
     AC_CommandModel command_model_acro_y;
 #endif
 
-    //HaRe AC_CommandModel command_model_pilot;
-
 #if MODE_ACRO_ENABLED == ENABLED
     AP_Int8 acro_options;
 #endif

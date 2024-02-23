@@ -51,33 +51,16 @@ void Soleon::init_ardupilot()
     // setup telem slots with serial ports
     gcs().setup_uarts();
 
-/*HaRe
-#if OSD_ENABLED == ENABLED
-    osd.init();
-#endif
-*/
+
 
 #if LOGGING_ENABLED == ENABLED
     log_init();
-#endif
-
-    // update motor interlock state
-  //HaRe  update_using_interlock();
-
-#if FRAME_CONFIG == HELI_FRAME
-    // trad heli specific initialisation
-    heli_init();
-#endif
-#if FRAME_CONFIG == HELI_FRAME
-    input_manager.set_loop_rate(scheduler.get_loop_rate_hz());
 #endif
 
     init_rc_in();               // sets up rc channels from radio
 
     // initialise surface to be tracked in SurfaceTracking
     // must be before rc init to not override initial switch position
-//HaRe    surface_tracking.init((SurfaceTracking::Surface)soleon.g2.surftrak_mode.get());
-
     // allocate the motors class
     allocate_motors();
 
@@ -87,9 +70,6 @@ void Soleon::init_ardupilot()
 
     // sets up motors and output to escs
     init_rc_out();
-
-    /*HaRe// check if we should enter esc calibration mode
-    esc_calibration_startup_check();*/
 
     // motors initialised so parameters can be sent
     ap.initialised_params = true;
@@ -114,12 +94,6 @@ void Soleon::init_ardupilot()
 #if AP_AIRSPEED_ENABLED
     airspeed.set_log_bit(MASK_LOG_IMU);
 #endif
-
-#if AC_OAPATHPLANNER_ENABLED == ENABLED
-    g2.oa.init();
-#endif
-
-    //HaRe attitude_control->parameter_sanity_check();
 
 #if AP_OPTICALFLOW_ENABLED
     // initialise optical flow sensor
@@ -195,10 +169,6 @@ void Soleon::init_ardupilot()
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
     custom_control.init();
 #endif
-
-    // set landed flags
-//HaRe    set_land_complete(true);
-//HaRe    set_land_complete_maybe(true);
 
     // enable CPU failsafe
     failsafe_enable();
@@ -323,36 +293,7 @@ bool Soleon::ekf_alt_ok() const
 // update_auto_armed - update status of auto_armed flag
 void Soleon::update_auto_armed()
 {
-    /*HaRe
-    // disarm checks
-    if(ap.auto_armed){
-        // if motors are disarmed, auto_armed should also be false
-        if(!motors->armed()) {
-            set_auto_armed(false);
-            return;
-        }
-        // if in stabilize or acro flight mode and throttle is zero, auto-armed should become false
-        if(flightmode->has_manual_throttle() && ap.throttle_zero && !failsafe.radio) {
-            set_auto_armed(false);
-        }
 
-    }else{
-        // arm checks
-        
-        // for tradheli if motors are armed and throttle is above zero and the motor is started, auto_armed should be true
-        if(motors->armed() && ap.using_interlock) {
-            if(!ap.throttle_zero && motors->get_spool_state() == AP_Motors::SpoolState::THROTTLE_UNLIMITED) {
-                set_auto_armed(true);
-            }
-        // if motors are armed and throttle is above zero auto_armed should be true
-        // if motors are armed and we are in throw mode, then auto_armed should be true
-        } else if (motors->armed() && !ap.using_interlock) {
-            if(!ap.throttle_zero || flightmode->mode_number() == Mode::Number::THROW) {
-                set_auto_armed(true);
-            }
-        }
-    }
-    */
 }
 
 /*
@@ -446,82 +387,7 @@ void Soleon::allocate_motors(void)
     if (ahrs_view == nullptr) {
         AP_BoardConfig::allocation_error("AP_AHRS_View");
     }
-    
-/*HaRe
-    const struct AP_Param::GroupInfo *ac_var_info;
 
-#if FRAME_CONFIG != HELI_FRAME
-    if ((AP_Motors::motor_frame_class)g2.frame_class.get() == AP_Motors::MOTOR_FRAME_6DOF_SCRIPTING) {
-#if AP_SCRIPTING_ENABLED
-        attitude_control = new AC_AttitudeControl_Multi_6DoF(*ahrs_view, aparm, *motors);
-        ac_var_info = AC_AttitudeControl_Multi_6DoF::var_info;
-#endif // AP_SCRIPTING_ENABLED
-    } else {
-        attitude_control = new AC_AttitudeControl_Multi(*ahrs_view, aparm, *motors);
-        ac_var_info = AC_AttitudeControl_Multi::var_info;
-    }
-#else
-    attitude_control = new AC_AttitudeControl_Heli(*ahrs_view, aparm, *motors);
-    ac_var_info = AC_AttitudeControl_Heli::var_info;
-#endif
-
-    if (attitude_control == nullptr) {
-        AP_BoardConfig::allocation_error("AttitudeControl");
-    }
-
-    AP_Param::load_object_from_eeprom(attitude_control, ac_var_info);
-        
-    pos_control = new AC_PosControl(*ahrs_view, inertial_nav, *motors, *attitude_control);
-    if (pos_control == nullptr) {
-        AP_BoardConfig::allocation_error("PosControl");
-    }
-    AP_Param::load_object_from_eeprom(pos_control, pos_control->var_info);
-
-#if AC_OAPATHPLANNER_ENABLED == ENABLED
-    wp_nav = new AC_WPNav_OA(inertial_nav, *ahrs_view, *pos_control, *attitude_control);
-#else
-    wp_nav = new AC_WPNav(inertial_nav, *ahrs_view, *pos_control, *attitude_control);
-#endif
-    if (wp_nav == nullptr) {
-        AP_BoardConfig::allocation_error("WPNav");
-    }
-    AP_Param::load_object_from_eeprom(wp_nav, wp_nav->var_info);
-
-    loiter_nav = new AC_Loiter(inertial_nav, *ahrs_view, *pos_control, *attitude_control);
-    if (loiter_nav == nullptr) {
-        AP_BoardConfig::allocation_error("LoiterNav");
-    }
-    AP_Param::load_object_from_eeprom(loiter_nav, loiter_nav->var_info);
-
-#if MODE_CIRCLE_ENABLED == ENABLED
-    circle_nav = new AC_Circle(inertial_nav, *ahrs_view, *pos_control);
-    if (circle_nav == nullptr) {
-        AP_BoardConfig::allocation_error("CircleNav");
-    }
-    AP_Param::load_object_from_eeprom(circle_nav, circle_nav->var_info);
-#endif
-
-    // reload lines from the defaults file that may now be accessible
-    AP_Param::reload_defaults_file(true);
-    
-    // now setup some frame-class specific defaults
-    switch ((AP_Motors::motor_frame_class)g2.frame_class.get()) {
-    case AP_Motors::MOTOR_FRAME_Y6:
-        attitude_control->get_rate_roll_pid().kP().set_default(0.1);
-        attitude_control->get_rate_roll_pid().kD().set_default(0.006);
-        attitude_control->get_rate_pitch_pid().kP().set_default(0.1);
-        attitude_control->get_rate_pitch_pid().kD().set_default(0.006);
-        attitude_control->get_rate_yaw_pid().kP().set_default(0.15);
-        attitude_control->get_rate_yaw_pid().kI().set_default(0.015);
-        break;
-    case AP_Motors::MOTOR_FRAME_TRI:
-        attitude_control->get_rate_yaw_pid().filt_D_hz().set_default(100);
-        break;
-       
-    default:
-        break;
-    }
-*/ 
     // brushed 16kHz defaults to 16kHz pulses
     if (motors->is_brushed_pwm_type()) {
         g.rc_speed.set_default(16000);

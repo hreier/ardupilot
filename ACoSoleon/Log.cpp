@@ -32,66 +32,20 @@ void Soleon::Log_Write_Control_Tuning()
         terr_alt = logger.quiet_nan();
     }
 #endif
-    /*HaRe
-    float des_alt_m = 0.0f;
-    int16_t target_climb_rate_cms = 0;
-    if (!flightmode->has_manual_throttle()) {
-        des_alt_m = pos_control->get_pos_target_z_cm() * 0.01f;
-        target_climb_rate_cms = pos_control->get_vel_target_z_cms();
-    }
 
-    // get surface tracking alts
-    float desired_rangefinder_alt;
-    if (!surface_tracking.get_target_dist_for_logging(desired_rangefinder_alt)) {
-        desired_rangefinder_alt = AP::logger().quiet_nan();
-    }
-
-    struct log_Control_Tuning pkt = {
-        LOG_PACKET_HEADER_INIT(LOG_CONTROL_TUNING_MSG),
-        time_us             : AP_HAL::micros64(),
-        throttle_in         : attitude_control->get_throttle_in(),
-        angle_boost         : attitude_control->angle_boost(),
-        throttle_out        : motors->get_throttle(),
-        throttle_hover      : motors->get_throttle_hover(),
-        desired_alt         : des_alt_m,
-        inav_alt            : inertial_nav.get_position_z_up_cm() * 0.01f,
-        baro_alt            : baro_alt,
-        desired_rangefinder_alt : desired_rangefinder_alt,
-        rangefinder_alt     : surface_tracking.get_dist_for_logging(),
-        terr_alt            : terr_alt,
-        target_climb_rate   : target_climb_rate_cms,
-        climb_rate          : int16_t(inertial_nav.get_velocity_z_up_cms()) // float -> int16_t
-    };
-    logger.WriteBlock(&pkt, sizeof(pkt));
-    */
 }
 
 // Write an attitude packet
 void Soleon::Log_Write_Attitude()
 {
-    /*HaRe
-    Vector3f targets = attitude_control->get_att_target_euler_cd();
-    targets.z = wrap_360_cd(targets.z);
-    ahrs.Write_Attitude(targets);
-    ahrs_view->Write_Rate(*motors, *attitude_control, *pos_control);
-    */
- }
+
+}
 
 // Write PIDS packets
 void Soleon::Log_Write_PIDS()
 {
-   /*HaRe
-   if (should_log(MASK_LOG_PID)) {
-        logger.Write_PID(LOG_PIDR_MSG, attitude_control->get_rate_roll_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDP_MSG, attitude_control->get_rate_pitch_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDY_MSG, attitude_control->get_rate_yaw_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDA_MSG, pos_control->get_accel_z_pid().get_pid_info() );
-        if (should_log(MASK_LOG_NTUN) && (flightmode->requires_GPS() || landing_with_GPS())) {
-            logger.Write_PID(LOG_PIDN_MSG, pos_control->get_vel_xy_pid().get_pid_info_x());
-            logger.Write_PID(LOG_PIDE_MSG, pos_control->get_vel_xy_pid().get_pid_info_y());
-        }
-    }
-    */
+   
+
 }
 
 // Write an EKF and POS packet
@@ -574,7 +528,6 @@ void Soleon::Log_Write_Vehicle_Startup_Messages()
     char frame_and_type_string[30];
     soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
     logger.Write_MessageF("%s", frame_and_type_string);
- //HaRe   logger.Write_Mode((uint8_t)flightmode->mode_number(), control_mode_reason);
     ahrs.Log_Write_Home_And_Origin();
     gps.Write_AP_Logger_Log_Startup_messages();
 }

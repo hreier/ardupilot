@@ -146,7 +146,6 @@ void Soleon::set_throttle_and_failsafe(uint16_t throttle_pwm)
         failsafe.radio_counter++;
         if( failsafe.radio_counter >= FS_COUNTER ) {
             failsafe.radio_counter = FS_COUNTER;  // check to ensure we don't overflow the counter
-     //HaRe       set_failsafe_radio(true);
         }
     }else{
         // we have a good throttle so reduce failsafe counter
@@ -156,7 +155,6 @@ void Soleon::set_throttle_and_failsafe(uint16_t throttle_pwm)
 
             // disengage failsafe after three (nearly) consecutive valid throttle values
             if (failsafe.radio) {
-           //HaRe     set_failsafe_radio(false);
             }
         }
         // pass through throttle

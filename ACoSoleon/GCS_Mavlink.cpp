@@ -29,39 +29,7 @@ MAV_TYPE GCS_Soleon::frame_type() const
 MAV_MODE GCS_MAVLINK_Soleon::base_mode() const
 {
     uint8_t _base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
-    /*HaRe
-    // work out the base_mode. This value is not very useful
-    // for APM, but we calculate it as best we can so a generic
-    // MAVLink enabled ground station can work out something about
-    // what the MAV is up to. The actual bit values are highly
-    // ambiguous for most of the APM flight modes. In practice, you
-    // only get useful information from the custom_mode, which maps to
-    // the APM flight mode and has a well defined meaning in the
-    // ArduPlane documentation
-    switch (soleon.flightmode->mode_number()) {
-    case Mode::Number::AUTO:
-    case Mode::Number::AUTO_RTL:
-    case Mode::Number::RTL:
-    case Mode::Number::LOITER:
-    case Mode::Number::AVOID_ADSB:
-    case Mode::Number::FOLLOW:
-    case Mode::Number::GUIDED:
-    case Mode::Number::CIRCLE:
-    case Mode::Number::POSHOLD:
-    case Mode::Number::BRAKE:
-    case Mode::Number::SMART_RTL:
-        _base_mode |= MAV_MODE_FLAG_GUIDED_ENABLED;
-        // note that MAV_MODE_FLAG_AUTO_ENABLED does not match what
-        // APM does in any mode, as that is defined as "system finds its own goal
-        // positions", which APM does not currently do
-        break;
-    default:
-        break;
-    }
 
-    // all modes except INITIALISING have some form of manual
-    // override if stick mixing is enabled
-    */
     _base_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
 
     // we are armed if we are not initialising
@@ -77,8 +45,6 @@ MAV_MODE GCS_MAVLINK_Soleon::base_mode() const
 
 uint32_t GCS_Soleon::custom_mode() const
 {
-    /*HaRe
-    return (uint32_t)soleon.flightmode->mode_number();*/
     return 0;
 }
 
@@ -99,37 +65,13 @@ MAV_STATE GCS_MAVLINK_Soleon::vehicle_system_status() const
 
 void GCS_MAVLINK_Soleon::send_attitude_target()
 {
-    /*HaRe
-    const Quaternion quat  = soleon.attitude_control->get_attitude_target_quat();
-    const Vector3f ang_vel = soleon.attitude_control->get_attitude_target_ang_vel();
-    const float thrust = soleon.attitude_control->get_throttle_in();
 
-    const float quat_out[4] {quat.q1, quat.q2, quat.q3, quat.q4};
-
-    // Note: When sending out the attitude_target info. we send out all of info. no matter the mavlink typemask
-    // This way we send out the maximum information that can be used by the sending control systems to adapt their generated trajectories
-    const uint16_t typemask = 0;    // Ignore nothing
-
-    mavlink_msg_attitude_target_send(
-        chan,
-        AP_HAL::millis(),       // time since boot (ms)
-        typemask,               // Bitmask that tells the system what control dimensions should be ignored by the vehicle
-        quat_out,               // Attitude quaternion [w, x, y, z] order, zero-rotation is [1, 0, 0, 0], unit-length
-        ang_vel.x,              // roll rate (rad/s)
-        ang_vel.y,              // pitch rate (rad/s)
-        ang_vel.z,              // yaw rate (rad/s)
-        thrust);                // Collective thrust, normalized to 0 .. 1
-        
-    */
 }
 
 void GCS_MAVLINK_Soleon::send_position_target_global_int()
 {
     Location target;
-    /*HaRe
-    if (!soleon.flightmode->get_wp(target)) {
-        return;
-    }*/
+
 
     // convert altitude frame to AMSL (this may use the terrain database)
     if (!target.change_alt_frame(Location::AltFrame::ABSOLUTE)) {
@@ -225,21 +167,6 @@ void GCS_MAVLINK_Soleon::send_position_target_local_ned()
 //int temp;
 void GCS_MAVLINK_Soleon::send_so_status(void) const
 {
-//    if (temp++> 4){
-//        gcs().send_text(MAV_SEVERITY_INFO, "Update Tanklevel = %f", SO::TankSupervision()->get_level());  ///-HaRe debug
-//        temp=0;
-//    }
-    
-    
-    /*mavlink_msg_so_status_send(chan,
-                                AP_HAL::millis(), 
-                                0,                //-- route to groundstation
-                                SO::TankSupervision()->get_level(),
-                                0,
-                                0,
-                                0,
-                                0);*/
-
     mavlink_msg_so_status_send(chan,
                                 AP_HAL::millis(), 
                                 SO::TankSupervision()->_mp_status,                //-- 
@@ -253,23 +180,7 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
 
 void GCS_MAVLINK_Soleon::send_nav_controller_output() const
 {
-    /*HaRe
-    if (!soleon.ap.initialised) {
-        return;
-    }
-    const Vector3f &targets = soleon.attitude_control->get_att_target_euler_cd();
-    const Mode *flightmode = soleon.flightmode;
-    mavlink_msg_nav_controller_output_send(
-        chan,
-        targets.x * 1.0e-2f,
-        targets.y * 1.0e-2f,
-        targets.z * 1.0e-2f,
-        flightmode->wp_bearing() * 1.0e-2f,
-        MIN(flightmode->wp_distance() * 1.0e-2f, UINT16_MAX),
-        soleon.pos_control->get_pos_error_z_cm() * 1.0e-2f,
-        0,
-        flightmode->crosstrack_error() * 1.0e-2f);
-    */
+
 }
 
 float GCS_MAVLINK_Soleon::vfr_hud_airspeed() const
@@ -306,51 +217,7 @@ int16_t GCS_MAVLINK_Soleon::vfr_hud_throttle() const
  */
 void GCS_MAVLINK_Soleon::send_pid_tuning()
 {
-    /*HaRe
-    static const PID_TUNING_AXIS axes[] = {
-        PID_TUNING_ROLL,
-        PID_TUNING_PITCH,
-        PID_TUNING_YAW,
-        PID_TUNING_ACCZ
-    };
-    for (uint8_t i=0; i<ARRAY_SIZE(axes); i++) {
-        if (!(soleon.g.gcs_pid_mask & (1<<(axes[i]-1)))) {
-            continue;
-        }
-        if (!HAVE_PAYLOAD_SPACE(chan, PID_TUNING)) {
-            return;
-        }
-        const AP_PIDInfo *pid_info = nullptr;
-        switch (axes[i]) {
-        case PID_TUNING_ROLL:
-            pid_info = &soleon.attitude_control->get_rate_roll_pid().get_pid_info();
-            break;
-        case PID_TUNING_PITCH:
-            pid_info = &soleon.attitude_control->get_rate_pitch_pid().get_pid_info();
-            break;
-        case PID_TUNING_YAW:
-            pid_info = &soleon.attitude_control->get_rate_yaw_pid().get_pid_info();
-            break;
-        case PID_TUNING_ACCZ:
-            pid_info = &soleon.pos_control->get_accel_z_pid().get_pid_info();
-            break;
-        default:
-            continue;
-        }
-        if (pid_info != nullptr) {
-            mavlink_msg_pid_tuning_send(chan,
-                                        axes[i],
-                                        pid_info->target,
-                                        pid_info->actual,
-                                        pid_info->FF,
-                                        pid_info->P,
-                                        pid_info->I,
-                                        pid_info->D,
-                                        pid_info->slew_rate,
-                                        pid_info->Dmod);
-        }
-    }
-    */
+
 }
 
 // send winch status message
@@ -387,45 +254,8 @@ bool GCS_Soleon::vehicle_initialised() const {
 bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
 {
     switch(id) {
-/*HaRe
-    case MSG_TERRAIN:
-#if AP_TERRAIN_AVAILABLE
-        CHECK_PAYLOAD_SIZE(TERRAIN_REQUEST);
-        soleon.terrain.send_request(chan);
-#endif
-        break;
 
-    case MSG_WIND:
 
-        CHECK_PAYLOAD_SIZE(WIND);
-        send_wind();
-        break;
-
-    case MSG_SERVO_OUT:
-    case MSG_AOA_SSA:
-    case MSG_LANDING:
-        // unused
-        break;*/
-/* HaRe
-    case MSG_ADSB_VEHICLE: {
-
-#if HAL_ADSB_ENABLED
-        CHECK_PAYLOAD_SIZE(ADSB_VEHICLE);
-        soleon.adsb.send_adsb_vehicle(chan);
-#endif
-#if AC_OAPATHPLANNER_ENABLED == ENABLED
-        AP_OADatabase *oadb = AP_OADatabase::get_singleton();
-        if (oadb != nullptr) {
-            CHECK_PAYLOAD_SIZE(ADSB_VEHICLE);
-            uint16_t interval_ms = 0;
-            if (get_ap_message_interval(id, interval_ms)) {
-                oadb->send_adsb_vehicle(chan, interval_ms);
-            }
-        }
-#endif
- 
-        break;
-    }*/
     
     case MSG_POSITION_TARGET_GLOBAL_INT:
     case MSG_TERRAIN:
@@ -641,10 +471,7 @@ const struct GCS_MAVLINK::stream_entries GCS_MAVLINK::all_stream_entries[] = {
 };
 
 MISSION_STATE GCS_MAVLINK_Soleon::mission_state(const class AP_Mission &mission) const
-{/* HaRe MODE_AUTO_ENABLED 
-    if (soleon.mode_auto.paused()) {
-        return MISSION_STATE_PAUSED;
-    }*/
+{
     return GCS_MAVLINK::mission_state(mission);
 }
 
@@ -661,14 +488,7 @@ void GCS_MAVLINK_Soleon::packetReceived(const mavlink_status_t &status,
                                         const mavlink_message_t &msg)
 {
     // we handle these messages here to avoid them being blocked by mavlink routing code
-/* HaRe
-#if HAL_ADSB_ENABLED
-    if (soleon.g2.dev_options.get() & DevOptionADSBMAVLink) {
-        // optional handling of GLOBAL_POSITION_INT as a MAVLink based avoidance source
-        soleon.avoidance_adsb.handle_msg(msg);
-    }
-#endif
-*/
+
 #if MODE_FOLLOW_ENABLED == ENABLED
     // pass message to follow library
     soleon.g2.follow.handle_msg(msg);
@@ -733,7 +553,6 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_do_set_roi(const Location &roi_loc
     if (!roi_loc.check_latlng()) {
         return MAV_RESULT_FAILED;
     }
-   //HaRe soleon.flightmode->auto_yaw.set_roi(roi_loc);
     return MAV_RESULT_ACCEPTED;
 }
 
@@ -830,12 +649,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_mount(const mavlink_command_long_t
 {
     switch (packet.command) {
     case MAV_CMD_DO_MOUNT_CONTROL:
-        /*HaRe
-        // if vehicle has a camera mount but it doesn't do pan control then yaw the entire vehicle instead
-        if ((soleon.camera_mount.get_mount_type() != AP_Mount::Type::None) &&
-            !soleon.camera_mount.has_pan_control()) {
-            soleon.flightmode->auto_yaw.set_yaw_angle_rate((float)packet.param3, 0.0f);
-        }*/
+
         break;
     default:
         break;
@@ -905,120 +719,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
         }
         return MAV_RESULT_ACCEPTED;
 
-/*HaRe
-    case MAV_CMD_CONDITION_YAW:
-        
-        // param1 : target angle [0-360]
-        // param2 : speed during change [deg per second]
-        // param3 : direction (-1:ccw, +1:cw)
-        // param4 : relative offset (1) or absolute angle (0)
-        if ((packet.param1 >= 0.0f)   &&
-            (packet.param1 <= 360.0f) &&
-            (is_zero(packet.param4) || is_equal(packet.param4,1.0f))) {
-            soleon.flightmode->auto_yaw.set_fixed_yaw(
-                packet.param1,
-                packet.param2,
-                (int8_t)packet.param3,
-                is_positive(packet.param4));
-            return MAV_RESULT_ACCEPTED;
-        } 
-        return MAV_RESULT_FAILED;
-        */
-/*HaRe
-    case MAV_CMD_DO_CHANGE_SPEED:
-        // param1 : Speed type (0 or 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
-        // param2 : new speed in m/s
-        // param3 : unused
-        // param4 : unused
-        if (packet.param2 > 0.0f) {
-            if (packet.param1 > 2.9f) { // 3 = speed down
-                if (soleon.flightmode->set_speed_down(packet.param2 * 100.0f)) {
-                    return MAV_RESULT_ACCEPTED;
-                }
-                return MAV_RESULT_FAILED;
-            } else if (packet.param1 > 1.9f) { // 2 = speed up
-                if (soleon.flightmode->set_speed_up(packet.param2 * 100.0f)) {
-                    return MAV_RESULT_ACCEPTED;
-                }
-                return MAV_RESULT_FAILED;
-            } else {
-                if (soleon.flightmode->set_speed_xy(packet.param2 * 100.0f)) {
-                    return MAV_RESULT_ACCEPTED;
-                }
-                return MAV_RESULT_FAILED;
-            }
-        }
-        return MAV_RESULT_FAILED;
 
-#if MODE_AUTO_ENABLED == ENABLED
-    case MAV_CMD_MISSION_START:
-        if (soleon.set_mode(Mode::Number::AUTO, ModeReason::GCS_COMMAND)) {
-            soleon.set_auto_armed(true);
-            if (soleon.mode_auto.mission.state() != AP_Mission::MISSION_RUNNING) {
-                soleon.mode_auto.mission.start_or_resume();
-            }
-            return MAV_RESULT_ACCEPTED;
-        }
-        return MAV_RESULT_FAILED;
-#endif
-
-#if PARACHUTE == ENABLED
-    case MAV_CMD_DO_PARACHUTE:
-        // configure or release parachute
-        switch ((uint16_t)packet.param1) {
-        case PARACHUTE_DISABLE:
-            soleon.parachute.enabled(false);
-            return MAV_RESULT_ACCEPTED;
-        case PARACHUTE_ENABLE:
-            soleon.parachute.enabled(true);
-            return MAV_RESULT_ACCEPTED;
-        case PARACHUTE_RELEASE:
-            // treat as a manual release which performs some additional check of altitude
-            soleon.parachute_manual_release();
-            return MAV_RESULT_ACCEPTED;
-        }
-        return MAV_RESULT_FAILED;
-#endif 
-*/
-/*HaRe
-    case MAV_CMD_DO_MOTOR_TEST:
-        // param1 : motor sequence number (a number from 1 to max number of motors on the vehicle)
-        // param2 : throttle type (0=throttle percentage, 1=PWM, 2=pilot throttle channel pass-through. See MOTOR_TEST_THROTTLE_TYPE enum)
-        // param3 : throttle (range depends upon param2)
-        // param4 : timeout (in seconds)
-        // param5 : num_motors (in sequence)
-        // param6 : motor test order
-        return soleon.mavlink_motor_test_start(*this,
-                                               (uint8_t)packet.param1,
-                                               (uint8_t)packet.param2,
-                                               packet.param3,
-                                               packet.param4,
-                                               (uint8_t)packet.param5);
-
-#if AP_WINCH_ENABLED
-    case MAV_CMD_DO_WINCH:
-        // param1 : winch number (ignored)
-        // param2 : action (0=relax, 1=relative length control, 2=rate control). See WINCH_ACTIONS enum.
-        if (!soleon.g2.winch.enabled()) {
-            return MAV_RESULT_FAILED;
-        }
-        switch ((uint8_t)packet.param2) {
-        case WINCH_RELAXED:
-            soleon.g2.winch.relax();
-            return MAV_RESULT_ACCEPTED;
-        case WINCH_RELATIVE_LENGTH_CONTROL: {
-            soleon.g2.winch.release_length(packet.param3);
-            return MAV_RESULT_ACCEPTED;
-        }
-        case WINCH_RATE_CONTROL:
-            soleon.g2.winch.set_desired_rate(packet.param4);
-            return MAV_RESULT_ACCEPTED;
-        default:
-            break;
-        }
-        return MAV_RESULT_FAILED;
-#endif
-*/
         /* Solo user presses Fly button */
     case MAV_CMD_SOLO_BTN_FLY_CLICK: {
         if (soleon.failsafe.radio) {
@@ -1034,60 +735,9 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
 
     
         /* Solo user holds down Fly button for a couple of seconds */
-    /*HaRe
-    case MAV_CMD_SOLO_BTN_FLY_HOLD: {
-        if (soleon.failsafe.radio) {
-            return MAV_RESULT_ACCEPTED;
-        }
-
-        if (!soleon.motors->armed()) {
-            // if disarmed, arm motors
-            soleon.arming.arm(AP_Arming::Method::MAVLINK);
-        } else if (soleon.ap.land_complete) {
-            // if armed and landed, takeoff
-            if (soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
-                soleon.flightmode->do_user_takeoff(packet.param1*100, true);
-            }
-        } else {
-            // if flying, land
-            soleon.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND);
-        }
-        return MAV_RESULT_ACCEPTED;
-    }*/
-
+    
         /* Solo user presses pause button */
-    /*HaRe
-    case MAV_CMD_SOLO_BTN_PAUSE_CLICK: {
-        if (soleon.failsafe.radio) {
-            return MAV_RESULT_ACCEPTED;
-        }
-
-        if (soleon.motors->armed()) {
-            if (soleon.ap.land_complete) {
-                // if landed, disarm motors
-                soleon.arming.disarm(AP_Arming::Method::SOLOPAUSEWHENLANDED);
-            } else {
-                // assume that shots modes are all done in guided.
-                // NOTE: this may need to change if we add a non-guided shot mode
-                bool shot_mode = (!is_zero(packet.param1) && (soleon.flightmode->mode_number() == Mode::Number::GUIDED || soleon.flightmode->mode_number() == Mode::Number::GUIDED_NOGPS));
-
-                if (!shot_mode) {
-#if MODE_BRAKE_ENABLED == ENABLED
-                    if (soleon.set_mode(Mode::Number::BRAKE, ModeReason::GCS_COMMAND)) {
-                        soleon.mode_brake.timeout_to_loiter_ms(2500);
-                    } else {
-                        soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
-                    }
-#else
-                    soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
-#endif
-                } else {
-                    // SoloLink is expected to handle pause in shots
-                }
-            }
-        }
-        return MAV_RESULT_ACCEPTED;
-    }*/
+ 
 
     default:
         return GCS_MAVLINK::handle_command_long_packet(packet);
@@ -1096,24 +746,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
 
 MAV_RESULT GCS_MAVLINK_Soleon::handle_command_pause_continue(const mavlink_command_int_t &packet)
 {
-    /*HaRe
-    // requested pause
-    if ((uint8_t) packet.param1 == 0) {
-        if (soleon.flightmode->pause()) {
-            return MAV_RESULT_ACCEPTED;
-        }
-        send_text(MAV_SEVERITY_INFO, "Failed to pause");
-        return MAV_RESULT_FAILED;
-    }
 
-    // requested resume
-    if ((uint8_t) packet.param1 == 1) {
-        if (soleon.flightmode->resume()) {
-            return MAV_RESULT_ACCEPTED;
-        }
-        send_text(MAV_SEVERITY_INFO, "Failed to resume");
-        return MAV_RESULT_FAILED;
-    }*/
     return MAV_RESULT_DENIED;
 }
 
@@ -1513,18 +1146,8 @@ void GCS_MAVLINK_Soleon::handleMessage(const mavlink_message_t &msg)
 
 
 MAV_RESULT GCS_MAVLINK_Soleon::handle_flight_termination(const mavlink_command_long_t &packet) {
-#if ADVANCED_FAILSAFE == ENABLED
-    if (GCS_MAVLINK::handle_flight_termination(packet) == MAV_RESULT_ACCEPTED) {
-        return MAV_RESULT_ACCEPTED;
-    }
-#endif
- /*HaRe
-    if (packet.param1 > 0.5f) {
-        soleon.arming.disarm(AP_Arming::Method::TERMINATION);
-        return MAV_RESULT_ACCEPTED;
-    }
 
-    return MAV_RESULT_FAILED;*/
+
     return MAV_RESULT_ACCEPTED; //-HaRe
 }
 
@@ -1558,32 +1181,10 @@ MAV_LANDED_STATE GCS_MAVLINK_Soleon::landed_state() const
     if (soleon.ap.land_complete) {
         return MAV_LANDED_STATE_ON_GROUND;
     }
-    /*HaRe
-    if (soleon.flightmode->is_landing()) {
-        return MAV_LANDED_STATE_LANDING;
-    }
-    if (soleon.flightmode->is_taking_off()) {
-        return MAV_LANDED_STATE_TAKEOFF;
-    }*/
+
     return MAV_LANDED_STATE_IN_AIR;
 }
-/*HaRe
-void GCS_MAVLINK_Soleon::send_wind() const
-{
-    Vector3f airspeed_vec_bf;
-    if (!AP::ahrs().airspeed_vector_true(airspeed_vec_bf)) {
-        // if we don't have an airspeed estimate then we don't have a
-        // valid wind estimate on soleons
-        return;
-    }
-    const Vector3f wind = AP::ahrs().wind_estimate();
-    mavlink_msg_wind_send(
-        chan,
-        degrees(atan2f(-wind.y, -wind.x)),
-        wind.length(),
-        wind.z);
-}
-*/
+
 
 #if HAL_HIGH_LATENCY2_ENABLED
 int16_t GCS_MAVLINK_Soleon::high_latency_target_altitude() const
@@ -1602,24 +1203,13 @@ int16_t GCS_MAVLINK_Soleon::high_latency_target_altitude() const
 
 uint8_t GCS_MAVLINK_Soleon::high_latency_tgt_heading() const
 {
-    /*HaRe
-    if (soleon.ap.initialised) {
-        // return units are deg/2
-        const Mode *flightmode = soleon.flightmode;
-        // need to convert -18000->18000 to 0->360/2
-        return wrap_360_cd(flightmode->wp_bearing()) / 200;
-    }*/
+
     return 0;     
 }
     
 uint16_t GCS_MAVLINK_Soleon::high_latency_tgt_dist() const
 {
-    /*HaRe
-    if (soleon.ap.initialised) {
-        // return units are dm
-        const Mode *flightmode = soleon.flightmode;
-        return MIN(flightmode->wp_distance() * 1.0e-2, UINT16_MAX) / 10;
-    }*/
+
     return 0;
 }
 
