@@ -290,22 +290,22 @@
 //
 
 #ifndef FLIGHT_MODE_1
- # define FLIGHT_MODE_1                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_1                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_2
- # define FLIGHT_MODE_2                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_2                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_3
- # define FLIGHT_MODE_3                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_3                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_4
- # define FLIGHT_MODE_4                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_4                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_5
- # define FLIGHT_MODE_5                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_5                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_6
- # define FLIGHT_MODE_6                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_6                  0 //Mode::Number::STABILIZE
 #endif
 
 

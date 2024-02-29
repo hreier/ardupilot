@@ -314,9 +314,9 @@ private:
 
     static_assert(sizeof(uint32_t) == sizeof(ap), "ap_t must be uint32_t");
 
-    // This is the state of the flight control system
+    // This is the state of the soleon controller mode
     // There are multiple states defined such as STABILIZE, ACRO,
- //   Mode *flightmode;
+    Mode *soleon_ctrl_mode;
     Mode::Number prev_control_mode;
 
     RCMapper rcmap;
@@ -629,15 +629,9 @@ private:
     void failsafe_gcs_off_event(void);
     void failsafe_terrain_check();
     void failsafe_terrain_set_status(bool data_ok);
-    void failsafe_terrain_on_event();
     void gpsglitch_check();
     void failsafe_deadreckon_check();
-    void set_mode_RTL_or_land_with_pause(ModeReason reason);
-    void set_mode_SmartRTL_or_RTL(ModeReason reason);
-    void set_mode_SmartRTL_or_land_with_pause(ModeReason reason);
-    void set_mode_auto_do_land_start_or_RTL(ModeReason reason);
-    void set_mode_brake_or_land_with_pause(ModeReason reason);
-    bool should_disarm_on_failsafe();
+
     void do_failsafe_action(FailsafeAction action, ModeReason reason);
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);
 
@@ -685,6 +679,7 @@ private:
     void log_init(void);
 
     // mode.cpp
+    void set_mode(Mode &newmode, ModeReason reason);
     bool set_mode(Mode::Number mode, ModeReason reason);
     bool set_mode(const uint8_t new_mode, const ModeReason reason) override;
     ModeReason _last_reason;
@@ -692,7 +687,7 @@ private:
     void mode_change_failed(const Mode *mode, const char *reason);
     uint8_t get_mode() const override { return 0; }
     bool current_mode_requires_mission() const override;
-    void update_flight_mode();
+    void update_soleon_ctrl_mode();
     void notify_flight_mode();
 
     // Check if this mode can be entered from the GCS
@@ -758,70 +753,8 @@ private:
     void userhook_auxSwitch2(const RC_Channel::AuxSwitchPos ch_flag);
     void userhook_auxSwitch3(const RC_Channel::AuxSwitchPos ch_flag);
 
-#if MODE_ACRO_ENABLED == ENABLED
-#if FRAME_CONFIG == HELI_FRAME
-    ModeAcro_Heli mode_acro;
-#else
-    ModeAcro mode_acro;
-#endif
-#endif
-#if MODE_AUTO_ENABLED == ENABLED
-    ModeAuto mode_auto;
-#endif
-#if AUTOTUNE_ENABLED == ENABLED
-    ModeAutoTune mode_autotune;
-#endif
-#if MODE_BRAKE_ENABLED == ENABLED
-    ModeBrake mode_brake;
-#endif
-#if MODE_CIRCLE_ENABLED == ENABLED
-    ModeCircle mode_circle;
-#endif
-#if MODE_DRIFT_ENABLED == ENABLED
-    ModeDrift mode_drift;
-#endif
-#if MODE_FLIP_ENABLED == ENABLED
-    ModeFlip mode_flip;
-#endif
-#if MODE_FOLLOW_ENABLED == ENABLED
-    ModeFollow mode_follow;
-#endif
-#if MODE_GUIDED_ENABLED == ENABLED
-    ModeGuided mode_guided;
-#endif
-#if MODE_LOITER_ENABLED == ENABLED
-    ModeLoiter mode_loiter;
-#endif
-#if MODE_POSHOLD_ENABLED == ENABLED
-    ModePosHold mode_poshold;
-#endif
-#if MODE_RTL_ENABLED == ENABLED
-    ModeRTL mode_rtl;
-#endif
 
-#if MODE_SPORT_ENABLED == ENABLED
-    ModeSport mode_sport;
-#endif
-#if MODE_SYSTEMID_ENABLED == ENABLED
-    ModeSystemId mode_systemid;
-#endif
-
-#if MODE_THROW_ENABLED == ENABLED
-    ModeThrow mode_throw;
-#endif
-#if MODE_GUIDED_NOGPS_ENABLED == ENABLED
-    ModeGuidedNoGPS mode_guided_nogps;
-#endif
-#if MODE_SMARTRTL_ENABLED == ENABLED
-    ModeSmartRTL mode_smartrtl;
-#endif
-
-#if MODE_ZIGZAG_ENABLED == ENABLED
-    ModeZigZag mode_zigzag;
-#endif
-#if MODE_AUTOROTATE_ENABLED == ENABLED
-    ModeAutorotate mode_autorotate;
-#endif
+    ModeCtrlDisabled ctrl_disabled;
 
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);

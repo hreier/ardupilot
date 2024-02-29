@@ -44,12 +44,7 @@ void Soleon::failsafe_radio_on_event()
     }
 
     // Conditions to deviate from FS_THR_ENABLE selection and send specific GCS warning
-    if (should_disarm_on_failsafe()) {
-        // should immediately disarm when we're on the ground
-        announce_failsafe("Radio", "Disarming");
-        desired_action = FailsafeAction::NONE;
-
-    } else if (((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
+    if (((battery.has_failsafed() && battery.get_highest_failsafe_priority() <= FAILSAFE_LAND_PRIORITY))) {
         // Allow landing to continue when battery failsafe requires it (not a user option)
         announce_failsafe("Radio + Battery", "Continuing Landing");
         desired_action = FailsafeAction::LAND;
@@ -86,22 +81,7 @@ void Soleon::handle_battery_failsafe(const char *type_str, const int8_t action)
 
     FailsafeAction desired_action = (FailsafeAction)action;
 
-    /*Hare
-    // Conditions to deviate from BATT_FS_XXX_ACT parameter setting
-    if (should_disarm_on_failsafe()) {
-        // should immediately disarm when we're on the ground
-        arming.disarm(AP_Arming::Method::BATTERYFAILSAFE);
-        desired_action = FailsafeAction::NONE;
-        announce_failsafe("Battery", "Disarming");
-
-    } else if (flightmode->is_landing() && failsafe_option(FailsafeOption::CONTINUE_IF_LANDING) && desired_action != FailsafeAction::NONE) {
-        // Allow landing to continue when FS_OPTIONS is set to continue when landing
-        desired_action = FailsafeAction::LAND;
-        announce_failsafe("Battery", "Continuing Landing");
-    } else {
-        announce_failsafe("Battery");
-    }*/
-
+ 
     // Battery FS options already use the Failsafe_Options enum. So use them directly.
     do_failsafe_action(desired_action, ModeReason::BATTERY_FAILSAFE);
 
@@ -158,20 +138,8 @@ void Soleon::failsafe_gcs_on_event(void)
     }
 
     // Conditions to deviate from FS_GCS_ENABLE parameter setting
-    if (!motors->armed()) {
-        desired_action = FailsafeAction::NONE;
+    
         announce_failsafe("GCS");
-
-    } else if (should_disarm_on_failsafe()) {
-        // should immediately disarm when we're on the ground
-        desired_action = FailsafeAction::NONE;
-        announce_failsafe("GCS", "Disarming");
-
-    } 
-
-    else {
-        announce_failsafe("GCS");
-    }
 
     // Call the failsafe action handler
     do_failsafe_action(desired_action, ModeReason::GCS_FAILSAFE);
@@ -210,18 +178,7 @@ void Soleon::failsafe_terrain_set_status(bool data_ok)
     }
 }
 
-// terrain failsafe action
-void Soleon::failsafe_terrain_on_event()
-{
-    failsafe.terrain = true;
-    gcs().send_text(MAV_SEVERITY_CRITICAL,"Failsafe: Terrain data missing");
-    AP::logger().Write_Error(LogErrorSubsystem::FAILSAFE_TERRAIN, LogErrorCode::FAILSAFE_OCCURRED);
 
-    if (should_disarm_on_failsafe()) {
-    } else {
-        set_mode_RTL_or_land_with_pause(ModeReason::TERRAIN_FAILSAFE);
-    }
-}
 
 // check for gps glitch failsafe
 void Soleon::gpsglitch_check()
@@ -284,83 +241,6 @@ void Soleon::failsafe_deadreckon_check()
  
 }
 
-// set_mode_RTL_or_land_with_pause - sets mode to RTL if possible or LAND with 4 second delay before descent starts
-//  this is always called from a failsafe so we trigger notification to pilot
-void Soleon::set_mode_RTL_or_land_with_pause(ModeReason reason)
-{
-    // attempt to switch to RTL, if this fails then switch to Land
-    if (!set_mode(Mode::Number::RTL, reason)) {
-        // set mode to land will trigger mode change notification to pilot
-    } else {
-        // alert pilot to mode change
-        AP_Notify::events.failsafe_mode_change = 1;
-    }
-}
-
-// set_mode_SmartRTL_or_land_with_pause - sets mode to SMART_RTL if possible or LAND with 4 second delay before descent starts
-// this is always called from a failsafe so we trigger notification to pilot
-void Soleon::set_mode_SmartRTL_or_land_with_pause(ModeReason reason)
-{
-    // attempt to switch to SMART_RTL, if this failed then switch to Land
-    if (!set_mode(Mode::Number::SMART_RTL, reason)) {
-        gcs().send_text(MAV_SEVERITY_WARNING, "SmartRTL Unavailable, Using Land Mode");
-    } else {
-        AP_Notify::events.failsafe_mode_change = 1;
-    }
-}
-
-// set_mode_SmartRTL_or_RTL - sets mode to SMART_RTL if possible or RTL if possible or LAND with 4 second delay before descent starts
-// this is always called from a failsafe so we trigger notification to pilot
-void Soleon::set_mode_SmartRTL_or_RTL(ModeReason reason)
-{
-    // attempt to switch to SmartRTL, if this failed then attempt to RTL
-    // if that fails, then land
-    if (!set_mode(Mode::Number::SMART_RTL, reason)) {
-        gcs().send_text(MAV_SEVERITY_WARNING, "SmartRTL Unavailable, Trying RTL Mode");
-        set_mode_RTL_or_land_with_pause(reason);
-    } else {
-        AP_Notify::events.failsafe_mode_change = 1;
-    }
-}
-
-// Sets mode to Auto and jumps to DO_LAND_START, as set with AUTO_RTL param
-// This can come from failsafe or RC option
-void Soleon::set_mode_auto_do_land_start_or_RTL(ModeReason reason)
-{
-#if MODE_AUTO_ENABLED == ENABLED
-    if (set_mode(Mode::Number::AUTO_RTL, reason)) {
-        AP_Notify::events.failsafe_mode_change = 1;
-        return;
-    }
-#endif
-
-    gcs().send_text(MAV_SEVERITY_WARNING, "Trying RTL Mode");
-    set_mode_RTL_or_land_with_pause(reason);
-}
-
-// Sets mode to Brake or LAND with 4 second delay before descent starts
-// This can come from failsafe or RC option
-void Soleon::set_mode_brake_or_land_with_pause(ModeReason reason)
-{
-#if MODE_BRAKE_ENABLED == ENABLED
-    if (set_mode(Mode::Number::BRAKE, reason)) {
-        AP_Notify::events.failsafe_mode_change = 1;
-        return;
-    }
-#endif
-
-    gcs().send_text(MAV_SEVERITY_WARNING, "Trying Land Mode");
-}
-
-bool Soleon::should_disarm_on_failsafe() {
-    if (ap.in_arming_delay) {
-        return true;
-    }
-
-
-    return true;
-}
-
 
 void Soleon::do_failsafe_action(FailsafeAction action, ModeReason reason){
 
@@ -371,23 +251,23 @@ void Soleon::do_failsafe_action(FailsafeAction action, ModeReason reason){
         case FailsafeAction::LAND:
             break;
         case FailsafeAction::RTL:
-            set_mode_RTL_or_land_with_pause(reason);
+           // set_mode_RTL_or_land_with_pause(reason);
             break;
         case FailsafeAction::SMARTRTL:
-            set_mode_SmartRTL_or_RTL(reason);
+           // set_mode_SmartRTL_or_RTL(reason);
             break;
         case FailsafeAction::SMARTRTL_LAND:
-            set_mode_SmartRTL_or_land_with_pause(reason);
+          //  set_mode_SmartRTL_or_land_with_pause(reason);
             break;
         case FailsafeAction::TERMINATE: {
 
             break;
         }
         case FailsafeAction::AUTO_DO_LAND_START:
-            set_mode_auto_do_land_start_or_RTL(reason);
+            //set_mode_auto_do_land_start_or_RTL(reason);
             break;
         case FailsafeAction::BRAKE_LAND:
-            set_mode_brake_or_land_with_pause(reason);
+          //  set_mode_brake_or_land_with_pause(reason);
             break;
     }
 

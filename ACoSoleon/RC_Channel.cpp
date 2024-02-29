@@ -453,7 +453,7 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
 
         case AUX_FUNC::STABILIZE:
-            do_aux_function_change_mode(Mode::Number::STABILIZE, ch_flag);
+           // do_aux_function_change_mode(Mode::Number::STABILIZE, ch_flag);
             break;
 
         case AUX_FUNC::POSHOLD:

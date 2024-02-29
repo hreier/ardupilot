@@ -62,8 +62,10 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     // run EKF state estimator (expensive)
     FAST_TASK(read_AHRS),
 
-    // run the attitude controllers
-    FAST_TASK(update_flight_mode),
+    // Runs the Soleon Aircontroller thread 
+    // It's similar to update_flight_mode in the pilot some kind of 'entry point' for the Soleon Controller
+    FAST_TASK(update_soleon_ctrl_mode),
+    
     // update home from EKF if necessary
     FAST_TASK(update_home_from_EKF),
 
@@ -448,7 +450,8 @@ Soleon::Soleon(void)
     land_accel_ef_filter(LAND_DETECTOR_ACCEL_LPF_CUTOFF),
     rc_throttle_control_in_filter(1.0f),
     inertial_nav(ahrs),
-    param_loader(var_info)
+    param_loader(var_info),
+    soleon_ctrl_mode(&ctrl_disabled)
 {
 }
 
