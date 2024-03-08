@@ -136,9 +136,9 @@ bool Soleon::set_mode(Mode::Number mode, ModeReason reason)
       case Mode::Number::CTRL_DISABLED:
         fred = &ctrl_disabled;
         break;
-/*    case Mode::Number::CTRL_SPRAY_PPM:
-        fred = &ctrl_disabled;
-        break;*/
+      case Mode::Number::CTRL_SPRAY_PPM:
+        fred = &ctrl_spray_ppm;
+        break;
     }
 
     if (fred == nullptr) {

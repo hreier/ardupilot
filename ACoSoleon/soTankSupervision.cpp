@@ -40,24 +40,6 @@ bool SO_TankSupervision::init(bool ignore_checks)
     _mp_sprayrate =0;
 
 
-  /*  // initialise pos controller speed and acceleration
-    pos_control->set_max_speed_accel_xy(inertial_nav.get_velocity_neu_cms().length(), BRAKE_MODE_DECEL_RATE);
-    pos_control->set_correction_speed_accel_xy(inertial_nav.get_velocity_neu_cms().length(), BRAKE_MODE_DECEL_RATE);
-
-    // initialise position controller
-    pos_control->init_xy_controller();
-
-    // set vertical speed and acceleration limits
-    pos_control->set_max_speed_accel_z(BRAKE_MODE_SPEED_Z, BRAKE_MODE_SPEED_Z, BRAKE_MODE_DECEL_RATE);
-    pos_control->set_correction_speed_accel_z(BRAKE_MODE_SPEED_Z, BRAKE_MODE_SPEED_Z, BRAKE_MODE_DECEL_RATE);
-
-    // initialise the vertical position controller
-    if (!pos_control->is_active_z()) {
-        pos_control->init_z_controller();
-    }
-
-    _timeout_ms = 0;
-*/
     return true;
 }
 

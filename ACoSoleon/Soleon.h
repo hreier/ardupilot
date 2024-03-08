@@ -754,7 +754,9 @@ private:
     void userhook_auxSwitch3(const RC_Channel::AuxSwitchPos ch_flag);
 
 
+    //-- controlmodes soleon
     ModeCtrlDisabled ctrl_disabled;
+    ModeCtrlSprayPPM ctrl_spray_ppm;
 
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);

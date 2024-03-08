@@ -43,6 +43,15 @@ public:
         // Mode number 127 reserved for the "drone show mode" in the Skybrush
         // fork at https://github.com/skybrush-io/ardupilot
     };
+  
+    // Missionplan commands enumeration
+    enum class mp_cmd_t : uint8_t {
+        SPR_OFF =      0,  // Pumps off
+        SPR_RIGHT =    1,  // spray the right site
+        SPR_LEFT =     2,  // spray the left site
+        SPR_BOTH =     3   // spray on both sites (left + right)
+        };
+
 
     // constructor
     Mode(void);
@@ -65,6 +74,22 @@ public:
     virtual const char *name() const = 0;
     virtual const char *name4() const = 0;
 
+//private:
+    //---- Soleon Spraycontrollers (mostly from missionplan) ----
+    float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate;
+    mp_cmd_t  _mp_cmd; 
+
+    //---- Soleon Spraycontroller (measured; calculated)
+    float        _fill_level;
+    
+    // _mp_status:   Status bits
+    #define MASK_STAT_SPR_RIGHT              (1<<0)
+    #define MASK_STAT_SPR_LEFT               (1<<1)
+    #define MASK_STAT_CTRL_READY             (1<<2)
+    #define MASK_STAT_ERR_PMP                (1<<3)
+    #define MASK_STAT_ERR_NOZZLE             (1<<4)
+    uint8_t      _mp_status;
+   
 
 protected:
 
@@ -86,15 +111,11 @@ protected:
 
     
 public:
- //   bool set_mode(Mode::Number mode, ModeReason reason);
- //   void set_land_complete(bool b);
-    GCS_Soleon &gcs();
- //   uint16_t get_pilot_speed_dn(void);
-    // end pass-through functions
+   GCS_Soleon &gcs();
 };
 
 
-
+// --- DISABLED
 class ModeCtrlDisabled : public Mode {
 
 public:
@@ -110,5 +131,27 @@ protected:
 
     const char *name() const override { return "DISABLED"; }
     const char *name4() const override { return "DIS"; }
+
+};
+
+
+// --- SPRAY_PPM 
+class ModeCtrlSprayPPM : public Mode {
+
+public:
+    // inherit constructor
+    using Mode::Mode;
+    Number mode_number() const override { return Number::CTRL_DISABLED; }
+
+    bool init() override;
+    void run() override;
+
+
+protected:
+
+    const char *name() const override { return "SPRAY_PPM"; }
+    const char *name4() const override { return "SPPM"; }
+
+    bool should_be_spraying;
 
 };
