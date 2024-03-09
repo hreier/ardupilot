@@ -1,12 +1,13 @@
 #include "Soleon.h"
 
-
+static int temp;
 
 // Controller disabled - initialise the disabled controller mode
 bool ModeCtrlSprayPPM::init()
 {
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
+    temp=0; //--debug
     return true;
 }
 
@@ -14,12 +15,41 @@ bool ModeCtrlSprayPPM::init()
 // Controller disabled - runs the disabled controller mode
 void ModeCtrlSprayPPM::run()
 {
-    static int temp2;
-    if (temp2++> 30){  //-- debugging
+    if (temp <= 10000)
+    {
+        temp++;        
+        if (temp<5000) return;
+        if (temp==5000) {
+            gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is starting up; let test the sprayer", name());  ///-HaRe debug
+            return;
+        }
+        if (temp==6000) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer activated");  
+            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
+            return;
+        }
+        if (temp==7000) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer deactivated");  
+            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get(), 0, 10000);
+            return;
+        }
+        if (temp==8000) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer activated");  
+            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
+            return;
+        }
+        if (temp==9000) {
+            gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer deactivated");  
+            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get(), 0, 10000);
+            return;
+        }
+        if (temp==10000) {
         gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is running", name());  ///-HaRe debug
-        temp2=0;
-    }
+        }
 
+        return;
+    }
+    
     // exit immediately if the pump function has not been set-up for any servo
     if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump)) {
         return;
