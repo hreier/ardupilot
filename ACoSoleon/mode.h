@@ -102,6 +102,7 @@ protected:
     AC_PosControl *&pos_control;
     AP_InertialNav &inertial_nav;
     AP_AHRS &ahrs;
+    AP_Arming &arming;
     MOTOR_CLASS *&motors;
     RC_Channel *&channel_roll;
     RC_Channel *&channel_pitch;

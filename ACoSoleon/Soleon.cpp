@@ -59,6 +59,9 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     // update INS immediately to get current gyro data populated
     FAST_TASK_CLASS(AP_InertialSensor, &soleon.ins, update),
 
+    // update the output signals (e.g. servos)
+    FAST_TASK(update_outputs),
+
     // run EKF state estimator (expensive)
     FAST_TASK(read_AHRS),
 
@@ -454,6 +457,28 @@ Soleon::Soleon(void)
     soleon_ctrl_mode(&ctrl_disabled)
 {
 }
+
+
+// update_output - send output signals to e.g. servos
+void Soleon::update_outputs()
+{
+
+    // output any servo channels
+    SRV_Channels::calc_pwm();
+
+    // cork now, so that all channel outputs happen at once
+    SRV_Channels::cork();
+
+    // update output on any aux channels, for manual passthru
+    SRV_Channels::output_ch_all();
+
+    // push all channels
+    SRV_Channels::push();
+}
+
+
+
+
 
 
 Soleon soleon;

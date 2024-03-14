@@ -678,6 +678,8 @@ private:
     void Log_Write_Vehicle_Startup_Messages();
     void log_init(void);
 
+    void update_outputs();
+    
     // mode.cpp
     void set_mode(Mode &newmode, ModeReason reason);
     bool set_mode(Mode::Number mode, ModeReason reason);

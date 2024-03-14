@@ -8,6 +8,8 @@ bool ModeCtrlSprayPPM::init()
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
     temp=0; //--debug
+    hal.util->set_soft_armed(true);
+    arming.arm(AP_Arming::Method::RUDDER);
     return true;
 }
 
@@ -20,28 +22,30 @@ void ModeCtrlSprayPPM::run()
         temp++;        
         if (temp<5000) return;
         if (temp==5000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is starting up; let test the sprayer", name());  ///-HaRe debug
+            gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is starting up", name());  ///-HaRe debug
+            // hal.util->set_soft_armed(true);
             return;
         }
         if (temp==6000) {
             gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer activated");  
-            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
+            //SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
+            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
             return;
         }
         if (temp==7000) {
             gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer deactivated");  
-            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get(), 0, 10000);
+            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
             return;
         }
         if (temp==8000) {
             gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer activated");  
-            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
+            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
             return;
         }
         if (temp==9000) {
             gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer deactivated");  
-            SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get(), 0, 10000);
-            return;
+            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+           return;
         }
         if (temp==10000) {
         gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is running", name());  ///-HaRe debug
@@ -83,8 +87,8 @@ void ModeCtrlSprayPPM::run()
             break;
         }
 
-    if (should_be_spraying) SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
-    else                    SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get(), 0, 10000);
+    if (should_be_spraying) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
+    else                    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
 
 }
 

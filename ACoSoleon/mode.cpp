@@ -21,6 +21,7 @@ Mode::Mode(void) :
     channel_pitch(soleon.channel_pitch),
     channel_throttle(soleon.channel_throttle),
     channel_yaw(soleon.channel_yaw),
+    arming(soleon.arming),
     G_Dt(soleon.G_Dt)
 { };
 

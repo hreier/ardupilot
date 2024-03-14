@@ -65,7 +65,7 @@ void Soleon::init_ardupilot()
     allocate_motors();
 
     // initialise rc channels including setting mode
-    rc().convert_options(RC_Channel::AUX_FUNC::ARMDISARM_UNUSED, RC_Channel::AUX_FUNC::ARMDISARM_AIRMODE);
+   // rc().convert_options(RC_Channel::AUX_FUNC::ARMDISARM_UNUSED, RC_Channel::AUX_FUNC::ARMDISARM_AIRMODE);
     rc().init();
 
     // sets up motors and output to escs

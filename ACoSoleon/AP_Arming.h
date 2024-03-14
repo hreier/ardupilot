@@ -12,7 +12,8 @@ public:
     {
         // default REQUIRE parameter to 1 (Copter does not have an
         // actual ARMING_REQUIRE parameter)
-     //   require.set_default((uint8_t)Required::YES_MIN_PWM);
+       // require.set_default((uint8_t)Required::YES_MIN_PWM);
+        require.set_and_default((uint8_t)Required::NO);
     }
 
     /* Do not allow copies */
