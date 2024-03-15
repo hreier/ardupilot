@@ -8,7 +8,7 @@ bool ModeCtrlSprayPPM::init()
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
     temp=0; //--debug
-    hal.util->set_soft_armed(true);
+    //hal.util->set_soft_armed(true);     //--- Note that this prevents MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN (used to activate bootloader) processing...
     arming.arm(AP_Arming::Method::RUDDER);
     return true;
 }
