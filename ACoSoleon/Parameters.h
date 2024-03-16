@@ -390,11 +390,11 @@ public:
         k_param_so_controlmode = 300,
         k_param_so_servo_out_spraying,
         k_param_so_servo_out_nospraying,
-        k_param_so_flow_sensor,
-        k_param_so_pressure_sensor,
-        k_param_so_arming,
-        k_param_so_pid_pressure,
         k_param_so_rcmap,
+    //    k_param_so_flow_sensor,
+    //    k_param_so_pressure_sensor,
+    //    k_param_so_arming,
+    //    k_param_so_pid_pressure,
      //    k_param_so_pid_flow,
     //    k_param_so_ref_in,
     //    k_param_so_offset_in,
@@ -490,10 +490,10 @@ public:
     AP_Int8         so_controlmode;
     AP_Int16        so_servo_out_spraying;
     AP_Int16        so_servo_out_nospraying;
-    AP_Int8         so_flow_sensor;
-    AP_Int8         so_pressure_sensor;
-    AP_Int8         so_arming;
-    AP_Float        so_pid_pressure;
+ //   AP_Int8         so_flow_sensor;
+ //   AP_Int8         so_pressure_sensor;
+ //   AP_Int8         so_arming;
+ //   AP_Float        so_pid_pressure;
  //   AP_Float        so_pid_flow;
  //   AP_Int8         so_ref_in;
  //   AP_Int8         so_offset_in;

@@ -709,6 +709,7 @@ const AP_Param::Info Soleon::var_info[] = {
     // @User: Advanced
     GSCALAR(so_servo_out_nospraying, "SO_SRV_NOSPRAY", SO_SERVO_OUT_NOSPRAYING_DEF),
 
+    /*
     // @Param: SO_FLOWSENSOR
     // @DisplayName: Solarion flow sensor configuration
     // @Description: Defines the configuration mode of the sprayer controller
@@ -735,7 +736,7 @@ const AP_Param::Info Soleon::var_info[] = {
     // @Description: Pressure pid configuration
     // @Range: 0 100.0
     // @User: Advanced
-    GSCALAR(so_pid_pressure, "SO_PRESSURE_PID", SO_PRESSURE_PID_DEF),
+    GSCALAR(so_pid_pressure, "SO_PRESSURE_PID", SO_PRESSURE_PID_DEF),*/
 
 #if OSD_ENABLED || OSD_PARAM_ENABLED
     // @Group: OSD
