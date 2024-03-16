@@ -59,10 +59,10 @@ bool RC_Channels_Soleon::arming_check_throttle() const {
     return RC_Channels::arming_check_throttle();
 }
 
-RC_Channel * RC_Channels_Soleon::get_arming_channel(void) const
+/*RC_Channel * RC_Channels_Soleon::get_arming_channel(void) const
 {
     return soleon.channel_yaw;
-}
+}*/
 
 // init_aux_switch_function - initialize aux functions
 void RC_Channel_Soleon::init_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
@@ -159,10 +159,10 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
 
         case AUX_FUNC::SAVE_TRIM:
-            if ((ch_flag == AuxSwitchPos::HIGH) &&
+            /*if ((ch_flag == AuxSwitchPos::HIGH) &&
                 (soleon.channel_throttle->get_control_in() == 0)) {
                 soleon.save_trim();
-            }
+            }*/
             break;
 
         case AUX_FUNC::SAVE_WP:
@@ -602,12 +602,12 @@ void RC_Channel_Soleon::do_aux_function_change_force_flying(const AuxSwitchPos c
 // save_trim - adds roll and pitch trims from the radio to ahrs
 void Soleon::save_trim()
 {
-    // save roll and pitch trim
+ /*   // save roll and pitch trim
     float roll_trim = ToRad((float)channel_roll->get_control_in()/100.0f);
     float pitch_trim = ToRad((float)channel_pitch->get_control_in()/100.0f);
     ahrs.add_trim(roll_trim, pitch_trim);
     AP::logger().Write_Event(LogEvent::SAVE_TRIM);
-    gcs().send_text(MAV_SEVERITY_INFO, "Trim saved");
+    gcs().send_text(MAV_SEVERITY_INFO, "Trim saved");*/
 }
 
 // auto_trim - slightly adjusts the ahrs.roll_trim and ahrs.pitch_trim towards the current stick positions
@@ -621,6 +621,7 @@ void Soleon::auto_trim_cancel()
 
 void Soleon::auto_trim()
 {
+    /*
     if (auto_trim_counter > 0) {
 
         // flash the leds
@@ -657,5 +658,5 @@ void Soleon::auto_trim()
             AP_Notify::flags.save_trim = false;
             gcs().send_text(MAV_SEVERITY_INFO, "AutoTrim: Trims saved");
         }
-    }
+    }*/
 }

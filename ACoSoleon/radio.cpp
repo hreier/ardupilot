@@ -4,38 +4,27 @@
 // Function that will read the radio data, limit servos and trigger a failsafe
 // ----------------------------------------------------------------------------
 
-void Soleon::default_dead_zones()
-{
-    channel_roll->set_default_dead_zone(20);
-    channel_pitch->set_default_dead_zone(20);
-#if FRAME_CONFIG == HELI_FRAME
-    channel_throttle->set_default_dead_zone(10);
-    channel_yaw->set_default_dead_zone(15);
-#else
-    channel_throttle->set_default_dead_zone(30);
-    channel_yaw->set_default_dead_zone(20);
-#endif
-    rc().channel(CH_6)->set_default_dead_zone(0);
-}
+
 
 void Soleon::init_rc_in()
 {
-    channel_roll     = rc().channel(rcmap.roll()-1);
-    channel_pitch    = rc().channel(rcmap.pitch()-1);
-    channel_throttle = rc().channel(rcmap.throttle()-1);
-    channel_yaw      = rc().channel(rcmap.yaw()-1);
+    channel_speed    = rc().channel(so_rcmap.speed()-1);
+    channel_offset   = rc().channel(so_rcmap.offset()-1);
+    channel_override = rc().channel(so_rcmap.override()-1);
 
     // set rc channel ranges
-    channel_roll->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_pitch->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_yaw->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_throttle->set_range(1000);
+    channel_speed->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    channel_offset->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    channel_override->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    //channel_throttle->set_range(1000);
 
     // set default dead zones
-    default_dead_zones();
+    channel_speed->set_default_dead_zone(0);   //20
+    channel_offset->set_default_dead_zone(0);
+    channel_override->set_default_dead_zone(0);
 
     // initialise throttle_zero flag
-    ap.throttle_zero = true;
+    //ap.throttle_zero = true;
 }
 
  // init_rc_out -- initialise motors
@@ -50,14 +39,14 @@ void Soleon::init_rc_out()
     motors->set_update_rate(g.rc_speed);
 
 #if FRAME_CONFIG != HELI_FRAME
-    if (channel_throttle->configured()) {
+    /*if (channel_throttle->configured()) {
         // throttle inputs setup, use those to set motor PWM min and max if not already configured
         motors->convert_pwm_min_max_param(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
     } else {
         // throttle inputs default, force set motor PWM min and max to defaults so they will not be over-written by a future change in RC min / max
         motors->convert_pwm_min_max_param(1000, 2000);
     }
-    motors->update_throttle_range();
+    motors->update_throttle_range();*/
 #else
     // setup correct scaling for ESCs like the UAVCAN ESCs which
     // take a proportion of speed.
@@ -84,17 +73,17 @@ void Soleon::read_radio()
     if (rc().read_input()) {
         ap.new_radio_frame = true;
 
-        set_throttle_and_failsafe(channel_throttle->get_radio_in());
-        set_throttle_zero_flag(channel_throttle->get_control_in());
+       // set_throttle_and_failsafe(channel_throttle->get_radio_in());
+       // set_throttle_zero_flag(channel_throttle->get_control_in());
 
         // RC receiver must be attached if we've just got input
         ap.rc_receiver_present = true;
 
         // pass pilot input through to motors (used to allow wiggling servos while disarmed on heli, single, coax copters)
-        radio_passthrough_to_motors();
+       // radio_passthrough_to_motors();
 
-        const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
-        rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
+        //const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
+       // rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
         last_radio_update_ms = tnow_ms;
         return;
     }
@@ -184,19 +173,12 @@ void Soleon::set_throttle_zero_flag(int16_t throttle_control)
     }
 }
 
-// pass pilot's inputs to motors library (used to allow wiggling servos while disarmed on heli, single, coax copters)
-void Soleon::radio_passthrough_to_motors()
-{
-    motors->set_radio_passthrough(channel_roll->norm_input(),
-                                  channel_pitch->norm_input(),
-                                  channel_throttle->get_control_in_zero_dz()*0.001f,
-                                  channel_yaw->norm_input());
-}
+
 
 /*
   return the throttle input for mid-stick as a control-in value
  */
-int16_t Soleon::get_throttle_mid(void)
+/*int16_t Soleon::get_throttle_mid(void)
 {
 #if TOY_MODE_ENABLED == ENABLED
     if (g2.toy_mode.enabled()) {
@@ -204,4 +186,4 @@ int16_t Soleon::get_throttle_mid(void)
     }
 #endif
     return channel_throttle->get_control_mid();
-}
+}*/

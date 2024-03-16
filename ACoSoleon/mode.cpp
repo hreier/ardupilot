@@ -17,11 +17,9 @@ Mode::Mode(void) :
     inertial_nav(soleon.inertial_nav),
     ahrs(soleon.ahrs),
     motors(soleon.motors),
-    channel_roll(soleon.channel_roll),
-    channel_pitch(soleon.channel_pitch),
-    channel_throttle(soleon.channel_throttle),
-    channel_yaw(soleon.channel_yaw),
-    arming(soleon.arming),
+    channel_speed(soleon.channel_speed),
+    channel_offset(soleon.channel_offset),
+    channel_override(soleon.channel_override),
     G_Dt(soleon.G_Dt)
 { };
 

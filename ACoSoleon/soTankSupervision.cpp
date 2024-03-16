@@ -55,7 +55,7 @@ void SO_TankSupervision::update()
     }*/
     _mp_sprayrate = _delta_fill;
 
-    if (_mp_liter_ha != 0.0f){
+    if (_mp_liter_ha > 0.0f){
     _mp_status |= 0x04;
 
     switch (_mp_cmd) {
@@ -71,7 +71,7 @@ void SO_TankSupervision::update()
 
         case 2:
             _mp_status = (_mp_status & 0xfc) | 0x2;
-             _delta_fill = 0.05;
+            _delta_fill = 0.05;
            break;
 
         case 3:

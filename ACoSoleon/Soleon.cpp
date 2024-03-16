@@ -368,7 +368,7 @@ void Soleon::init_simple_bearing()
 // update_simple_mode - rotates pilot input if we are in simple mode
 void Soleon::update_simple_mode(void)
 {
-    float rollx, pitchx;
+    /*float rollx, pitchx;
 
     // exit immediately if no new radio frame or not in simple mode
     if (simple_mode == SimpleMode::NONE || !ap.new_radio_frame) {
@@ -391,6 +391,7 @@ void Soleon::update_simple_mode(void)
     // rotate roll, pitch input from north facing to vehicle's perspective
     channel_roll->set_control_in(rollx*ahrs.cos_yaw() + pitchx*ahrs.sin_yaw());
     channel_pitch->set_control_in(-rollx*ahrs.sin_yaw() + pitchx*ahrs.cos_yaw());
+    */
 }
 
 

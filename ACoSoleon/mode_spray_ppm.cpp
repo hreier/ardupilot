@@ -7,9 +7,8 @@ bool ModeCtrlSprayPPM::init()
 {
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
+    _fill_level = 30;   //-- let assume the tank is full
     temp=0; //--debug
-    //hal.util->set_soft_armed(true);     //--- Note that this prevents MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN (used to activate bootloader) processing...
-    arming.arm(AP_Arming::Method::RUDDER);
     return true;
 }
 
@@ -59,6 +58,9 @@ void ModeCtrlSprayPPM::run()
         return;
     }
 
+    if (_mp_liter_ha > 0.0f){
+    _mp_status |= 0x04;
+    }
       
     switch (_mp_cmd) {
         case mp_cmd_t::SPR_OFF :
@@ -87,30 +89,14 @@ void ModeCtrlSprayPPM::run()
             break;
         }
 
-    if (should_be_spraying) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
-    else                    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+    if (should_be_spraying) {
+        _mp_sprayrate = 1.5f;
+        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
+        }
+    else {
+        _mp_sprayrate = 0;
+        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+        }
 
 }
 
-/*
-void ModeCtrlSprayPPM::stop_spraying()
-{
-    SRV_Channels::set_output_limit(SRV_Channel::k_sprayer_pump, SRV_Channel::Limit::MIN);
-    SRV_Channels::set_output_limit(SRV_Channel::k_sprayer_spinner, SRV_Channel::Limit::MIN);
-
-    _flags.spraying = false;
-}*/
-
-/*
-    // if spraying or testing update the pump servo position
-    if (should_be_spraying) {
-        float pos = ground_speed * _pump_pct_1ms;
-        pos = MAX(pos, 100 *_pump_min_pct); // ensure min pump speed
-        pos = MIN(pos,10000); // clamp to range
-        SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, pos, 0, 10000);
-        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_spinner, _spinner_pwm);
-        _flags.spraying = true;
-    } else {
-        stop_spraying();
-    }
-*/

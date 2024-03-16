@@ -9,7 +9,7 @@ const AP_Param::GroupInfo SoRCMapper::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO("SPEED",        1, SoRCMapper, _ch_speed, 1),
+    AP_GROUPINFO("SPEED",        0, SoRCMapper, _ch_speed, 1),
  
     // @Param: OFFSET
     // @DisplayName: Offset channel
@@ -18,7 +18,7 @@ const AP_Param::GroupInfo SoRCMapper::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO("OFFSET",        2, SoRCMapper, _ch_offset, 2),
+    AP_GROUPINFO("OFFSET",        1, SoRCMapper, _ch_offset, 2),
 
     // @Param: OVERRIDE
     // @DisplayName: Channel enable to override mission plan commands  
@@ -27,7 +27,7 @@ const AP_Param::GroupInfo SoRCMapper::var_info[] = {
     // @Increment: 1
     // @User: Advanced
     // @RebootRequired: True
-    AP_GROUPINFO("OVERRIDE",       3, SoRCMapper, _ch_override, 3),
+    AP_GROUPINFO("OVRIDE",       2, SoRCMapper, _ch_override, 3),
 
 
     AP_GROUPEND

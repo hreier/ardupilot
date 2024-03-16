@@ -394,6 +394,7 @@ public:
         k_param_so_pressure_sensor,
         k_param_so_arming,
         k_param_so_pid_pressure,
+        k_param_so_rcmap,
      //    k_param_so_pid_flow,
     //    k_param_so_ref_in,
     //    k_param_so_offset_in,

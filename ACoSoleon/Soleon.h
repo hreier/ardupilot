@@ -57,6 +57,9 @@
 #include <AP_Proximity/AP_Proximity.h>      // ArduPilot proximity sensor library
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
 
+#include "SO_RCMapper.h"        // Soleon RC input mapping library
+
+
 // Configuration
 #include "defines.h"
 #include "config.h"
@@ -73,6 +76,7 @@
 #include "GCS_Mavlink.h"
 #include "GCS_Soleon.h"
 #include "AP_Arming.h"
+#include "SO_RCMapper.h"
 
 #include <AP_Beacon/AP_Beacon_config.h>
 #if AP_BEACON_ENABLED
@@ -207,10 +211,16 @@ private:
     uint8_t command_ack_counter;
 
     // primary input control channels
-    RC_Channel *channel_roll;
-    RC_Channel *channel_pitch;
-    RC_Channel *channel_throttle;
-    RC_Channel *channel_yaw;
+   // RC_Channel *channel_roll;
+   // RC_Channel *channel_pitch;
+   // RC_Channel *channel_throttle;
+   // RC_Channel *channel_yaw;
+
+    // soleon controller input control channels
+    RC_Channel *channel_speed;
+    RC_Channel *channel_offset;
+    RC_Channel *channel_override;
+
 
     AP_Logger logger;
 
@@ -319,7 +329,8 @@ private:
     Mode *soleon_ctrl_mode;
     Mode::Number prev_control_mode;
 
-    RCMapper rcmap;
+    //RCMapper rcmap;
+    SoRCMapper so_rcmap;
 
     // inertial nav alt when we armed
     float arming_altitude_m;
@@ -715,8 +726,7 @@ private:
     void read_radio();
     void set_throttle_and_failsafe(uint16_t throttle_pwm);
     void set_throttle_zero_flag(int16_t throttle_control);
-    void radio_passthrough_to_motors();
-    int16_t get_throttle_mid(void);
+    //int16_t get_throttle_mid(void);
 
     // sensors.cpp
     void read_barometer(void);

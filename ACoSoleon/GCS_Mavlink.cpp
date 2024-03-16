@@ -691,10 +691,10 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
                 break;
             
             case 2: //-- mission plan command
-                SO::TankSupervision()->_mp_dist_waypoint = packet.param2;   //--HaRe: to remove
-                SO::TankSupervision()->_mp_cmd  = (uint8_t) packet.param3;
-                soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param2;  
-                soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param3;
+                SO::TankSupervision()->_mp_cmd  = (uint8_t) packet.param2;
+                SO::TankSupervision()->_mp_dist_waypoint = packet.param3;   //--HaRe: to remove
+                soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param2;
+                soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param3;  
                 break;
             
             default:
@@ -792,10 +792,10 @@ void GCS_MAVLINK_Soleon::handle_manual_control_axes(const mavlink_manual_control
         return;
     }
 
-    manual_override(soleon.channel_roll, packet.y, 1000, 2000, tnow);
+    /*manual_override(soleon.channel_roll, packet.y, 1000, 2000, tnow);
     manual_override(soleon.channel_pitch, packet.x, 1000, 2000, tnow, true);
     manual_override(soleon.channel_throttle, packet.z, 0, 1000, tnow);
-    manual_override(soleon.channel_yaw, packet.r, 1000, 2000, tnow);
+    manual_override(soleon.channel_yaw, packet.r, 1000, 2000, tnow);*/
 }
 
 // sanity check velocity or acceleration vector components are numbers

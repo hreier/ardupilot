@@ -608,9 +608,10 @@ const AP_Param::Info Soleon::var_info[] = {
     GOBJECTVARPTR(motors, "MOT_",      &soleon.motors_var_info),
 #endif
 
-    // @Group: RCMAP_
-    // @Path: ../libraries/AP_RCMapper/AP_RCMapper.cpp
-    GOBJECT(rcmap, "RCMAP_",        RCMapper),
+    // @Group: SO_RCMAP
+    // @Path: SO_RCMapper.cpp
+    GOBJECT(so_rcmap, "SO_RCMAP_",        SoRCMapper),
+
 
 #if HAL_NAVEKF2_AVAILABLE
     // @Group: EK2_

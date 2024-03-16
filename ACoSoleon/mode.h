@@ -102,12 +102,10 @@ protected:
     AC_PosControl *&pos_control;
     AP_InertialNav &inertial_nav;
     AP_AHRS &ahrs;
-    AP_Arming &arming;
     MOTOR_CLASS *&motors;
-    RC_Channel *&channel_roll;
-    RC_Channel *&channel_pitch;
-    RC_Channel *&channel_throttle;
-    RC_Channel *&channel_yaw;
+    RC_Channel *&channel_speed;
+    RC_Channel *&channel_offset;
+    RC_Channel *&channel_override;
     float &G_Dt;
 
     
@@ -142,7 +140,7 @@ class ModeCtrlSprayPPM : public Mode {
 public:
     // inherit constructor
     using Mode::Mode;
-    Number mode_number() const override { return Number::CTRL_DISABLED; }
+    Number mode_number() const override { return Number::CTRL_SPRAY_PPM; }
 
     bool init() override;
     void run() override;
