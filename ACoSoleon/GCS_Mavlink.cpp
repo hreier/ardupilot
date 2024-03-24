@@ -167,18 +167,7 @@ void GCS_MAVLINK_Soleon::send_position_target_local_ned()
 //int temp;
 void GCS_MAVLINK_Soleon::send_so_status(void) const
 {
-    if (soleon.soleon_ctrl_mode->mode_number() == (Mode::Number) 0){   //- HaRe to remove; debugging
-        mavlink_msg_so_status_send(chan,
-                                AP_HAL::millis(), 
-                                SO::TankSupervision()->_mp_status,                //-- 
-                                SO::TankSupervision()->get_level(),
-                                SO::TankSupervision()->_mp_sprayrate,
-                                SO::TankSupervision()->_mp_liter_ha,
-                                SO::TankSupervision()->_mp_line_dist,
-                                SO::TankSupervision()->_mp_planned_spd);
-    }
-    else {   
-        mavlink_msg_so_status_send(chan,
+    mavlink_msg_so_status_send(chan,
                                 AP_HAL::millis(), 
                                 soleon.soleon_ctrl_mode->_mp_status,  
                                 soleon.soleon_ctrl_mode->_fill_level,
@@ -186,7 +175,6 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
                                 soleon.soleon_ctrl_mode->_mp_liter_ha,
                                 soleon.soleon_ctrl_mode->_mp_line_dist,
                                 soleon.soleon_ctrl_mode->_mp_planned_spd);
-    }
 }
 
 
@@ -677,22 +665,17 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
     case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
         switch ((uint8_t)packet.param1){ //--process the selector
             case 0: //--HaRe only for test - remove it
-                SO::TankSupervision()->set(packet.param2);
+                soleon.soleon_ctrl_mode->_delta_fill = packet.param2;
                 gcs().send_text(MAV_SEVERITY_INFO, "SprayRateScript = %f", packet.param2);  ///-HaRe debug
                 break;
 
             case 1: //-- mission plan startup command/configuration
-                SO::TankSupervision()->_mp_liter_ha = packet.param2; //--HaRe: to remove
-                SO::TankSupervision()->_mp_line_dist = packet.param3;
-                SO::TankSupervision()->_mp_planned_spd = packet.param4;
                 soleon.soleon_ctrl_mode->_mp_liter_ha = packet.param2;
                 soleon.soleon_ctrl_mode->_mp_line_dist = packet.param3;
                 soleon.soleon_ctrl_mode->_mp_planned_spd = packet.param4;
                 break;
             
             case 2: //-- mission plan command
-                SO::TankSupervision()->_mp_cmd  = (uint8_t) packet.param2;
-                SO::TankSupervision()->_mp_dist_waypoint = packet.param3;   //--HaRe: to remove
                 soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param2;
                 soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param3;  
                 break;
@@ -704,7 +687,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
         return MAV_RESULT_ACCEPTED;
         
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
-        SO::TankSupervision()->set(packet.param1);
+        soleon.soleon_ctrl_mode->_delta_fill = packet.param1;
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
 

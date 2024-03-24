@@ -182,7 +182,7 @@ void Soleon::init_ardupilot()
         // set mode to STABILIZE will trigger mode change notification to pilot
         set_mode(Mode::Number::CTRL_DISABLED, ModeReason::UNAVAILABLE);
     }
-    TankSupervision.init(true);
+ //   TankSupervision.init(true);
     
     // flag that initialisation has completed
     ap.initialised = true;

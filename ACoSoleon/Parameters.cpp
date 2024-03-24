@@ -690,8 +690,8 @@ const AP_Param::Info Soleon::var_info[] = {
 
     // @Param: SO_CONTROLMODE
     // @DisplayName: Soleon control mode
-    // @Description: Defines the configuration mode of the soleon controller
-    // @Values: 0:disabled, 1:ppm, 3:flow, 2:pressure
+    // @Description: Defines the control mode of the soleon controller
+    // @Values: 0:disabled, 1:ppm, 2:test
     // @User: Standard
     GSCALAR(so_controlmode, "SO_CONTROLMODE", SO_CONTROLMODE_DEF),
 
@@ -708,6 +708,14 @@ const AP_Param::Info Soleon::var_info[] = {
     // @Range: 800 2200
     // @User: Advanced
     GSCALAR(so_servo_out_nospraying, "SO_SRV_NOSPRAY", SO_SERVO_OUT_NOSPRAYING_DEF),
+
+
+    // @Param: SO_SPRAYRATE_EST
+    // @DisplayName: Estimated sprayrate
+    // @Description: Estimated sprayrate for modes without flow measurement (SO_SPRAYERMODE == mission_ppm)
+    // @Range: 0 10.0
+    // @User: Advanced
+    GSCALAR(so_sprayrate_est, "SO_SPRAYRATE_EST", SO_SPRAYRATE_EST_DEF),
 
     /*
     // @Param: SO_FLOWSENSOR

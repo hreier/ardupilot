@@ -155,7 +155,7 @@
 
 
 #include "mode.h"
-#include "soTankSupervision.h"
+
 
 class Soleon : public AP_Vehicle {
 public:
@@ -450,8 +450,6 @@ private:
 #if HAL_SPRAYER_ENABLED
     AC_Sprayer sprayer;
 #endif
-
-    SO_TankSupervision TankSupervision;
 
     // Parachute release
 #if PARACHUTE == ENABLED
@@ -769,6 +767,7 @@ private:
     //-- controlmodes soleon
     ModeCtrlDisabled ctrl_disabled;
     ModeCtrlSprayPPM ctrl_spray_ppm;
+    ModeCtrlTest     ctrl_test;
 
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);

@@ -1,6 +1,5 @@
 #include "Soleon.h"
 
-static int temp;
 
 // Controller disabled - initialise the disabled controller mode
 bool ModeCtrlSprayPPM::init()
@@ -8,59 +7,27 @@ bool ModeCtrlSprayPPM::init()
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
     _fill_level = 30;   //-- let assume the tank is full
-    temp=0; //--debug
+    offset_trim_proz = 0;
+    _mode_booting = true;
+    _time_stamp  = AP_HAL::millis();
     return true;
 }
 
-
+#define start_delay 0
 // Controller disabled - runs the disabled controller mode
 void ModeCtrlSprayPPM::run()
 {
-    if (temp <= 10000)
-    {
-        temp++;        
-        if (temp<5000) return;
-        if (temp==5000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is starting up", name());  ///-HaRe debug
-            // hal.util->set_soft_armed(true);
-            return;
-        }
-        if (temp==6000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer activated");  
-            //SRV_Channels::move_servo(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get(), 0, 10000);
-            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
-            return;
-        }
-        if (temp==7000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "Test1: sprayer deactivated");  
-            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
-            return;
-        }
-        if (temp==8000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer activated");  
-            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
-            return;
-        }
-        if (temp==9000) {
-            gcs().send_text(MAV_SEVERITY_INFO, "Test2: sprayer deactivated");  
-            SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
-           return;
-        }
-        if (temp==10000) {
-        gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%s> is running", name());  ///-HaRe debug
-        }
-
-        return;
-    }
-    
     // exit immediately if the pump function has not been set-up for any servo
     if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump)) {
         return;
     }
 
-    if (_mp_liter_ha > 0.0f){
-    _mp_status |= 0x04;
+    //-- show the boot sequence
+    if (_mode_booting) {
+        _mode_booting = bootsequence();
+        return;
     }
+
       
     switch (_mp_cmd) {
         case mp_cmd_t::SPR_OFF :
@@ -74,9 +41,9 @@ void ModeCtrlSprayPPM::run()
             break;
 
         case mp_cmd_t::SPR_LEFT:
+            _mp_status = (_mp_status & 0xfc) | 0x2;
             should_be_spraying = true;
-            // _delta_fill = 0.05;
-           break;
+            break;
 
         case mp_cmd_t::SPR_BOTH:
             _mp_status = (_mp_status & 0xfc) | 0x3;
@@ -90,13 +57,20 @@ void ModeCtrlSprayPPM::run()
         }
 
     if (should_be_spraying) {
-        _mp_sprayrate = 1.5f;
-        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
+        _mp_sprayrate = g.so_sprayrate_est.get();
+        _ppm_pump = g.so_servo_out_spraying.get();
         }
     else {
         _mp_sprayrate = 0;
-        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+        _ppm_pump = g.so_servo_out_nospraying.get();
         }
+    
+    manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
+    _fill_level = modulate_value_trim(30, 30);  //- for test --> this will be 
+    _ppm_pump = modulate_value_trim(_ppm_pump, 1000);
+
+    override_ppm();              //- remote controller switch can force to run/stop the pump
+    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, _ppm_pump);
 }
 

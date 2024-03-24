@@ -462,9 +462,9 @@ bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
-        case AUX_FUNC::ALTHOLD:
+        /*case AUX_FUNC::ALTHOLD:
             do_aux_function_change_mode(Mode::Number::ALT_HOLD, ch_flag);
-            break;
+            break;*/
 
 
         case AUX_FUNC::ACRO:

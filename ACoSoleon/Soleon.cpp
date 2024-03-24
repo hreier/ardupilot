@@ -96,7 +96,7 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
 #endif
     SCHED_TASK(update_altitude,       10,    100,  42),
 
-    SCHED_TASK_CLASS(SO_TankSupervision,     &soleon.TankSupervision,       update,        10,  90,  54),
+//    SCHED_TASK_CLASS(SO_TankSupervision,     &soleon.TankSupervision,       update,        10,  90,  54),
     SCHED_TASK(three_hz_loop,          3,     75, 57),
 #if AP_SERVORELAYEVENTS_ENABLED
     SCHED_TASK_CLASS(AP_ServoRelayEvents,  &soleon.ServoRelayEvents,      update_events, 50,  75,  60),
@@ -206,7 +206,7 @@ bool Soleon::current_mode_requires_mission() const
 #endif
 }
 
-// rc_loops - reads user input from transmitter/receiver
+// rc_loops - reads user input from copter
 // called at 100hz
 void Soleon::rc_loop()
 {

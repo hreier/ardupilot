@@ -23,6 +23,130 @@ Mode::Mode(void) :
     G_Dt(soleon.G_Dt)
 { };
 
+//---------------------------------------------------------------------
+// this shows the active Controlmode with the PUMP
+// returns true as long bootsequence is ongoing
+// returns false if bootsequence is done
+#define PULS_LENGHT 1000
+bool Mode::bootsequence(void)
+{
+    uint16_t spray_pwm; 
+    uint32_t d_time = AP_HAL::millis() - _time_stamp;
+
+    if (d_time >= (PULS_LENGHT* ((int)mode_number()+1))){
+        _time_stamp = AP_HAL::millis();
+        return false; //- done
+    }
+    
+    SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump, spray_pwm);
+
+    d_time %= PULS_LENGHT;
+
+    if (d_time < PULS_LENGHT/2){
+        if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
+    }
+    else {
+        if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+    }
+
+    return true; 
+}
+
+//-------------------------------------------------------------------------
+// This modulates in_value with the channel_offset trim (offset_trim_proz)
+// max_deviation defines the maximal value for the modulation;
+// this would be the value modification in case the offset_trim_proz == 1.0;
+// return: the value with offset
+float Mode::modulate_value_trim(float in_value, float max_deviation)
+{
+    float offset_val;
+
+    offset_val = (max_deviation * offset_trim_proz) / 100;   //- the offset
+
+    return (in_value + offset_val);
+}
+
+//-------------------------------------------------------------------------
+// This overrides the Pump server PPM signal depending on the override RCin
+// handles the _mp_status ready bit;
+// manipulates _ppm_pump if overriding
+// Note: this needs to be last manipulation before to update servo channel
+void Mode::override_ppm(void)
+{
+    RC_Channel::AuxSwitchPos override_sw = channel_override->get_aux_switch_pos();
+
+    switch (override_sw)
+    {
+        //-- Pump forced to stand still
+        default:
+        case RC_Channel::AuxSwitchPos::LOW:
+            _mp_status &= ~0x04;                            //- set sprayer status to not ready 
+            _ppm_pump = g.so_servo_out_nospraying.get();    //- override with no spaying ppm-value
+            offset_trim_proz = 0;
+            break;
+
+        //-- Pump controlled by mission
+        case RC_Channel::AuxSwitchPos::MIDDLE:
+            _mp_status |= 0x04;                             //- sprayer is ready 
+            break;
+
+        //-- Pump forced to run
+        case RC_Channel::AuxSwitchPos::HIGH:
+            _mp_status &= ~0x04;                            //- set sprayer status to not ready 
+            _ppm_pump = g.so_servo_out_spraying.get();      //- override with spaying ppm-value
+            break;
+    }
+}
+
+//-------------------------------------------------------------------------
+// This manages the offset channel from remote control  
+// - inc/dec the offset percent value in 0.5% steps   
+// - limit between -5% to 5%
+// - verbose: send info message to Ground Station if offset reached limits or 0
+#define TRIM_DELTA 0.5
+#define OFFSET_MAX 5.0
+#define OFFSET_MIN -5.0
+void Mode::manage_offset_trim(bool verbose)
+{
+    RC_Channel::AuxSwitchPos channel_pos = channel_offset->get_aux_switch_pos();
+
+    switch (channel_pos)
+    {
+        //-- TrimDec
+        case RC_Channel::AuxSwitchPos::LOW:
+            if (_last_offset_trim_pos == RC_Channel::AuxSwitchPos::MIDDLE) offset_trim_proz -= TRIM_DELTA;
+            break;
+
+        //-- Middle
+        default:
+        case RC_Channel::AuxSwitchPos::MIDDLE:
+            if (_last_offset_trim_pos == RC_Channel::AuxSwitchPos::MIDDLE) break;
+            
+            if (fabs(offset_trim_proz) < 0.001) {
+                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim zero percent");
+                break;
+            }
+            if (offset_trim_proz >= OFFSET_MAX) {
+                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim at Max value: %f", OFFSET_MAX);
+                offset_trim_proz = OFFSET_MAX;
+                break;
+            }
+            if (offset_trim_proz <= OFFSET_MIN) {
+                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim at Min value: %f", OFFSET_MIN);
+                offset_trim_proz = OFFSET_MIN;
+            }
+            break;
+
+        //-- TrimInc
+        case RC_Channel::AuxSwitchPos::HIGH:
+            if (_last_offset_trim_pos == RC_Channel::AuxSwitchPos::MIDDLE) offset_trim_proz += TRIM_DELTA;
+            break;
+    }
+
+    _last_offset_trim_pos = channel_pos;  //- store actual value to 
+}
+
+
 // return the static controller object corresponding to supplied mode
 Mode *Soleon::mode_from_mode_num(const Mode::Number mode)
 {
@@ -63,7 +187,7 @@ bool Soleon::gcs_mode_enabled(const Mode::Number mode_num)
     static const uint8_t mode_list [] {
         (uint8_t)Mode::Number::CTRL_DISABLED,
         (uint8_t)Mode::Number::CTRL_SPRAY_PPM,
-        (uint8_t)Mode::Number::ALT_HOLD,
+        (uint8_t)Mode::Number::CTRL_TEST,
         (uint8_t)Mode::Number::AUTO,
         (uint8_t)Mode::Number::GUIDED,
         (uint8_t)Mode::Number::LOITER,
@@ -138,6 +262,9 @@ bool Soleon::set_mode(Mode::Number mode, ModeReason reason)
       case Mode::Number::CTRL_SPRAY_PPM:
         fred = &ctrl_spray_ppm;
         break;
+      case Mode::Number::CTRL_TEST:
+        fred = &ctrl_test;
+        break;
     }
 
     if (fred == nullptr) {
@@ -160,6 +287,11 @@ bool Soleon::set_mode(const uint8_t new_mode, const ModeReason reason)
 void Soleon::update_soleon_ctrl_mode()
 {
     soleon_ctrl_mode->run();
+    
+    //- look if the control mode has be changed (configuration change)
+    if (soleon_ctrl_mode->mode_number() !=  (enum Mode::Number)g.so_controlmode.get()){
+        set_mode((enum Mode::Number)g.so_controlmode.get(), ModeReason::RC_COMMAND);
+    }
 }
 
 // exit_mode - high level call to organise cleanup as a flight mode is exited

@@ -15,7 +15,7 @@ public:
     enum class Number : uint8_t {
         CTRL_DISABLED =     0,  // Soleon controller disabled
         CTRL_SPRAY_PPM =    1,  // Soleon spray controller generate ppm signals
-        ALT_HOLD =      2,  // manual airframe angle with automatic throttle
+        CTRL_TEST =         2,  // Soleon controller for test 
         AUTO =          3,  // fully automatic waypoint control using mission commands
         GUIDED =        4,  // fully automatic fly to coordinate or fly at velocity/direction using GCS immediate commands
         LOITER =        5,  // automatic horizontal acceleration with automatic throttle
@@ -76,8 +76,10 @@ public:
 
 //private:
     //---- Soleon Spraycontrollers (mostly from missionplan) ----
-    float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate;
+    float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate, _ppm_pump;
     mp_cmd_t  _mp_cmd; 
+    float _delta_fill;
+    bool _mode_booting;
 
     //---- Soleon Spraycontroller (measured; calculated)
     float        _fill_level;
@@ -89,10 +91,17 @@ public:
     #define MASK_STAT_ERR_PMP                (1<<3)
     #define MASK_STAT_ERR_NOZZLE             (1<<4)
     uint8_t      _mp_status;
+    
+    uint32_t     _time_stamp; 
+    RC_Channel::AuxSwitchPos _last_offset_trim_pos;
+    float offset_trim_proz;
    
 
 protected:
-
+    virtual void override_ppm();
+    virtual float modulate_value_trim(float in_value, float max_deviation);
+    virtual bool bootsequence(void);
+    virtual void manage_offset_trim(bool verbose);
 
     // convenience references to avoid code churn in conversion:
     Parameters &g;
@@ -130,7 +139,6 @@ protected:
 
     const char *name() const override { return "DISABLED"; }
     const char *name4() const override { return "DIS"; }
-
 };
 
 
@@ -152,5 +160,31 @@ protected:
     const char *name4() const override { return "SPPM"; }
 
     bool should_be_spraying;
+
+};
+
+
+
+// --- Control module for testing  
+class ModeCtrlTest : public Mode {
+
+public:
+    // inherit constructor
+    using Mode::Mode;
+    Number mode_number() const override { return Number::CTRL_TEST; }
+
+    bool init() override;
+    void run() override;
+
+
+protected:
+
+    const char *name() const override { return "CTR_TESTING"; }
+    const char *name4() const override { return "TEST"; }
+
+private:
+
+    
+
 
 };

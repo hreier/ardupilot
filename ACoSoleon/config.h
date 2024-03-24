@@ -619,6 +619,10 @@
 # define SO_SERVO_OUT_NOSPRAYING_DEF 1100
 #endif
 
+#ifndef SO_SPRAYRATE_EST_DEF
+# define SO_SPRAYRATE_EST_DEF 1.5
+#endif
+
 
 
 //////////////////////////////////////////////////////////////////////////////
