@@ -67,8 +67,8 @@ void ModeCtrlSprayPPM::run()
     
     manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
-    _fill_level = modulate_value_trim(30, 30);  //- for test --> this will be 
-    _ppm_pump = modulate_value_trim(_ppm_pump, 1000);
+    _fill_level = modulate_value_trim(30, 30);  //- for test --> this will be removed; _fill_level comes from wägemodule...
+    //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- may be needs to be validated if between the limits???
 
     override_ppm();              //- remote controller switch can force to run/stop the pump
     SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, _ppm_pump);
