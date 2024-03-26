@@ -123,16 +123,16 @@ void Mode::manage_offset_trim(bool verbose)
             if (_last_offset_trim_pos == RC_Channel::AuxSwitchPos::MIDDLE) break;
             
             if (fabs(offset_trim_proz) < 0.001) {
-                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim zero percent");
+                if (verbose) gcs().send_text(MAV_SEVERITY_NOTICE, "Offsettrim zero percent");
                 break;
             }
             if (offset_trim_proz >= OFFSET_MAX) {
-                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim at Max value: %f", OFFSET_MAX);
+                if (verbose) gcs().send_text(MAV_SEVERITY_NOTICE, "Offsettrim at Max value: %f", OFFSET_MAX);
                 offset_trim_proz = OFFSET_MAX;
                 break;
             }
             if (offset_trim_proz <= OFFSET_MIN) {
-                if (verbose) gcs().send_text(MAV_SEVERITY_INFO, "Offsettrim at Min value: %f", OFFSET_MIN);
+                if (verbose) gcs().send_text(MAV_SEVERITY_NOTICE, "Offsettrim at Min value: %f", OFFSET_MIN);
                 offset_trim_proz = OFFSET_MIN;
             }
             break;
