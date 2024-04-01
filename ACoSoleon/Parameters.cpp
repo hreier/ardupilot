@@ -567,12 +567,6 @@ const AP_Param::Info Soleon::var_info[] = {
     GOBJECT(can_mgr,        "CAN_",       AP_CANManager),
 #endif
 
-#if HAL_SPRAYER_ENABLED
-    // @Group: SPRAY_
-    // @Path: ../libraries/AC_Sprayer/AC_Sprayer.cpp
-    GOBJECT(sprayer,                "SPRAY_",       AC_Sprayer),
-#endif
-
 #if AP_SIM_ENABLED
     // @Group: SIM_
     // @Path: ../libraries/SITL/SITL.cpp
@@ -612,6 +606,12 @@ const AP_Param::Info Soleon::var_info[] = {
     // @Path: SO_RCMapper.cpp
     GOBJECT(so_rcmap, "SO_RCMAP_",        SoRCMapper),
 
+    
+    /*// @Group: SO_SC
+    // @Path: SO_WeightSens.cpp
+    GOBJECT(so_scale,        "SO_SC",       WeightSens),*/
+
+    
 
 #if HAL_NAVEKF2_AVAILABLE
     // @Group: EK2_
@@ -664,17 +664,7 @@ const AP_Param::Info Soleon::var_info[] = {
     // @Path: ../libraries/AP_RPM/AP_RPM.cpp
     GOBJECT(rpm_sensor, "RPM", AP_RPM),
 #endif
-/* HaRe
-#if HAL_ADSB_ENABLED
-    // @Group: ADSB_
-    // @Path: ../libraries/AP_ADSB/AP_ADSB.cpp
-    GOBJECT(adsb,                "ADSB_", AP_ADSB),
 
-    // @Group: AVD_
-    // @Path: ../libraries/AP_Avoidance/AP_Avoidance.cpp
-    GOBJECT(avoidance_adsb, "AVD_", AP_Avoidance_Copter),
-#endif
-*/
     // @Group: NTF_
     // @Path: ../libraries/AP_Notify/AP_Notify.cpp
     GOBJECT(notify, "NTF_",  AP_Notify),
@@ -1154,6 +1144,11 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // ID 62 is reserved for the SHOW_... parameters from the Skybrush fork at
     // https://github.com/skybrush-io/ardupilot
+
+    // @Group: SO_SC
+    // @Path: SO_WeightSens.cpp
+    AP_SUBGROUPINFO(so_scale, "SO_SC", 63, ParametersG2, WeightSens),
+
 
     AP_GROUPEND
 };

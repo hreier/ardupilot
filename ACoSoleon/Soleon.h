@@ -58,6 +58,7 @@
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
 
 #include "SO_RCMapper.h"        // Soleon RC input mapping library
+#include "SO_WeightSens.h"        // Soleon RC input mapping library
 
 
 // Configuration
@@ -248,6 +249,7 @@ private:
 #if AP_RPM_ENABLED
     AP_RPM rpm_sensor;
 #endif
+    
 
     // Inertial Navigation EKF - different viewpoint
     AP_AHRS_View *ahrs_view;

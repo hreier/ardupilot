@@ -86,6 +86,8 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
 #endif
     SCHED_TASK(update_batt_compass,   10,    120, 15),
     SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&soleon.g2.rc_channels, read_aux_all,    10,  50,  18),
+    SCHED_TASK_CLASS(WeightSens,  &soleon.g2.so_scale,                  update,          10,  50,  18),
+
     SCHED_TASK(auto_trim,             10,     75,  30),
 
 #if HAL_PROXIMITY_ENABLED

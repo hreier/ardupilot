@@ -16,12 +16,12 @@ extern const AP_HAL::HAL &hal;
 // table of user settable parameters 
 const AP_Param::GroupInfo WeightSens::var_info[] = {
     // @Group: 1_
-    // @Path: AP_WeightSens_Params.cpp
-    AP_SUBGROUPINFO(params[0], "1_", 25, WeightSens, SO_WeightSens_Params),
+    // @Path: SO_WeightSens_Params.cpp
+    AP_SUBGROUPINFO(params[0], "1_", 1, WeightSens, SO_WeightSens_Params),
 
     // @Group: 1_
-    // @Path: AP_WeightSens_Wasp.cpp,AP_WeightSens_Benewake_CAN.cpp,AP_WeightSens_USD1_CAN.cpp
-    AP_SUBGROUPVARPTR(drivers[0], "1_",  57, WeightSens, backend_var_info[0]),
+    // @Path: SO_WeightSens_FX29_I2C.cpp
+    AP_SUBGROUPVARPTR(drivers[0], "1_",  2, WeightSens, backend_var_info[0]),
 
 #if WEIGHTSENS_MAX_INSTANCES > 1
     // @Group: 2_
@@ -32,7 +32,7 @@ const AP_Param::GroupInfo WeightSens::var_info[] = {
     // @Path: AP_WeightSens_Wasp.cpp,AP_WeightSens_Benewake_CAN.cpp,AP_WeightSens_USD1_CAN.cpp
     AP_SUBGROUPVARPTR(drivers[1], "2_",  58, WeightSens, backend_var_info[1]),
 #endif
-// -- to extend like this in case of more instances should be possible 
+// -- to extend like this in case of more instances should be needed 
 
     AP_GROUPEND
 };
@@ -42,6 +42,7 @@ const AP_Param::GroupInfo *WeightSens::backend_var_info[WEIGHTSENS_MAX_INSTANCES
 WeightSens::WeightSens()
 {
     AP_Param::setup_object_defaults(this, var_info);
+    num_instances = 0;
 
     _singleton = this;
 }
@@ -184,6 +185,7 @@ void WeightSens::Log_RFND() const
 {
     if (_log_rfnd_bit == uint32_t(-1)) {
         return;
+        
     }
 
     AP_Logger &logger = AP::logger();

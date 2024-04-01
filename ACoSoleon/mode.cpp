@@ -33,7 +33,7 @@ bool Mode::bootsequence(void)
     uint16_t spray_pwm; 
     uint32_t d_time = AP_HAL::millis() - _time_stamp;
 
-    if (d_time >= (PULS_LENGHT* ((int)mode_number()+1))){
+    if (d_time >= (((uint32_t)mode_number()+1) * PULS_LENGHT)){
         _time_stamp = AP_HAL::millis();
         return false; //- done
     }

@@ -27,7 +27,12 @@ SO_WeightSens_FX29_I2C::SO_WeightSens_FX29_I2C(WeightSens::WeightSens_State &_st
         SO_WeightSens_Params &_params,
         AP_HAL::OwnPtr<AP_HAL::I2CDevice> dev)
     : SO_WeightSens_Backend(_state, _params)
-    , _dev(std::move(dev)) {};
+    , _dev(std::move(dev)) {
+
+     //   AP_Param::setup_object_defaults(this, var_info);
+     //   state.var_info = var_info;
+
+    };
 
 
 /*
@@ -75,6 +80,8 @@ bool SO_WeightSens_FX29_I2C::write_bytes(uint8_t *write_buf_u8, uint32_t len_u8)
  */
 bool SO_WeightSens_FX29_I2C::init()
 {
+    //    gcs().send_text(MAV_SEVERITY_INFO, "FX29 init"); //-- the activation routine send similar message
+
     if (legacy_init()) {
         DEV_PRINTF("Found FX29-weightsensors\n");
         return true;

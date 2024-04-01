@@ -392,6 +392,9 @@ public:
         k_param_so_servo_out_nospraying,
         k_param_so_rcmap,
         k_param_so_sprayrate_est,
+    
+    //    k_param_so_scale,
+    
     //    k_param_so_flow_sensor,
     //    k_param_so_pressure_sensor,
     //    k_param_so_arming,
@@ -608,6 +611,10 @@ public:
     
     // control over servo output ranges
     SRV_Channels servo_channels;
+
+    WeightSens  so_scale;
+
+
 
 #if MODE_SMARTRTL_ENABLED == ENABLED
     // Safe RTL library

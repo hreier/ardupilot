@@ -9,23 +9,23 @@ const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Description: Type of connected rangefinder
     // @Values: 0:None,1:FX29_I2C
     // @User: Standard
-    AP_GROUPINFO_FLAGS("TYPE", 1, SO_WeightSens_Params, type, 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO("TYPE", 1, SO_WeightSens_Params, type, 1),
 
     // @Param: MODE
     // @DisplayName: WeightSensor mode
     // @Description: mode of connected WeightSensor
     // @Values: 0:disabled,1:enabled,2:zero,9:scanning,10:set_addr,11:set_addr+1,12:set_addr+2
     // @User: Standard
-    AP_GROUPINFO_FLAGS("MODE", 1, SO_WeightSens_Params, mode, 0, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO("MODE", 2, SO_WeightSens_Params, mode, 0),
 
 
     // @Param: OFFSET
-    // @DisplayName: WeithSensor offset
+    // @DisplayName: WeightSensor offset
     // @Description: Offset in liters for weight zero adjustment. (can also be set with mode = 2)
     // @Units: l
     // @Increment: 0.001
     // @User: Standard
-    AP_GROUPINFO("OFFSET",  4, SO_WeightSens_Params, offset, 0.0f),
+    AP_GROUPINFO("OFFSET",  3, SO_WeightSens_Params, offset, 0.0f),
     
     // @Param: ADDR
     // @DisplayName: Bus address of sensor
@@ -33,7 +33,7 @@ const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Range: 0 127
     // @Increment: 1
     // @User: Standard
-    AP_GROUPINFO("ADDR", 23, SO_WeightSens_Params, address, 40),
+    AP_GROUPINFO("ADDR", 4, SO_WeightSens_Params, address, 40),
 
     // @Param: SENSRNG
     // @DisplayName: Sensor range
@@ -41,7 +41,7 @@ const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Units: N
     // @Range: 0 1000
     // @User: Standard
-    AP_GROUPINFO("PWRRNG", 11, SO_WeightSens_Params, range, 500),
+    AP_GROUPINFO("PWRRNG", 5, SO_WeightSens_Params, range, 500),
 
 
     AP_GROUPEND
