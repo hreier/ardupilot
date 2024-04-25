@@ -129,8 +129,8 @@ void Soleon::init_ardupilot()
     barometer.set_log_baro_bit(MASK_LOG_IMU);
     barometer.calibrate();
 
-    // initialise rangefinder
-    init_rangefinder();
+    // initialise the scale module
+    g2.so_scale.init();
 
 #if HAL_PROXIMITY_ENABLED
     // init proximity sensor

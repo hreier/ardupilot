@@ -5,8 +5,8 @@
 // table of user settable parameters
 const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Param: TYPE
-    // @DisplayName: Rangefinder type
-    // @Description: Type of connected rangefinder
+    // @DisplayName: WeightSensor type
+    // @Description: Type of connected WeightSensor
     // @Values: 0:None,1:FX29_I2C
     // @User: Standard
     AP_GROUPINFO("TYPE", 1, SO_WeightSens_Params, type, 1),

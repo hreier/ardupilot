@@ -37,7 +37,9 @@ public:
     // true if sensor is returning data
     bool has_data() const;
 
-
+    float get_measure();
+    char * get_gcs_message() {msg_updated = false; return gcs_message;}
+    bool is_new_gcs_message() {return msg_updated;}
 
     // return system time of last successful read from the sensor
     uint32_t last_reading_ms() const { return state.last_reading_ms; }
@@ -54,8 +56,13 @@ protected:
     // set status and update valid_count
     void set_status(WeightSens::Status status);
 
+    bool set_gcs_message(const char * msg);
+
     WeightSens::WeightSens_State &state;
     SO_WeightSens_Params &params;
+
+    char gcs_message[100];
+    bool msg_updated;
 
     // semaphore for access to shared frontend data
     HAL_Semaphore _sem;

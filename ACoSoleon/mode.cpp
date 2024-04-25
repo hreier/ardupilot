@@ -286,7 +286,17 @@ bool Soleon::set_mode(const uint8_t new_mode, const ModeReason reason)
 // called at 100hz or more
 void Soleon::update_soleon_ctrl_mode()
 {
-    soleon_ctrl_mode->run();
+    if (g2.so_scale.get_status(0) == WeightSens::Status::setAdd)
+    {   //-- backend is in address configuration mode --> switch of the soleon controller
+        //                                                instead forward status messages from backend driver to the GCS 
+        if (g2.so_scale.is_new_gcs_message(0)){
+            gcs().send_text(MAV_SEVERITY_INFO, "%s", g2.so_scale.get_gcs_message(0) ); //-- the activation routine send similar message
+        }
+    }
+    else
+    {
+        soleon_ctrl_mode->run();
+    }
     
     //- look if the control mode has be changed (configuration change)
     if (soleon_ctrl_mode->mode_number() !=  (enum Mode::Number)g.so_controlmode.get()){

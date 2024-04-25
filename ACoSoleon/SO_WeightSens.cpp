@@ -1,5 +1,8 @@
 /*
-   This is Soleon weight sensor driver frontend 
+   This is Soleon scale driver frontend:
+   > implements a scale that uses tree weight sensors for measurement on the backend site
+   > prepared to support also more scales
+
  */
 
 #include "SO_WeightSens.h"
@@ -51,23 +54,17 @@ WeightSens::WeightSens()
   initialise the WeightSens class. We do detection of attached weight modules here. 
   For now we won't allow for hot-plugging of weightsensors.
  */
-void WeightSens::init(enum Rotation orientation_default)
+void WeightSens::init()
 {
     if (num_instances != 0) {
         // don't re-init if we've found some sensors already
         return;
     }
 
-    // set orientation defaults
-    //for (uint8_t i=0; i<WEIGHTSENS_MAX_INSTANCES; i++) {
-    //    params[i].orientation.set_default(orientation_default);
-    //}
-
     for (uint8_t i=0; i<WEIGHTSENS_MAX_INSTANCES; i++) {
-        // serial_instance will be increased inside detect_instance
-        // if a serial driver is loaded for this instance
+        // detect and load the configured drivers
         WITH_SEMAPHORE(detect_sem);
-        //detect_instance(i, serial_instance);
+        detect_instance(i);
         if (drivers[i] != nullptr) {
             // we loaded a driver for this instance, so it must be
             // present (although it may not be healthy). We use MAX()
@@ -133,16 +130,16 @@ void WeightSens::detect_instance(uint8_t instance)
     switch (_type) {
 
     case Type::FX29_I2C:
-        //_add_backend(SO_WeightSens_FX29_I2C::detect(state[instance], params[instance],
-        //                                           hal.i2c_mgr->get_device(HAL_RANGEFINDER_LIGHTWARE_I2C_BUS, params[instance].address)),
-        //                                           instance);
+        _add_backend(SO_WeightSens_FX29_I2C::detect(state[instance], params[instance],
+                                                   hal.i2c_mgr->get_device(HAL_WEIGHTSENSOR_I2C_BUS, params[instance].address)),
+                                                   instance);
     
-        FOREACH_I2C(i) {
+        /*FOREACH_I2C(i) {
              if (_add_backend(SO_WeightSens_FX29_I2C::detect(state[instance], params[instance],
                                                            hal.i2c_mgr->get_device(i, params[instance].address)), instance)) {
                      break;
                  }
-             }
+             }*/
 
         break;
     
@@ -177,7 +174,32 @@ SO_WeightSens_Backend *WeightSens::get_backend(uint8_t id) const {
     return drivers[id];
 };
 
+// returns the WeightSens measured value [kg / l]
+float WeightSens::get_measure(uint8_t id)
+{
+    if (id >= WEIGHTSENS_MAX_INSTANCES) return 0;
+    else return drivers[id]->get_measure();
+}
 
+// returns the WeightSens status
+WeightSens::Status WeightSens::get_status(uint8_t id)
+{
+    if (id >= WEIGHTSENS_MAX_INSTANCES) return WeightSens::Status::NotConnected;
+    else return drivers[id]->status();
+}
+
+// manage to forward backend messages
+bool WeightSens::is_new_gcs_message(uint8_t id)
+{
+    if (id >= WEIGHTSENS_MAX_INSTANCES) return false;
+    else return drivers[id]->is_new_gcs_message();
+}
+    
+const char * WeightSens::get_gcs_message(uint8_t id)
+{
+    if (id >= WEIGHTSENS_MAX_INSTANCES) return 0;
+    else return drivers[id]->get_gcs_message();
+}
 
 
 // Write an RFND (weightsens) packet
@@ -241,15 +263,17 @@ bool WeightSens::prearm_healthy(char *failure_msg, const uint8_t failure_msg_len
         case Status::NotConnected:
             hal.util->snprintf(failure_msg, failure_msg_len, "WeightSens %X: Not Connected", i + 1);
             return false;
-        case Status::OutOfRangeLow:
-        case Status::OutOfRangeHigh:
+        case Status::SensorError:
         case Status::Good:  
+        default:
             break;
         }
     }
 
     return true;
 }
+
+
 
 WeightSens *WeightSens::_singleton;
 

@@ -6,7 +6,7 @@ bool ModeCtrlSprayPPM::init()
 {
     gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
-    _fill_level = 30;   //-- let assume the tank is full
+    _fill_level = g2.so_scale.get_measure(0);
     offset_trim_proz = 0;
     _mode_booting = true;
     _time_stamp  = AP_HAL::millis();
@@ -67,7 +67,9 @@ void ModeCtrlSprayPPM::run()
     
     manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
-    _fill_level = modulate_value_trim(30, 30);  //- for test --> this will be removed; _fill_level comes from wägemodule...
+    _fill_level = g2.so_scale.get_measure(0); 
+
+    //modulate_value_trim(30, 30);  //- for test --> this will be removed; _fill_level comes from wägemodule...
     //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- may be needs to be validated if between the limits???
 
     override_ppm();              //- remote controller switch can force to run/stop the pump

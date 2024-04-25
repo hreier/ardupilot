@@ -46,14 +46,14 @@ public:
     enum class Status {
         NotConnected = 0,
         NoData,
-        OutOfRangeLow,
-        OutOfRangeHigh,
-        Good
+        Good,
+        SensorError,
+        setAdd
     };
 
     // The WeightSens_State structure is filled in by the backend driver
     struct WeightSens_State {
-        float weight_n;                 // weight in newton
+        float weight_kg;                // weight in kg
         enum WeightSens::Status status; // sensor status
         uint8_t  range_valid_count;     // number of consecutive valid readings (maxes out at 10)
         uint32_t last_reading_ms;       // system time of last successful update from sensor
@@ -80,7 +80,7 @@ public:
     bool prearm_healthy(char *failure_msg, const uint8_t failure_msg_len) const;
 
     // detect and initialise any available rangefinders  HaRe remove rotation_default
-    void init(enum Rotation orientation_default);
+    void init(void);
 
     // update state of all rangefinders. Should be called at around
     // 10Hz from main loop
@@ -99,6 +99,16 @@ public:
         return id >= WEIGHTSENS_MAX_INSTANCES? 0 : uint8_t(params[id].address.get());
     }
     
+    // returns the WeightSens measured value [kg / l]
+    float get_measure(uint8_t id);
+
+    // returns the WeightSens status
+    WeightSens::Status get_status(uint8_t id);
+    
+    // backend messages
+    bool is_new_gcs_message(uint8_t id);
+    const char * get_gcs_message(uint8_t id);
+
 
 
     static WeightSens *get_singleton(void) { return _singleton; }
