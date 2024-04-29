@@ -175,6 +175,9 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
                                 soleon.soleon_ctrl_mode->_mp_liter_ha,
                                 soleon.soleon_ctrl_mode->_mp_line_dist,
                                 soleon.soleon_ctrl_mode->_mp_planned_spd);
+
+    gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: tank level = %fl",  soleon.soleon_ctrl_mode->_fill_level);  //-- debugging
+    
 }
 
 

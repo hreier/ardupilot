@@ -31,6 +31,7 @@ protected:
     uint8_t setAdd, scanAdd, foundAdd, add_cnt;
     uint16_t sens0_err, sens1_err, sens2_err;
     float sens0_row, sens1_row, sens2_row;
+    float weight_filtered;
     uint32_t time_stamp;
     
 
@@ -57,22 +58,11 @@ private:
     void _stm_init(); 
     void _measure(); 
     void _measure_s0(); 
-
-    void _set_add();
-    void _set_add_disc_all();
-    void _set_add_conn();
-    void _set_add_cmd();
-    void _set_add_cmd1();
-    void _set_add_cmd2();
-    void _set_add_cmd3();
-    void _set_add_done();
-
-
-    void _set_add_disc();
-    void _set_add_reconn();
+    void _measure_s1(); 
+    void _measure_s2(); 
 
     float fx29_to_kgL (int16_t fx29_measure);
-    bool  checkTimeoutSetAddr();
+    
     AP_HAL::OwnPtr<AP_HAL::I2CDevice> _dev;
 };
 

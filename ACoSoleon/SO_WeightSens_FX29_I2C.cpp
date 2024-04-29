@@ -110,19 +110,7 @@ void SO_WeightSens_FX29_I2C::_stm_init()
     case drv_mode::goMEASURE:
         timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure;
         break;
-        
-    case drv_mode::setAdd0:
-    case drv_mode::setAdd1:
-    case drv_mode::setAdd2:
-        setAdd = (int8_t)act_mode - (int8_t) drv_mode::setAdd0 + params.address;
-        set_status(WeightSens::Status::setAdd);
-        
-        char * str;
-        asprintf(&str, "Set I2C-address %u: disconnect all devices", setAdd);
-        set_gcs_message(str);
-        
-        timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add;
-        break;
+
     
     default: 
         set_status(WeightSens::Status::NoData);
@@ -141,7 +129,12 @@ void SO_WeightSens_FX29_I2C::_measure()
     
     _dev->set_address(params.address);
     _dev->transfer(0, 0, buf, 0);
-    //-- HaRe todo: add trigger for the other two sensors
+
+    _dev->set_address(params.address+1);
+    _dev->transfer(0, 0, buf, 0);
+ 
+    _dev->set_address(params.address+2);
+    _dev->transfer(0, 0, buf, 0);
     
     timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure_s0;
 }
@@ -151,7 +144,8 @@ void SO_WeightSens_FX29_I2C::_measure_s0()
 {
     be16_t val;
 
-    // read the high and low byte distance registers
+    _dev->set_address(params.address);
+
     if (_dev->transfer(0, 0, (uint8_t *)&val, sizeof(val))) {
         int16_t signed_val = int16_t(be16toh(val));
         signed_val &= 0x3FFF;  //mask bit 15 and 14; status info
@@ -163,192 +157,61 @@ void SO_WeightSens_FX29_I2C::_measure_s0()
         if (sens0_err < SENS_ERR_LIMIT_CNT) sens0_err += 2;
     }
 
-    //-- HaRe todo: replace this with measurement of the other sensors (load machine _measure_s1/_measure_s2)
-    state.weight_kg = sens0_row;
+
+    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure_s1;
+}
+
+
+//-- read measured data from sensor 1 ---
+void SO_WeightSens_FX29_I2C::_measure_s1()
+{
+    be16_t val;
+
+    _dev->set_address(params.address+1);
+    
+    if (_dev->transfer(0, 0, (uint8_t *)&val, sizeof(val))) {
+        int16_t signed_val = int16_t(be16toh(val));
+        signed_val &= 0x3FFF;  //mask bit 15 and 14; status info
+        sens1_row = fx29_to_kgL(signed_val);
+
+        if (sens1_err > 0) sens1_err --;
+    }
+    else{
+        if (sens1_err < SENS_ERR_LIMIT_CNT) sens1_err += 2;
+    }
+
+    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure_s2;
+}
+
+//-- read measured data from sensor 2 ---
+#define FILT_LENGHT  3
+void SO_WeightSens_FX29_I2C::_measure_s2()
+{
+    be16_t val;
+    
+
+    _dev->set_address(params.address+2);
+    
+    if (_dev->transfer(0, 0, (uint8_t *)&val, sizeof(val))) {
+        int16_t signed_val = int16_t(be16toh(val));
+        signed_val &= 0x3FFF;  //mask bit 15 and 14; status info
+        sens2_row = fx29_to_kgL(signed_val);
+
+        if (sens2_err > 0) sens2_err --;
+    }
+    else{
+        if (sens2_err < SENS_ERR_LIMIT_CNT) sens2_err += 2;
+    }
+
+    //out = (out*FILT_LENGHT + in) / (FILT_LENGHT+1); //FILT_LENGHT == 0 --> without filtering
+    weight_filtered = weight_filtered * FILT_LENGHT + sens0_row  + sens1_row + sens2_row;
+    weight_filtered = weight_filtered / (FILT_LENGHT+1);
+    state.weight_kg = weight_filtered - params.offset;
 
     if ((drv_mode)((int) params.mode) != drv_mode::goMEASURE)  timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_stm_init;
     else                                                       timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure;
 }
 
-
-//----- set the I2C address init --
-void SO_WeightSens_FX29_I2C::_set_add()
-{ //- init the set address module 
-    time_stamp = AP_HAL::millis();
-    scanAdd =  setAdd;
-    foundAdd = setAdd;
-    add_cnt = 0;
-
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_disc_all;
-}
-
-//----- set the I2C address disconnect all --
-void SO_WeightSens_FX29_I2C::_set_add_disc_all()
-{ //- wait for all I2C devices being disconnected
-    uint8_t buf[2];
-    
-    _dev->set_address(scanAdd);
-    if (_dev->transfer(0, 0, buf, 2))
-    {  //-- this one is connected 
-        foundAdd = scanAdd;
-        checkTimeoutSetAddr();
-        return;
-    }
-
-    time_stamp = AP_HAL::millis();
-    if (scanAdd < 127) scanAdd++;
-    else               scanAdd = 0;
-
-    if (scanAdd == foundAdd) 
-    {
-        timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_conn;
-        set_gcs_message("Now connect the weight sensor");
-        return;
-    }
-};
-
-//----- set the I2C address: wait for one sensor to be connected --
-void SO_WeightSens_FX29_I2C::_set_add_conn()
-{
-    uint8_t buf[2];
-    
-    _dev->set_address(scanAdd);
-    if (!_dev->transfer(0, 0, buf, 2))
-    {  //-- this is not connected 
-        if (scanAdd < 127) scanAdd++;
-        else               scanAdd = 0;
-        //foundAdd = scanAdd;
-        checkTimeoutSetAddr();
-        return;
-    }
-
-    char * str;
-    
-    if (scanAdd == setAdd)
-    {
-        asprintf(&str, "Sensor found [addr:%u]; DONE!!", scanAdd);
-        set_gcs_message(str);
-        timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_done;
-        return;
-    }
-
-    time_stamp = AP_HAL::millis();
-    foundAdd = scanAdd;
-    
-    asprintf(&str, "Sensor found [addr:%u]; disconnect once again!!!", scanAdd);
-    set_gcs_message(str);
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_cmd;
-}
-
-
-//----- set the I2C address: wait until disconnected --
-void SO_WeightSens_FX29_I2C::_set_add_cmd()
-{
-    uint8_t buf[2];
-    
-    _dev->set_address(scanAdd);
-    if (_dev->transfer(0, 0, buf, 2))
-    {  //-- not yet disconnected 
-        checkTimeoutSetAddr();
-        return;
-    }
-
-    time_stamp = AP_HAL::millis();
-
-    set_gcs_message("And again CONNECT!!!");
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_cmd1;
-}
-    
-//--- now enter into command mode ---
-void SO_WeightSens_FX29_I2C::_set_add_cmd1()
-{
-    uint8_t buf[3];
-
-    //-- enter command mode within 6mSec after sensor power on --
-    buf[0] = 0xA0;   //- enter command mode
-    buf[1] = 0x0;
-    buf[2] = 0x0;
-
-    while (!_dev->transfer(buf, 3, 0, 0))
-    {  //-- wait for power cycle --
-        if (checkTimeoutSetAddr()) return;
-    }
-
-    _dev->transfer(buf, 3, 0, 0);
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_cmd2;
-}
-    
-//--- command mode active; read the eeprom word 2 ---
-void SO_WeightSens_FX29_I2C::_set_add_cmd2()
-{
-    uint8_t buf[3];
-
-    buf[0] = 0x2;   //- eeprom word 2
-    buf[1] = 0x0;
-    buf[2] = 0x0;
-
-    _dev->transfer(buf, 3, 0, 0);
-
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_cmd3;
-}
-
-//--- fetch the eeprom word 2 ---
-void SO_WeightSens_FX29_I2C::_set_add_cmd3()
-{
-    uint8_t buf[3];
-
-    _dev->transfer(0, 0, buf, 3);
-
-    char * str;
-    asprintf(&str, "EEProm: %X; %X; %X", buf[0], buf[1], buf[2]);
-    set_gcs_message(str);
-   
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_done;
-}
-
-
-//---- set the I2C address: done --> waiting for configuration change of mode --
-/*void SO_WeightSens_FX29_I2C::_set_add_successful()
-{
-set_gcs_message("Successful!!!");
-timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_done;
-}*/
-
-/*    
-    void _set_add_disc();
-    void _set_add_reconn();*/
-
-
-//---- set the I2C address: done --> waiting for configuration change of mode --
-void SO_WeightSens_FX29_I2C::_set_add_done()
-{
-    switch ((drv_mode)((int) params.mode))
-    {
-    case drv_mode::setAdd0:
-    case drv_mode::setAdd1:
-    case drv_mode::setAdd2:
-        break;
-
-    default:
-        set_status(WeightSens::Status::NoData);
-        timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_stm_init;
-        break;
-    }
-}
-
-
-
-#define I2C_ADD_TIMEOUT  25000
-//-- watch the timeout and reset the state machine if stucking
-//- returns true if timeouted
-bool SO_WeightSens_FX29_I2C::checkTimeoutSetAddr()
-{
-    if ((time_stamp + I2C_ADD_TIMEOUT) >= AP_HAL::millis()) return false;
-    
-    set_gcs_message("ERROR: TimeOut!!!");
-    timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_set_add_done;
-    return true; 
-}
 
 
 //-- converts fx28 readed data into kg liter ---

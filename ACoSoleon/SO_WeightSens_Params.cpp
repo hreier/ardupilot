@@ -14,15 +14,16 @@ const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Param: MODE
     // @DisplayName: WeightSensor mode
     // @Description: mode of connected WeightSensor
-    // @Values: 0:disabled,1:enabled,2:zero,9:scanning,10:set_addr,11:set_addr+1,12:set_addr+2
+    // @Values: 0:disabled,1:enabled
     // @User: Standard
-    AP_GROUPINFO("MODE", 2, SO_WeightSens_Params, mode, 0),
+    AP_GROUPINFO("MODE", 2, SO_WeightSens_Params, mode, 1),
 
 
     // @Param: OFFSET
     // @DisplayName: WeightSensor offset
-    // @Description: Offset in liters for weight zero adjustment. (can also be set with mode = 2)
+    // @Description: Offset in liters for weight zero adjustment. 
     // @Units: l
+    // @Range: -5.0 15.0
     // @Increment: 0.001
     // @User: Standard
     AP_GROUPINFO("OFFSET",  3, SO_WeightSens_Params, offset, 0.0f),
