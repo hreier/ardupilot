@@ -135,6 +135,22 @@ void SO_WeightSens_FX29_I2C::_measure()
  
     _dev->set_address(params.address+2);
     _dev->transfer(0, 0, buf, 0);
+
+#ifdef SCALE_LOGGING
+    AP::logger().Write("SCAL", "TimeUS,OutFilt,RowSum,Row0,Row1,Row2,err0,err1,err2", "QfffffIII",
+            AP_HAL::micros64(),
+            (double)state.weight_kg,
+            (double)(sens0_row+sens1_row+sens2_row),
+            (double)sens0_row,
+            (double)sens1_row,
+            (double)sens2_row,
+            (double)sens0_err,
+            (double)sens1_err,
+            (double)sens2_err
+            );
+#endif  //- SCALE_LOGGING
+
+
     
     timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure_s0;
 }

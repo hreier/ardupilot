@@ -2,8 +2,6 @@
 
 #include "SO_WeightSens_config.h"
 
-
-
 #include "SO_WeightSens.h"
 #include "SO_WeightSens_Backend.h"
 

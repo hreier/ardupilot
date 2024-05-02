@@ -12,11 +12,15 @@
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <AP_MSP/msp.h>
 #include "SO_WeightSens_Params.h"
+#include <AP_Logger/AP_Logger.h>            // ArduPilot Mega Flash Memory Library
+
 
 // Maximum number of weight sensor module instances available on this platform
 #ifndef WEIGHTSENS_MAX_INSTANCES 
   #define WEIGHTSENS_MAX_INSTANCES 1
 #endif
+
+//#define SCALE_LOGGING      //-- this activates logging of the Weight sensor module for debugging
 
 
 class SO_WeightSens_Backend;

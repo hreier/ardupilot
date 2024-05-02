@@ -9,7 +9,6 @@
 #include "SO_WeightSens_FX29_I2C.h"
 
 #include <AP_BoardConfig/AP_BoardConfig.h>
-#include <AP_Logger/AP_Logger.h>
 #include <AP_SerialManager/AP_SerialManager.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 #include <AP_HAL/I2CDevice.h>
