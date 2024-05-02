@@ -1,6 +1,6 @@
 #pragma once
 
-#define AP_PARAM_VEHICLE_NAME copter
+#define AP_PARAM_VEHICLE_NAME soleon
 
 #include <AP_Common/AP_Common.h>
 #include "RC_Channel.h"
@@ -201,7 +201,7 @@ public:
         //
         k_param_inertial_nav = 100, // deprecated
         k_param_wp_nav,
-        k_param_attitude_control,
+        //HaRe k_param_attitude_control,
         k_param_pos_control,
         k_param_circle_nav,
         k_param_loiter_nav,     // 105
@@ -384,6 +384,34 @@ public:
 
         k_param_vehicle = 257, // vehicle common block of parameters
 
+        //
+        // 300: Area for Soleon Parameters
+        //
+        k_param_so_controlmode = 300,
+        k_param_so_servo_out_spraying,
+        k_param_so_servo_out_nospraying,
+        k_param_so_rcmap,
+        k_param_so_sprayrate_est,
+    
+    //    k_param_so_scale,
+    
+    //    k_param_so_flow_sensor,
+    //    k_param_so_pressure_sensor,
+    //    k_param_so_arming,
+    //    k_param_so_pid_pressure,
+     //    k_param_so_pid_flow,
+    //    k_param_so_ref_in,
+    //    k_param_so_offset_in,
+    //    k_param_so_speed_in,
+    //    k_param_so_pump1_out,
+    //    k_param_so_pump2_out,
+    //    k_param_so_nozzle_type,
+    //    k_param_so_nozzle_warn,
+    //    k_param_so_tank_volume,
+    //    k_param_so_tank_level,
+    //    k_param_so_act_pressure,
+    //    k_param_so_act_flow,
+
         // the k_param_* space is 9-bits in size
         // 511: reserved
     };
@@ -460,6 +488,31 @@ public:
     AP_Int8         fs_crash_check;
     AP_Float        fs_ekf_thresh;
     AP_Int16        gcs_pid_mask;
+
+    // Soleon 
+    //
+    AP_Int8         so_controlmode;
+    AP_Int16        so_servo_out_spraying;
+    AP_Int16        so_servo_out_nospraying;
+    AP_Float        so_sprayrate_est;
+ //   AP_Int8         so_flow_sensor;
+ //   AP_Int8         so_pressure_sensor;
+ //   AP_Int8         so_arming;
+ //   AP_Float        so_pid_pressure;
+ //   AP_Float        so_pid_flow;
+ //   AP_Int8         so_ref_in;
+ //   AP_Int8         so_offset_in;
+ //   AP_Int8         so_speed_in;
+ //   AP_Int8         so_pump1_out;
+ //   AP_Int8         so_pump2_out;
+ //   AP_Int8         so_nozzle_type;
+ //   AP_Int8         so_nozzle_warn;
+ //   AP_Int16        so_tank_volume;
+ //   AP_Int16        so_tank_level;
+ //   AP_Float        so_act_pressure;
+ //   AP_Float        so_act_flow;
+
+
 
 #if MODE_THROW_ENABLED == ENABLED
     AP_Enum<ModeThrow::PreThrowMotorState>         throw_motor_start;
@@ -554,10 +607,14 @@ public:
     AP_Int8 frame_class;
 
     // RC input channels
-    RC_Channels_Copter rc_channels;
+    RC_Channels_Soleon rc_channels;
     
     // control over servo output ranges
     SRV_Channels servo_channels;
+
+    WeightSens  so_scale;
+
+
 
 #if MODE_SMARTRTL_ENABLED == ENABLED
     // Safe RTL library
@@ -640,8 +697,6 @@ public:
 #if MODE_ACRO_ENABLED == ENABLED || MODE_DRIFT_ENABLED == ENABLED
     AC_CommandModel command_model_acro_y;
 #endif
-
-    AC_CommandModel command_model_pilot;
 
 #if MODE_ACRO_ENABLED == ENABLED
     AP_Int8 acro_options;

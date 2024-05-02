@@ -59,6 +59,7 @@
 Tools/vagrant/*.log
 Rover/test.Rover/
 Rover/way.txt
+ArduCopter/debugging/
 ArduCopter/Debug/
 ArduCopter/arducopter.exe.stackdump
 ArduCopter/fence.txt
@@ -154,3 +155,5 @@ dumpstack_*out
 build.tmp.binaries/
 tasklist.json
 modules/esp_idf
+ACoSoleon/debugging/
+ACoSoleon/openocd/

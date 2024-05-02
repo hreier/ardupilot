@@ -2,7 +2,7 @@
 
 #include <GCS_MAVLink/GCS.h>
 
-class GCS_MAVLINK_Copter : public GCS_MAVLINK
+class GCS_MAVLINK_Soleon : public GCS_MAVLINK
 {
 
 public:
@@ -82,6 +82,8 @@ private:
     void send_winch_status() const override;
 
     void send_wind() const;
+    void send_so_status(void) const;
+
 
 #if HAL_HIGH_LATENCY2_ENABLED
     int16_t high_latency_target_altitude() const override;

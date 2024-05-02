@@ -1,27 +1,27 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #include "RC_Channel.h"
 
 
 // defining these two macros and including the RC_Channels_VarInfo header defines the parameter information common to all vehicle types
-#define RC_CHANNELS_SUBCLASS RC_Channels_Copter
-#define RC_CHANNEL_SUBCLASS RC_Channel_Copter
+#define RC_CHANNELS_SUBCLASS RC_Channels_Soleon
+#define RC_CHANNEL_SUBCLASS RC_Channel_Soleon
 
 #include <RC_Channel/RC_Channels_VarInfo.h>
 
-int8_t RC_Channels_Copter::flight_mode_channel_number() const
+int8_t RC_Channels_Soleon::flight_mode_channel_number() const
 {
-    return copter.g.flight_mode_chan.get();
+    return soleon.g.flight_mode_chan.get();
 }
 
-void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
+void RC_Channel_Soleon::mode_switch_changed(modeswitch_pos_t new_pos)
 {
-    if (new_pos < 0 || (uint8_t)new_pos > copter.num_flight_modes) {
+    if (new_pos < 0 || (uint8_t)new_pos > soleon.num_flight_modes) {
         // should not have been called
         return;
     }
 
-    if (!copter.set_mode((Mode::Number)copter.flight_modes[new_pos].get(), ModeReason::RC_COMMAND)) {
+    if (!soleon.set_mode((Mode::Number)soleon.flight_modes[new_pos].get(), ModeReason::RC_COMMAND)) {
         return;
     }
 
@@ -29,33 +29,29 @@ void RC_Channel_Copter::mode_switch_changed(modeswitch_pos_t new_pos)
         !rc().find_channel_for_option(AUX_FUNC::SUPERSIMPLE_MODE)) {
         // if none of the Aux Switches are set to Simple or Super Simple Mode then
         // set Simple Mode using stored parameters from EEPROM
-        if (BIT_IS_SET(copter.g.super_simple, new_pos)) {
-            copter.set_simple_mode(Copter::SimpleMode::SUPERSIMPLE);
-        } else {
-            copter.set_simple_mode(BIT_IS_SET(copter.g.simple_modes, new_pos) ? Copter::SimpleMode::SIMPLE : Copter::SimpleMode::NONE);
-        }
+
     }
 }
 
-bool RC_Channels_Copter::in_rc_failsafe() const
+bool RC_Channels_Soleon::in_rc_failsafe() const
 {
-    return copter.failsafe.radio;
+    return soleon.failsafe.radio;
 }
 
-bool RC_Channels_Copter::has_valid_input() const
+bool RC_Channels_Soleon::has_valid_input() const
 {
     if (in_rc_failsafe()) {
         return false;
     }
-    if (copter.failsafe.radio_counter != 0) {
+    if (soleon.failsafe.radio_counter != 0) {
         return false;
     }
     return true;
 }
 
 // returns true if throttle arming checks should be run
-bool RC_Channels_Copter::arming_check_throttle() const {
-    if ((copter.g.throttle_behavior & THR_BEHAVE_FEEDBACK_FROM_MID_STICK) != 0) {
+bool RC_Channels_Soleon::arming_check_throttle() const {
+    if ((soleon.g.throttle_behavior & THR_BEHAVE_FEEDBACK_FROM_MID_STICK) != 0) {
         // center sprung throttle configured, dont run AP_Arming check
         // Copter already checks this case in its own arming checks
         return false;
@@ -63,13 +59,13 @@ bool RC_Channels_Copter::arming_check_throttle() const {
     return RC_Channels::arming_check_throttle();
 }
 
-RC_Channel * RC_Channels_Copter::get_arming_channel(void) const
+/*RC_Channel * RC_Channels_Soleon::get_arming_channel(void) const
 {
-    return copter.channel_yaw;
-}
+    return soleon.channel_yaw;
+}*/
 
 // init_aux_switch_function - initialize aux functions
-void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::init_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
 {
     // init channel options
     switch(ch_option) {
@@ -137,55 +133,24 @@ void RC_Channel_Copter::init_aux_function(const aux_func_t ch_option, const AuxS
 
 // do_aux_function_change_mode - change mode based on an aux switch
 // being moved
-void RC_Channel_Copter::do_aux_function_change_mode(const Mode::Number mode,
+void RC_Channel_Soleon::do_aux_function_change_mode(const Mode::Number mode,
                                                     const AuxSwitchPos ch_flag)
-{
-    switch(ch_flag) {
-    case AuxSwitchPos::HIGH: {
-        // engage mode (if not possible we remain in current flight mode)
-        copter.set_mode(mode, ModeReason::RC_COMMAND);
-        break;
-    }
-    default:
-        // return to flight mode switch's flight mode if we are currently
-        // in this mode
-        if (copter.flightmode->mode_number() == mode) {
-            rc().reset_mode_switch();
-        }
-    }
+{ 
+
 }
 
 // do_aux_function - implement the function invoked by auxiliary switches
-bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
+bool RC_Channel_Soleon::do_aux_function(const aux_func_t ch_option, const AuxSwitchPos ch_flag)
 {
     switch(ch_option) {
         case AUX_FUNC::FLIP:
             // flip if switch is on, positive throttle and we're actually flying
             if (ch_flag == AuxSwitchPos::HIGH) {
-                copter.set_mode(Mode::Number::FLIP, ModeReason::RC_COMMAND);
+                soleon.set_mode(Mode::Number::FLIP, ModeReason::RC_COMMAND);
             }
             break;
 
-        case AUX_FUNC::SIMPLE_MODE:
-            // low = simple mode off, middle or high position turns simple mode on
-            copter.set_simple_mode((ch_flag == AuxSwitchPos::LOW) ? Copter::SimpleMode::NONE : Copter::SimpleMode::SIMPLE);
-            break;
 
-        case AUX_FUNC::SUPERSIMPLE_MODE: {
-            Copter::SimpleMode newmode = Copter::SimpleMode::NONE;
-            switch (ch_flag) {
-            case AuxSwitchPos::LOW:
-                break;
-            case AuxSwitchPos::MIDDLE:
-                newmode = Copter::SimpleMode::SIMPLE;
-                break;
-            case AuxSwitchPos::HIGH:
-                newmode = Copter::SimpleMode::SUPERSIMPLE;
-                break;
-            }
-            copter.set_simple_mode(newmode);
-            break;
-        }
 
         case AUX_FUNC::RTL:
 #if MODE_RTL_ENABLED == ENABLED
@@ -194,11 +159,10 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
 
         case AUX_FUNC::SAVE_TRIM:
-            if ((ch_flag == AuxSwitchPos::HIGH) &&
-                (copter.flightmode->allows_save_trim()) &&
-                (copter.channel_throttle->get_control_in() == 0)) {
-                copter.save_trim();
-            }
+            /*if ((ch_flag == AuxSwitchPos::HIGH) &&
+                (soleon.channel_throttle->get_control_in() == 0)) {
+                soleon.save_trim();
+            }*/
             break;
 
         case AUX_FUNC::SAVE_WP:
@@ -207,12 +171,12 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             if (ch_flag == RC_Channel::AuxSwitchPos::HIGH) {
 
                 // do not allow saving new waypoints while we're in auto or disarmed
-                if (copter.flightmode == &copter.mode_auto || !copter.motors->armed()) {
+                if (soleon.flightmode == &soleon.mode_auto || !soleon.motors->armed()) {
                     break;
                 }
 
                 // do not allow saving the first waypoint with zero throttle
-                if ((copter.mode_auto.mission.num_commands() == 0) && (copter.channel_throttle->get_control_in() == 0)) {
+                if ((soleon.mode_auto.mission.num_commands() == 0) && (soleon.channel_throttle->get_control_in() == 0)) {
                     break;
                 }
 
@@ -220,24 +184,24 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
                 AP_Mission::Mission_Command cmd  = {};
 
                 // if the mission is empty save a takeoff command
-                if (copter.mode_auto.mission.num_commands() == 0) {
+                if (soleon.mode_auto.mission.num_commands() == 0) {
                     // set our location ID to 16, MAV_CMD_NAV_WAYPOINT
                     cmd.id = MAV_CMD_NAV_TAKEOFF;
-                    cmd.content.location.alt = MAX(copter.current_loc.alt,100);
+                    cmd.content.location.alt = MAX(soleon.current_loc.alt,100);
 
                     // use the current altitude for the target alt for takeoff.
                     // only altitude will matter to the AP mission script for takeoff.
-                    if (copter.mode_auto.mission.add_cmd(cmd)) {
+                    if (soleon.mode_auto.mission.add_cmd(cmd)) {
                         // log event
                         AP::logger().Write_Event(LogEvent::SAVEWP_ADD_WP);
                     }
                 }
 
                 // set new waypoint to current location
-                cmd.content.location = copter.current_loc;
+                cmd.content.location = soleon.current_loc;
 
                 // if throttle is above zero, create waypoint command
-                if (copter.channel_throttle->get_control_in() > 0) {
+                if (soleon.channel_throttle->get_control_in() > 0) {
                     cmd.id = MAV_CMD_NAV_WAYPOINT;
                 } else {
                     // with zero throttle, create LAND command
@@ -245,7 +209,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
                 }
 
                 // save command
-                if (copter.mode_auto.mission.add_cmd(cmd)) {
+                if (soleon.mode_auto.mission.add_cmd(cmd)) {
                     // log event
                     AP::logger().Write_Event(LogEvent::SAVEWP_ADD_WP);
                 }
@@ -263,10 +227,10 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             // enable or disable the rangefinder
 #if RANGEFINDER_ENABLED == ENABLED
             if ((ch_flag == AuxSwitchPos::HIGH) &&
-                copter.rangefinder.has_orientation(ROTATION_PITCH_270)) {
-                copter.rangefinder_state.enabled = true;
+                soleon.rangefinder.has_orientation(ROTATION_PITCH_270)) {
+                soleon.rangefinder_state.enabled = true;
             } else {
-                copter.rangefinder_state.enabled = false;
+                soleon.rangefinder_state.enabled = false;
             }
 #endif
             break;
@@ -275,15 +239,15 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #if MODE_ACRO_ENABLED == ENABLED
             switch(ch_flag) {
                 case AuxSwitchPos::LOW:
-                    copter.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::OFF);
+                    soleon.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::OFF);
                     AP::logger().Write_Event(LogEvent::ACRO_TRAINER_OFF);
                     break;
                 case AuxSwitchPos::MIDDLE:
-                    copter.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::LEVELING);
+                    soleon.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::LEVELING);
                     AP::logger().Write_Event(LogEvent::ACRO_TRAINER_LEVELING);
                     break;
                 case AuxSwitchPos::HIGH:
-                    copter.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::LIMITED);
+                    soleon.g.acro_trainer.set((uint8_t)ModeAcro::Trainer::LIMITED);
                     AP::logger().Write_Event(LogEvent::ACRO_TRAINER_LIMITED);
                     break;
             }
@@ -315,14 +279,14 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
         case AUX_FUNC::PARACHUTE_ENABLE:
 #if PARACHUTE == ENABLED
             // Parachute enable/disable
-            copter.parachute.enabled(ch_flag == AuxSwitchPos::HIGH);
+            soleon.parachute.enabled(ch_flag == AuxSwitchPos::HIGH);
 #endif
             break;
 
         case AUX_FUNC::PARACHUTE_RELEASE:
 #if PARACHUTE == ENABLED
             if (ch_flag == AuxSwitchPos::HIGH) {
-                copter.parachute_manual_release();
+                soleon.parachute_manual_release();
             }
 #endif
             break;
@@ -332,38 +296,29 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             // Parachute disable, enable, release with 3 position switch
             switch (ch_flag) {
                 case AuxSwitchPos::LOW:
-                    copter.parachute.enabled(false);
+                    soleon.parachute.enabled(false);
                     break;
                 case AuxSwitchPos::MIDDLE:
-                    copter.parachute.enabled(true);
+                    soleon.parachute.enabled(true);
                     break;
                 case AuxSwitchPos::HIGH:
-                    copter.parachute.enabled(true);
-                    copter.parachute_manual_release();
+                    soleon.parachute.enabled(true);
+                    soleon.parachute_manual_release();
                     break;
             }
 #endif
             break;
 
-        case AUX_FUNC::ATTCON_FEEDFWD:
-            // enable or disable feed forward
-            copter.attitude_control->bf_feedforward(ch_flag == AuxSwitchPos::HIGH);
-            break;
-
-        case AUX_FUNC::ATTCON_ACCEL_LIM:
-            // enable or disable accel limiting by restoring defaults
-            copter.attitude_control->accel_limiting(ch_flag == AuxSwitchPos::HIGH);
-            break;
 
         case AUX_FUNC::MOTOR_INTERLOCK:
 #if FRAME_CONFIG == HELI_FRAME
             // The interlock logic for ROTOR_CONTROL_MODE_PASSTHROUGH is handled 
             // in heli_update_rotor_speed_targets.  Otherwise turn on when above low.
-            if (copter.motors->get_rsc_mode() != ROTOR_CONTROL_MODE_PASSTHROUGH) {
-                copter.ap.motor_interlock_switch = (ch_flag == AuxSwitchPos::HIGH || ch_flag == AuxSwitchPos::MIDDLE);
+            if (soleon.motors->get_rsc_mode() != ROTOR_CONTROL_MODE_PASSTHROUGH) {
+                soleon.ap.motor_interlock_switch = (ch_flag == AuxSwitchPos::HIGH || ch_flag == AuxSwitchPos::MIDDLE);
             }
 #else
-            copter.ap.motor_interlock_switch = (ch_flag == AuxSwitchPos::HIGH || ch_flag == AuxSwitchPos::MIDDLE);
+            soleon.ap.motor_interlock_switch = (ch_flag == AuxSwitchPos::HIGH || ch_flag == AuxSwitchPos::MIDDLE);
 #endif
             break;
 			
@@ -371,13 +326,13 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #if FRAME_CONFIG == HELI_FRAME     
            switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
-                    copter.motors->set_turb_start(true);
+                    soleon.motors->set_turb_start(true);
                     break;
                 case AuxSwitchPos::MIDDLE:
                     // nothing
                     break;
                 case AuxSwitchPos::LOW:
-                    copter.motors->set_turb_start(false);
+                    soleon.motors->set_turb_start(false);
                     break;
            }
 #endif
@@ -399,13 +354,13 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #if AC_PRECLAND_ENABLED && MODE_LOITER_ENABLED == ENABLED
             switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
-                    copter.mode_loiter.set_precision_loiter_enabled(true);
+                    soleon.mode_loiter.set_precision_loiter_enabled(true);
                     break;
                 case AuxSwitchPos::MIDDLE:
                     // nothing
                     break;
                 case AuxSwitchPos::LOW:
-                    copter.mode_loiter.set_precision_loiter_enabled(false);
+                    soleon.mode_loiter.set_precision_loiter_enabled(false);
                     break;
             }
 #endif
@@ -421,17 +376,17 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #if FRAME_CONFIG == HELI_FRAME
             switch (ch_flag) {
             case AuxSwitchPos::HIGH:
-                copter.motors->set_inverted_flight(true);
-                copter.attitude_control->set_inverted_flight(true);
-                copter.heli_flags.inverted_flight = true;
+                soleon.motors->set_inverted_flight(true);
+                soleon.attitude_control->set_inverted_flight(true);
+                soleon.heli_flags.inverted_flight = true;
                 break;
             case AuxSwitchPos::MIDDLE:
                 // nothing
                 break;
             case AuxSwitchPos::LOW:
-                copter.motors->set_inverted_flight(false);
-                copter.attitude_control->set_inverted_flight(false);
-                copter.heli_flags.inverted_flight = false;
+                soleon.motors->set_inverted_flight(false);
+                soleon.attitude_control->set_inverted_flight(false);
+                soleon.heli_flags.inverted_flight = false;
                 break;
             }
 #endif
@@ -442,12 +397,12 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
                     // high switch position stops winch using rate control
-                    copter.g2.winch.set_desired_rate(0.0f);
+                    soleon.g2.winch.set_desired_rate(0.0f);
                     break;
                 case AuxSwitchPos::MIDDLE:
                 case AuxSwitchPos::LOW:
                     // all other position relax winch
-                    copter.g2.winch.relax();
+                    soleon.g2.winch.relax();
                     break;
                 }
 #endif
@@ -459,15 +414,15 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 
 #ifdef USERHOOK_AUXSWITCH
         case AUX_FUNC::USER_FUNC1:
-            copter.userhook_auxSwitch1(ch_flag);
+            soleon.userhook_auxSwitch1(ch_flag);
             break;
 
         case AUX_FUNC::USER_FUNC2:
-            copter.userhook_auxSwitch2(ch_flag);
+            soleon.userhook_auxSwitch2(ch_flag);
             break;
 
         case AUX_FUNC::USER_FUNC3:
-            copter.userhook_auxSwitch3(ch_flag);
+            soleon.userhook_auxSwitch3(ch_flag);
             break;
 #endif
 
@@ -479,18 +434,18 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 
         case AUX_FUNC::ZIGZAG_SaveWP:
 #if MODE_ZIGZAG_ENABLED == ENABLED
-            if (copter.flightmode == &copter.mode_zigzag) {
+            if (soleon.flightmode == &soleon.mode_zigzag) {
                 // initialize zigzag auto
-                copter.mode_zigzag.init_auto();
+                soleon.mode_zigzag.init_auto();
                 switch (ch_flag) {
                     case AuxSwitchPos::LOW:
-                        copter.mode_zigzag.save_or_move_to_destination(ModeZigZag::Destination::A);
+                        soleon.mode_zigzag.save_or_move_to_destination(ModeZigZag::Destination::A);
                         break;
                     case AuxSwitchPos::MIDDLE:
-                        copter.mode_zigzag.return_to_manual_control(false);
+                        soleon.mode_zigzag.return_to_manual_control(false);
                         break;
                     case AuxSwitchPos::HIGH:
-                        copter.mode_zigzag.save_or_move_to_destination(ModeZigZag::Destination::B);
+                        soleon.mode_zigzag.save_or_move_to_destination(ModeZigZag::Destination::B);
                         break;
                 }
             }
@@ -498,7 +453,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
 
         case AUX_FUNC::STABILIZE:
-            do_aux_function_change_mode(Mode::Number::STABILIZE, ch_flag);
+           // do_aux_function_change_mode(Mode::Number::STABILIZE, ch_flag);
             break;
 
         case AUX_FUNC::POSHOLD:
@@ -507,9 +462,9 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
-        case AUX_FUNC::ALTHOLD:
+        /*case AUX_FUNC::ALTHOLD:
             do_aux_function_change_mode(Mode::Number::ALT_HOLD, ch_flag);
-            break;
+            break;*/
 
 
         case AUX_FUNC::ACRO:
@@ -539,12 +494,12 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
         case AUX_FUNC::STANDBY: {
             switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
-                    copter.standby_active = true;
+                    soleon.standby_active = true;
                     AP::logger().Write_Event(LogEvent::STANDBY_ENABLE);
                     gcs().send_text(MAV_SEVERITY_INFO, "Stand By Enabled");
                     break;
                 default:
-                    copter.standby_active = false;
+                    soleon.standby_active = false;
                     AP::logger().Write_Event(LogEvent::STANDBY_DISABLE);
                     gcs().send_text(MAV_SEVERITY_INFO, "Stand By Disabled");
                     break;
@@ -552,29 +507,16 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
             break;
         }
 
-        case AUX_FUNC::SURFACE_TRACKING:
-            switch (ch_flag) {
-            case AuxSwitchPos::LOW:
-                copter.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::GROUND);
-                break;
-            case AuxSwitchPos::MIDDLE:
-                copter.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::NONE);
-                break;
-            case AuxSwitchPos::HIGH:
-                copter.surface_tracking.set_surface(Copter::SurfaceTracking::Surface::CEILING);
-                break;
-            }
-            break;
 
         case AUX_FUNC::ZIGZAG_Auto:
 #if MODE_ZIGZAG_ENABLED == ENABLED
-            if (copter.flightmode == &copter.mode_zigzag) {
+            if (soleon.flightmode == &soleon.mode_zigzag) {
                 switch (ch_flag) {
                 case AuxSwitchPos::HIGH:
-                    copter.mode_zigzag.run_auto();
+                    soleon.mode_zigzag.run_auto();
                     break;
                 default:
-                    copter.mode_zigzag.suspend_auto();
+                    soleon.mode_zigzag.suspend_auto();
                     break;
                 }
             }
@@ -584,7 +526,7 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
         case AUX_FUNC::AIRMODE:
             do_aux_function_change_air_mode(ch_flag);
 #if MODE_ACRO_ENABLED == ENABLED && FRAME_CONFIG != HELI_FRAME
-            copter.mode_acro.air_mode_aux_changed();
+            soleon.mode_acro.air_mode_aux_changed();
 #endif
             break;
 
@@ -598,29 +540,10 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 #endif
             break;
 
-        case AUX_FUNC::TURTLE:
-#if MODE_TURTLE_ENABLED == ENABLED
-            do_aux_function_change_mode(Mode::Number::TURTLE, ch_flag);
-#endif
-            break;
-
-        case AUX_FUNC::SIMPLE_HEADING_RESET:
-            if (ch_flag == AuxSwitchPos::HIGH) {
-                copter.init_simple_bearing();
-                gcs().send_text(MAV_SEVERITY_INFO, "Simple heading reset");
-            }
-            break;
-
-        case AUX_FUNC::ARMDISARM_AIRMODE:
-            RC_Channel::do_aux_function_armdisarm(ch_flag);
-            if (copter.arming.is_armed()) {
-                copter.ap.armed_with_airmode_switch = true;
-            }
-            break;
 
 #if AC_CUSTOMCONTROL_MULTI_ENABLED == ENABLED
         case AUX_FUNC::CUSTOM_CONTROLLER:
-            copter.custom_control.set_custom_controller(ch_flag == AuxSwitchPos::HIGH);
+            soleon.custom_control.set_custom_controller(ch_flag == AuxSwitchPos::HIGH);
             break;
 #endif
 
@@ -628,12 +551,12 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
     case AUX_FUNC::WEATHER_VANE_ENABLE: {
         switch (ch_flag) {
             case AuxSwitchPos::HIGH:
-                copter.g2.weathervane.allow_weathervaning(true);
+                soleon.g2.weathervane.allow_weathervaning(true);
                 break;
             case AuxSwitchPos::MIDDLE:
                 break;
             case AuxSwitchPos::LOW:
-                copter.g2.weathervane.allow_weathervaning(false);
+                soleon.g2.weathervane.allow_weathervaning(false);
                 break;
         }
         break;
@@ -647,63 +570,59 @@ bool RC_Channel_Copter::do_aux_function(const aux_func_t ch_option, const AuxSwi
 }
 
 // change air-mode status
-void RC_Channel_Copter::do_aux_function_change_air_mode(const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::do_aux_function_change_air_mode(const AuxSwitchPos ch_flag)
 {
     switch (ch_flag) {
     case AuxSwitchPos::HIGH:
-        copter.air_mode = AirMode::AIRMODE_ENABLED;
+        soleon.air_mode = AirMode::AIRMODE_ENABLED;
         break;
     case AuxSwitchPos::MIDDLE:
         break;
     case AuxSwitchPos::LOW:
-        copter.air_mode = AirMode::AIRMODE_DISABLED;
+        soleon.air_mode = AirMode::AIRMODE_DISABLED;
         break;
     }
 }
 
 // change force flying status
-void RC_Channel_Copter::do_aux_function_change_force_flying(const AuxSwitchPos ch_flag)
+void RC_Channel_Soleon::do_aux_function_change_force_flying(const AuxSwitchPos ch_flag)
 {
     switch (ch_flag) {
     case AuxSwitchPos::HIGH:
-        copter.force_flying = true;
+        soleon.force_flying = true;
         break;
     case AuxSwitchPos::MIDDLE:
         break;
     case AuxSwitchPos::LOW:
-        copter.force_flying = false;
+        soleon.force_flying = false;
         break;
     }
 }
 
 // save_trim - adds roll and pitch trims from the radio to ahrs
-void Copter::save_trim()
+void Soleon::save_trim()
 {
-    // save roll and pitch trim
+ /*   // save roll and pitch trim
     float roll_trim = ToRad((float)channel_roll->get_control_in()/100.0f);
     float pitch_trim = ToRad((float)channel_pitch->get_control_in()/100.0f);
     ahrs.add_trim(roll_trim, pitch_trim);
     AP::logger().Write_Event(LogEvent::SAVE_TRIM);
-    gcs().send_text(MAV_SEVERITY_INFO, "Trim saved");
+    gcs().send_text(MAV_SEVERITY_INFO, "Trim saved");*/
 }
 
 // auto_trim - slightly adjusts the ahrs.roll_trim and ahrs.pitch_trim towards the current stick positions
-// meant to be called continuously while the pilot attempts to keep the copter level
-void Copter::auto_trim_cancel()
+// meant to be called continuously while the pilot attempts to keep the soleon level
+void Soleon::auto_trim_cancel()
 {
     auto_trim_counter = 0;
     AP_Notify::flags.save_trim = false;
     gcs().send_text(MAV_SEVERITY_INFO, "AutoTrim cancelled");
 }
 
-void Copter::auto_trim()
+void Soleon::auto_trim()
 {
+    /*
     if (auto_trim_counter > 0) {
-        if (copter.flightmode != &copter.mode_stabilize ||
-            !copter.motors->armed()) {
-            auto_trim_cancel();
-            return;
-        }
 
         // flash the leds
         AP_Notify::flags.save_trim = true;
@@ -739,5 +658,5 @@ void Copter::auto_trim()
             AP_Notify::flags.save_trim = false;
             gcs().send_text(MAV_SEVERITY_INFO, "AutoTrim: Trims saved");
         }
-    }
+    }*/
 }

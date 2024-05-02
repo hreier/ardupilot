@@ -345,6 +345,15 @@ class VehicleInfo(object):
             },
         },
     },
+    "ACoSoleon": {
+        "default_frame": "quad",
+        "frames": {
+            "quad": {
+                "waf_target": "bin/aco-soleon",
+                "default_params_filename": "default_params/soleon.parm",
+            },
+        },
+    },
     "Rover": {
         "default_frame": "rover",
         "frames": {

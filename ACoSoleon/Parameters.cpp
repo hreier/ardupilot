@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 /*
    This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 #define DEFAULT_FRAME_CLASS 0
 #endif
 
-const AP_Param::Info Copter::var_info[] = {
+const AP_Param::Info Soleon::var_info[] = {
     // @Param: FORMAT_VERSION
     // @DisplayName: Eeprom format version number
     // @Description: This value is incremented when changes are made to the eeprom format
@@ -297,7 +297,7 @@ const AP_Param::Info Copter::var_info[] = {
     // @Description: This selects the mode to start in on boot. This is useful for when you want to start in AUTO mode on boot without a receiver.
     // @Values: 0:Stabilize,1:Acro,2:AltHold,3:Auto,4:Guided,5:Loiter,6:RTL,7:Circle,9:Land,11:Drift,13:Sport,14:Flip,15:AutoTune,16:PosHold,17:Brake,18:Throw,19:Avoid_ADSB,20:Guided_NoGPS,21:Smart_RTL,22:FlowHold,23:Follow,24:ZigZag,25:SystemID,26:Heli_Autorotate
     // @User: Advanced
-    GSCALAR(initial_mode,        "INITIAL_MODE",     (uint8_t)Mode::Number::STABILIZE),
+    GSCALAR(initial_mode,        "INITIAL_MODE",     (uint8_t)0),
 
     // @Param: SIMPLE
     // @DisplayName: Simple mode bitmask
@@ -337,7 +337,7 @@ const AP_Param::Info Copter::var_info[] = {
 
     // @Group: ARMING_
     // @Path: ../libraries/AP_Arming/AP_Arming.cpp
-    GOBJECT(arming,                 "ARMING_", AP_Arming_Copter),
+    GOBJECT(arming,                 "ARMING_", AP_Arming_Soleon),
 
     // @Param: DISARM_DELAY
     // @DisplayName: Disarm delay
@@ -495,14 +495,6 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECTPTR(circle_nav, "CIRCLE_",  AC_Circle),
 #endif
 
-    // @Group: ATC_
-    // @Path: ../libraries/AC_AttitudeControl/AC_AttitudeControl.cpp,../libraries/AC_AttitudeControl/AC_AttitudeControl_Multi.cpp,../libraries/AC_AttitudeControl/AC_AttitudeControl_Heli.cpp
-#if FRAME_CONFIG == HELI_FRAME
-    GOBJECTPTR(attitude_control, "ATC_", AC_AttitudeControl_Heli),
-#else
-    GOBJECTPTR(attitude_control, "ATC_", AC_AttitudeControl_Multi),
-#endif
-
     // @Group: PSC
     // @Path: ../libraries/AC_AttitudeControl/AC_PosControl.cpp
     GOBJECTPTR(pos_control, "PSC", AC_PosControl),
@@ -575,12 +567,6 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(can_mgr,        "CAN_",       AP_CANManager),
 #endif
 
-#if HAL_SPRAYER_ENABLED
-    // @Group: SPRAY_
-    // @Path: ../libraries/AC_Sprayer/AC_Sprayer.cpp
-    GOBJECT(sprayer,                "SPRAY_",       AC_Sprayer),
-#endif
-
 #if AP_SIM_ENABLED
     // @Group: SIM_
     // @Path: ../libraries/SITL/SITL.cpp
@@ -606,25 +592,26 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(avoid,      "AVOID_",   AC_Avoid),
 #endif
 
-#if HAL_RALLY_ENABLED
-    // @Group: RALLY_
-    // @Path: AP_Rally.cpp,../libraries/AP_Rally/AP_Rally.cpp
-    GOBJECT(rally,      "RALLY_",   AP_Rally_Copter),
-#endif
-
 #if FRAME_CONFIG == HELI_FRAME
     // @Group: H_
     // @Path: ../libraries/AP_Motors/AP_MotorsHeli_Single.cpp,../libraries/AP_Motors/AP_MotorsHeli_Dual.cpp,../libraries/AP_Motors/AP_MotorsHeli.cpp
-    GOBJECTVARPTR(motors, "H_",        &copter.motors_var_info),
+    GOBJECTVARPTR(motors, "H_",        &soleon.motors_var_info),
 #else
     // @Group: MOT_
     // @Path: ../libraries/AP_Motors/AP_MotorsMulticopter.cpp
-    GOBJECTVARPTR(motors, "MOT_",      &copter.motors_var_info),
+    GOBJECTVARPTR(motors, "MOT_",      &soleon.motors_var_info),
 #endif
 
-    // @Group: RCMAP_
-    // @Path: ../libraries/AP_RCMapper/AP_RCMapper.cpp
-    GOBJECT(rcmap, "RCMAP_",        RCMapper),
+    // @Group: SO_RCMAP
+    // @Path: SO_RCMapper.cpp
+    GOBJECT(so_rcmap, "SO_RCMAP_",        SoRCMapper),
+
+    
+    /*// @Group: SO_SC
+    // @Path: SO_WeightSens.cpp
+    GOBJECT(so_scale,        "SO_SC",       WeightSens),*/
+
+    
 
 #if HAL_NAVEKF2_AVAILABLE
     // @Group: EK2_
@@ -678,16 +665,6 @@ const AP_Param::Info Copter::var_info[] = {
     GOBJECT(rpm_sensor, "RPM", AP_RPM),
 #endif
 
-#if HAL_ADSB_ENABLED
-    // @Group: ADSB_
-    // @Path: ../libraries/AP_ADSB/AP_ADSB.cpp
-    GOBJECT(adsb,                "ADSB_", AP_ADSB),
-
-    // @Group: AVD_
-    // @Path: ../libraries/AP_Avoidance/AP_Avoidance.cpp
-    GOBJECT(avoidance_adsb, "AVD_", AP_Avoidance_Copter),
-#endif
-
     // @Group: NTF_
     // @Path: ../libraries/AP_Notify/AP_Notify.cpp
     GOBJECT(notify, "NTF_",  AP_Notify),
@@ -700,6 +677,64 @@ const AP_Param::Info Copter::var_info[] = {
     // @User: Standard
     GSCALAR(throw_motor_start, "THROW_MOT_START", (float)ModeThrow::PreThrowMotorState::STOPPED),
 #endif
+
+    // @Param: SO_CONTROLMODE
+    // @DisplayName: Soleon control mode
+    // @Description: Defines the control mode of the soleon controller
+    // @Values: 0:disabled, 1:ppm, 2:test
+    // @User: Standard
+    GSCALAR(so_controlmode, "SO_CONTROLMODE", SO_CONTROLMODE_DEF),
+
+    // @Param: SO_SERVO_OUT_SPRAYING
+    // @DisplayName: Servo outvalue spraying
+    // @Description: Servo out value if spraying (SO_SPRAYERMODE == mission_ppm) 
+    // @Range: 800 2200
+    // @User: Advanced
+    GSCALAR(so_servo_out_spraying, "SO_SRV_SPRAYING", SO_SERVO_OUT_SPRAYING_DEF),
+    
+    // @Param: SO_SERVO_OUT_NOSPRAYING
+    // @DisplayName: Servo outvalue not spraying
+    // @Description: Servo out value if not spraying (SO_SPRAYERMODE == mission_ppm) 
+    // @Range: 800 2200
+    // @User: Advanced
+    GSCALAR(so_servo_out_nospraying, "SO_SRV_NOSPRAY", SO_SERVO_OUT_NOSPRAYING_DEF),
+
+
+    // @Param: SO_SPRAYRATE_EST
+    // @DisplayName: Estimated sprayrate
+    // @Description: Estimated sprayrate for modes without flow measurement (SO_SPRAYERMODE == mission_ppm)
+    // @Range: 0 10.0
+    // @User: Advanced
+    GSCALAR(so_sprayrate_est, "SO_SPRAYRATE_EST", SO_SPRAYRATE_EST_DEF),
+
+    /*
+    // @Param: SO_FLOWSENSOR
+    // @DisplayName: Solarion flow sensor configuration
+    // @Description: Defines the configuration mode of the sprayer controller
+    // @Values: 0:not connected, 1:digital cha1, 2:digital cha2, 3:analog
+    // @User: Advanced
+    GSCALAR(so_flow_sensor, "SO_FLOWSENSOR", SO_FLOWSENSOR_DEF),
+
+    // @Param: PRESSURESENS
+    // @DisplayName: Solarion pressure sensor
+    // @Description: Defines the configuration mode of the sprayer controller
+    // @Values: 0:disabled, 1:analog1, 2:analog2
+    // @User: Advanced
+    GSCALAR(so_pressure_sensor, "SO_PRESSURESENS", SO_PRESSURESENS_DEF),
+
+    // @Param: SO_ARMING
+    // @DisplayName: Sprayer arming
+    // @Description: Arm disarm the sprayer arming
+    // @Values: 0:disarmed, 1:armed
+    // @User: Standard
+    GSCALAR(so_arming, "SO_ARMING", SO_ARMING_DEF),
+
+    // @Param: SO_PRESSURE_PID
+    // @DisplayName: Solarion pressure pid 
+    // @Description: Pressure pid configuration
+    // @Range: 0 100.0
+    // @User: Advanced
+    GSCALAR(so_pid_pressure, "SO_PRESSURE_PID", SO_PRESSURE_PID_DEF),*/
 
 #if OSD_ENABLED || OSD_PARAM_ENABLED
     // @Group: OSD
@@ -834,7 +869,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // @Group: RC
     // @Path: ../libraries/RC_Channel/RC_Channels_VarInfo.h
-    AP_SUBGROUPINFO(rc_channels, "RC", 17, ParametersG2, RC_Channels_Copter),
+    AP_SUBGROUPINFO(rc_channels, "RC", 17, ParametersG2, RC_Channels_Soleon),
 
     // 18 was used by AP_VisualOdom
 
@@ -880,17 +915,6 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("LAND_ALT_LOW", 25, ParametersG2, land_alt_low, 1000),
 
-#if MODE_FLOWHOLD_ENABLED == ENABLED
-    // @Group: FHLD
-    // @Path: mode_flowhold.cpp
-    AP_SUBGROUPPTR(mode_flowhold_ptr, "FHLD", 26, ParametersG2, ModeFlowHold),
-#endif
-
-#if MODE_FOLLOW_ENABLED == ENABLED
-    // @Group: FOLL
-    // @Path: ../libraries/AP_Follow/AP_Follow.cpp
-    AP_SUBGROUPINFO(follow, "FOLL", 27, ParametersG2, AP_Follow),
-#endif
 
 #ifdef USER_PARAMS_ENABLED
     AP_SUBGROUPINFO(user_parameters, "USR", 28, ParametersG2, UserParameters),
@@ -945,7 +969,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Values: 0:Disabled, 1:Continue if in Auto on RC failsafe only, 2:Continue if in Auto on GCS failsafe only, 3:Continue if in Auto on RC and/or GCS failsafe, 4:Continue if in Guided on RC failsafe only, 8:Continue if landing on any failsafe, 16:Continue if in pilot controlled modes on GCS failsafe, 19:Continue if in Auto on RC and/or GCS failsafe and continue if in pilot controlled modes on GCS failsafe
     // @Bitmask: 0:Continue if in Auto on RC failsafe, 1:Continue if in Auto on GCS failsafe, 2:Continue if in Guided on RC failsafe, 3:Continue if landing on any failsafe, 4:Continue if in pilot controlled modes on GCS failsafe, 5:Release Gripper
     // @User: Advanced
-    AP_GROUPINFO("FS_OPTIONS", 36, ParametersG2, fs_options, (float)Copter::FailsafeOption::GCS_CONTINUE_IF_PILOT_CONTROL),
+    AP_GROUPINFO("FS_OPTIONS", 36, ParametersG2, fs_options, (float)Soleon::FailsafeOption::GCS_CONTINUE_IF_PILOT_CONTROL),
 
 #if MODE_AUTOROTATE_ENABLED == ENABLED
     // @Group: AROT_
@@ -1023,32 +1047,12 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_GROUPINFO("RNGFND_FILT", 45, ParametersG2, rangefinder_filt, RANGEFINDER_FILT_DEFAULT),
 #endif
 
-#if MODE_GUIDED_ENABLED == ENABLED
-    // @Param: GUID_TIMEOUT
-    // @DisplayName: Guided mode timeout
-    // @Description: Guided mode timeout after which vehicle will stop or return to level if no updates are received from caller. Only applicable during any combination of velocity, acceleration, angle control, and/or angular rate control
-    // @Units: s
-    // @Range: 0.1 5
-    // @User: Advanced
-    AP_GROUPINFO("GUID_TIMEOUT", 46, ParametersG2, guided_timeout, 3.0),
-#endif
-
-    // ACRO_PR_RATE (47), ACRO_Y_RATE (48), PILOT_Y_RATE (49) and PILOT_Y_EXPO (50) moved to command model class
-
-    // @Param: SURFTRAK_MODE
-    // @DisplayName: Surface Tracking Mode
-    // @Description: set which surface to track in surface tracking
-    // @Values: 0:Do not track, 1:Ground, 2:Ceiling
-    // @User: Advanced
-    // @RebootRequired: True
-    AP_GROUPINFO("SURFTRAK_MODE", 51, ParametersG2, surftrak_mode, (uint8_t)Copter::SurfaceTracking::Surface::GROUND),
-
     // @Param: FS_DR_ENABLE
     // @DisplayName: DeadReckon Failsafe Action
     // @Description: Failsafe action taken immediately as deadreckoning starts. Deadreckoning starts when EKF loses position and velocity source and relies only on wind estimates
     // @Values: 0:Disabled/NoAction,1:Land, 2:RTL, 3:SmartRTL or RTL, 4:SmartRTL or Land, 6:Auto DO_LAND_START or RTL
     // @User: Standard
-    AP_GROUPINFO("FS_DR_ENABLE", 52, ParametersG2, failsafe_dr_enable, (uint8_t)Copter::FailsafeAction::RTL),
+    AP_GROUPINFO("FS_DR_ENABLE", 52, ParametersG2, failsafe_dr_enable, (uint8_t)Soleon::FailsafeAction::RTL),
 
     // @Param: FS_DR_TIMEOUT
     // @DisplayName: DeadReckon Failsafe Timeout
@@ -1109,29 +1113,6 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_SUBGROUPINFO(command_model_acro_y, "ACRO_Y_", 55, ParametersG2, AC_CommandModel),
 #endif
 
-    // @Param: PILOT_Y_RATE
-    // @DisplayName: Pilot controlled yaw rate
-    // @Description: Pilot controlled yaw rate max.  Used in all pilot controlled modes except Acro
-    // @Units: deg/s
-    // @Range: 1 360
-    // @User: Standard
-
-    // @Param: PILOT_Y_EXPO
-    // @DisplayName: Pilot controlled yaw expo
-    // @Description: Pilot controlled yaw expo to allow faster rotation when stick at edges
-    // @Values: 0:Disabled,0.1:Very Low,0.2:Low,0.3:Medium,0.4:High,0.5:Very High
-    // @Range: -0.5 1.0
-    // @User: Advanced
-
-    // @Param: PILOT_Y_RATE_TC
-    // @DisplayName: Pilot yaw rate control input time constant
-    // @Description: Pilot yaw rate control input time constant.  Low numbers lead to sharper response, higher numbers to softer response
-    // @Units: s
-    // @Range: 0 1
-    // @Increment: 0.01
-    // @Values: 0.5:Very Soft, 0.2:Soft, 0.15:Medium, 0.1:Crisp, 0.05:Very Crisp
-    // @User: Standard
-    AP_SUBGROUPINFO(command_model_pilot, "PILOT_Y_", 56, ParametersG2, AC_CommandModel),
 
     // @Param: TKOFF_SLEW_TIME
     // @DisplayName: Slew time of throttle during take-off
@@ -1163,6 +1144,11 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
     // ID 62 is reserved for the SHOW_... parameters from the Skybrush fork at
     // https://github.com/skybrush-io/ardupilot
+
+    // @Group: SO_SC
+    // @Path: SO_WeightSens.cpp
+    AP_SUBGROUPINFO(so_scale, "SO_SC", 63, ParametersG2, WeightSens),
+
 
     AP_GROUPEND
 };
@@ -1249,9 +1235,7 @@ ParametersG2::ParametersG2(void)
 #if MODE_SMARTRTL_ENABLED == ENABLED
     ,smart_rtl()
 #endif
-#if MODE_FLOWHOLD_ENABLED == ENABLED
-    ,mode_flowhold_ptr(&copter.mode_flowhold)
-#endif
+
 #if MODE_FOLLOW_ENABLED == ENABLED
     ,follow()
 #endif
@@ -1259,19 +1243,19 @@ ParametersG2::ParametersG2(void)
     ,user_parameters()
 #endif
 #if AUTOTUNE_ENABLED == ENABLED
-    ,autotune_ptr(&copter.mode_autotune.autotune)
+    ,autotune_ptr(&soleon.mode_autotune.autotune)
 #endif
 #if MODE_SYSTEMID_ENABLED == ENABLED
-    ,mode_systemid_ptr(&copter.mode_systemid)
+    ,mode_systemid_ptr(&soleon.mode_systemid)
 #endif
 #if MODE_AUTOROTATE_ENABLED == ENABLED
     ,arot()
 #endif
 #if HAL_BUTTON_ENABLED
-    ,button_ptr(&copter.button)
+    ,button_ptr(&soleon.button)
 #endif
 #if MODE_ZIGZAG_ENABLED == ENABLED
-    ,mode_zigzag_ptr(&copter.mode_zigzag)
+    ,mode_zigzag_ptr(&soleon.mode_zigzag)
 #endif
 
 #if MODE_ACRO_ENABLED == ENABLED || MODE_SPORT_ENABLED == ENABLED
@@ -1282,7 +1266,7 @@ ParametersG2::ParametersG2(void)
     ,command_model_acro_y(ACRO_Y_RATE_DEFAULT, ACRO_Y_EXPO_DEFAULT, 0.0f)
 #endif
 
-    ,command_model_pilot(PILOT_Y_RATE_DEFAULT, PILOT_Y_EXPO_DEFAULT, 0.0f)
+    //HaRe ,command_model_pilot(PILOT_Y_RATE_DEFAULT, PILOT_Y_EXPO_DEFAULT, 0.0f)
 
 #if WEATHERVANE_ENABLED == ENABLED
     ,weathervane()
@@ -1327,7 +1311,7 @@ const AP_Param::ConversionInfo conversion_table[] = {
     { Parameters::k_param_arming,             2,     AP_PARAM_INT16,  "ARMING_CHECK" },
 };
 
-void Copter::load_parameters(void)
+void Soleon::load_parameters(void)
 {
     hal.util->set_soft_armed(false);
 
@@ -1374,7 +1358,7 @@ void Copter::load_parameters(void)
 }
 
 // handle conversion of PID gains
-void Copter::convert_pid_parameters(void)
+void Soleon::convert_pid_parameters(void)
 {
     const AP_Param::ConversionInfo angle_and_filt_conversion_info[] = {
         // PARAMETER_CONVERSION - Added: Jan-2018
@@ -1446,34 +1430,6 @@ void Copter::convert_pid_parameters(void)
     AP_Param::set_defaults_from_table(heli_defaults_table, ARRAY_SIZE(heli_defaults_table));
 #endif
 
-    // attitude and position control filter parameter changes (from _FILT to FLTD, FLTE, FLTT) for Copter-4.0
-    // magic numbers shown below are discovered by setting AP_PARAM_KEY_DUMP = 1
-    const AP_Param::ConversionInfo ff_and_filt_conversion_info[] = {
-#if FRAME_CONFIG == HELI_FRAME
-        // tradheli moves ATC_RAT_RLL/PIT_FILT to FLTE, ATC_RAT_YAW_FILT to FLTE
-        // PARAMETER_CONVERSION - Added: Jul-2019
-        { Parameters::k_param_attitude_control, 386, AP_PARAM_FLOAT, "ATC_RAT_RLL_FLTE" },
-        { Parameters::k_param_attitude_control, 387, AP_PARAM_FLOAT, "ATC_RAT_PIT_FLTE" },
-        { Parameters::k_param_attitude_control, 388, AP_PARAM_FLOAT, "ATC_RAT_YAW_FLTE" },
-#else
-        // multicopters move ATC_RAT_RLL/PIT_FILT to FLTD & FLTT, ATC_RAT_YAW_FILT to FLTE
-        { Parameters::k_param_attitude_control, 385, AP_PARAM_FLOAT, "ATC_RAT_RLL_FLTD" },
-        // PARAMETER_CONVERSION - Added: Oct-2019
-        { Parameters::k_param_attitude_control, 385, AP_PARAM_FLOAT, "ATC_RAT_RLL_FLTT" },
-        // PARAMETER_CONVERSION - Added: Jul-2019
-        { Parameters::k_param_attitude_control, 386, AP_PARAM_FLOAT, "ATC_RAT_PIT_FLTD" },
-        // PARAMETER_CONVERSION - Added: Oct-2019
-        { Parameters::k_param_attitude_control, 386, AP_PARAM_FLOAT, "ATC_RAT_PIT_FLTT" },
-        // PARAMETER_CONVERSION - Added: Jul-2019
-        { Parameters::k_param_attitude_control, 387, AP_PARAM_FLOAT, "ATC_RAT_YAW_FLTE" },
-        { Parameters::k_param_attitude_control, 449, AP_PARAM_FLOAT, "ATC_RAT_RLL_FF" },
-        { Parameters::k_param_attitude_control, 450, AP_PARAM_FLOAT, "ATC_RAT_PIT_FF" },
-        { Parameters::k_param_attitude_control, 451, AP_PARAM_FLOAT, "ATC_RAT_YAW_FF" },
-#endif
-        // PARAMETER_CONVERSION - Added: Oct-2019
-        { Parameters::k_param_pos_control, 388, AP_PARAM_FLOAT, "PSC_ACCZ_FLTE" },
-    };
-    AP_Param::convert_old_parameters(&ff_and_filt_conversion_info[0], ARRAY_SIZE(ff_and_filt_conversion_info));
 
 #if HAL_INS_NUM_HARMONIC_NOTCH_FILTERS > 1
     if (!ins.harmonic_notches[1].params.enabled()) {
@@ -1520,7 +1476,7 @@ void Copter::convert_pid_parameters(void)
 }
 
 #if HAL_PROXIMITY_ENABLED
-void Copter::convert_prx_parameters()
+void Soleon::convert_prx_parameters()
 {
     // convert PRX to PRX1_ parameters for Copter-4.3
     // PARAMETER_CONVERSION - Added: Aug-2022
@@ -1549,7 +1505,7 @@ void Copter::convert_prx_parameters()
 /*
   convert landing gear parameters
  */
-void Copter::convert_lgr_parameters(void)
+void Soleon::convert_lgr_parameters(void)
 {
     // PARAMETER_CONVERSION - Added: Nov-2018
 
@@ -1633,7 +1589,7 @@ void Copter::convert_lgr_parameters(void)
 
 #if FRAME_CONFIG == HELI_FRAME
 // handle conversion of tradheli parameters from Copter-3.6 to Copter-3.7
-void Copter::convert_tradheli_parameters(void) const
+void Soleon::convert_tradheli_parameters(void) const
 {
         // PARAMETER_CONVERSION - Added: Mar-2019
     if (g2.frame_class.get() == AP_Motors::MOTOR_FRAME_HELI) {

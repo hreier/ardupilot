@@ -1,4 +1,4 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 #if LOGGING_ENABLED == ENABLED
 
@@ -23,7 +23,7 @@ struct PACKED log_Control_Tuning {
 };
 
 // Write a control tuning packet
-void Copter::Log_Write_Control_Tuning()
+void Soleon::Log_Write_Control_Tuning()
 {
     // get terrain altitude
     float terr_alt = 0.0f;
@@ -32,64 +32,24 @@ void Copter::Log_Write_Control_Tuning()
         terr_alt = logger.quiet_nan();
     }
 #endif
-    float des_alt_m = 0.0f;
-    int16_t target_climb_rate_cms = 0;
-    if (!flightmode->has_manual_throttle()) {
-        des_alt_m = pos_control->get_pos_target_z_cm() * 0.01f;
-        target_climb_rate_cms = pos_control->get_vel_target_z_cms();
-    }
 
-    // get surface tracking alts
-    float desired_rangefinder_alt;
-    if (!surface_tracking.get_target_dist_for_logging(desired_rangefinder_alt)) {
-        desired_rangefinder_alt = AP::logger().quiet_nan();
-    }
-
-    struct log_Control_Tuning pkt = {
-        LOG_PACKET_HEADER_INIT(LOG_CONTROL_TUNING_MSG),
-        time_us             : AP_HAL::micros64(),
-        throttle_in         : attitude_control->get_throttle_in(),
-        angle_boost         : attitude_control->angle_boost(),
-        throttle_out        : motors->get_throttle(),
-        throttle_hover      : motors->get_throttle_hover(),
-        desired_alt         : des_alt_m,
-        inav_alt            : inertial_nav.get_position_z_up_cm() * 0.01f,
-        baro_alt            : baro_alt,
-        desired_rangefinder_alt : desired_rangefinder_alt,
-        rangefinder_alt     : surface_tracking.get_dist_for_logging(),
-        terr_alt            : terr_alt,
-        target_climb_rate   : target_climb_rate_cms,
-        climb_rate          : int16_t(inertial_nav.get_velocity_z_up_cms()) // float -> int16_t
-    };
-    logger.WriteBlock(&pkt, sizeof(pkt));
 }
 
 // Write an attitude packet
-void Copter::Log_Write_Attitude()
+void Soleon::Log_Write_Attitude()
 {
-    Vector3f targets = attitude_control->get_att_target_euler_cd();
-    targets.z = wrap_360_cd(targets.z);
-    ahrs.Write_Attitude(targets);
-    ahrs_view->Write_Rate(*motors, *attitude_control, *pos_control);
- }
+
+}
 
 // Write PIDS packets
-void Copter::Log_Write_PIDS()
+void Soleon::Log_Write_PIDS()
 {
-   if (should_log(MASK_LOG_PID)) {
-        logger.Write_PID(LOG_PIDR_MSG, attitude_control->get_rate_roll_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDP_MSG, attitude_control->get_rate_pitch_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDY_MSG, attitude_control->get_rate_yaw_pid().get_pid_info());
-        logger.Write_PID(LOG_PIDA_MSG, pos_control->get_accel_z_pid().get_pid_info() );
-        if (should_log(MASK_LOG_NTUN) && (flightmode->requires_GPS() || landing_with_GPS())) {
-            logger.Write_PID(LOG_PIDN_MSG, pos_control->get_vel_xy_pid().get_pid_info_x());
-            logger.Write_PID(LOG_PIDE_MSG, pos_control->get_vel_xy_pid().get_pid_info_y());
-        }
-    }
+   
+
 }
 
 // Write an EKF and POS packet
-void Copter::Log_Write_EKF_POS()
+void Soleon::Log_Write_EKF_POS()
 {
     AP::ahrs().Log_Write();
 }
@@ -103,7 +63,7 @@ struct PACKED log_Data_Int16t {
 
 // Write an int16_t data packet
 UNUSED_FUNCTION
-void Copter::Log_Write_Data(LogDataID id, int16_t value)
+void Soleon::Log_Write_Data(LogDataID id, int16_t value)
 {
     if (should_log(MASK_LOG_ANY)) {
         struct log_Data_Int16t pkt = {
@@ -125,7 +85,7 @@ struct PACKED log_Data_UInt16t {
 
 // Write an uint16_t data packet
 UNUSED_FUNCTION 
-void Copter::Log_Write_Data(LogDataID id, uint16_t value)
+void Soleon::Log_Write_Data(LogDataID id, uint16_t value)
 {
     if (should_log(MASK_LOG_ANY)) {
         struct log_Data_UInt16t pkt = {
@@ -146,7 +106,7 @@ struct PACKED log_Data_Int32t {
 };
 
 // Write an int32_t data packet
-void Copter::Log_Write_Data(LogDataID id, int32_t value)
+void Soleon::Log_Write_Data(LogDataID id, int32_t value)
 {
     if (should_log(MASK_LOG_ANY)) {
         struct log_Data_Int32t pkt = {
@@ -167,7 +127,7 @@ struct PACKED log_Data_UInt32t {
 };
 
 // Write a uint32_t data packet
-void Copter::Log_Write_Data(LogDataID id, uint32_t value)
+void Soleon::Log_Write_Data(LogDataID id, uint32_t value)
 {
     if (should_log(MASK_LOG_ANY)) {
         struct log_Data_UInt32t pkt = {
@@ -189,7 +149,7 @@ struct PACKED log_Data_Float {
 
 // Write a float data packet
 UNUSED_FUNCTION
-void Copter::Log_Write_Data(LogDataID id, float value)
+void Soleon::Log_Write_Data(LogDataID id, float value)
 {
     if (should_log(MASK_LOG_ANY)) {
         struct log_Data_Float pkt = {
@@ -211,7 +171,7 @@ struct PACKED log_ParameterTuning {
     float    tuning_max;    // tuning maximum value
 };
 
-void Copter::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float tune_min, float tune_max)
+void Soleon::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float tune_min, float tune_max)
 {
     struct log_ParameterTuning pkt_tune = {
         LOG_PACKET_HEADER_INIT(LOG_PARAMTUNE_MSG),
@@ -225,7 +185,7 @@ void Copter::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float t
     logger.WriteBlock(&pkt_tune, sizeof(pkt_tune));
 }
 
-void Copter::Log_Video_Stabilisation()
+void Soleon::Log_Video_Stabilisation()
 {
     if (!should_log(MASK_LOG_VIDEO_STABILISATION)) {
         return;
@@ -248,7 +208,7 @@ struct PACKED log_SysIdD {
 };
 
 // Write an rate packet
-void Copter::Log_Write_SysID_Data(float waveform_time, float waveform_sample, float waveform_freq, float angle_x, float angle_y, float angle_z, float accel_x, float accel_y, float accel_z)
+void Soleon::Log_Write_SysID_Data(float waveform_time, float waveform_sample, float waveform_freq, float angle_x, float angle_y, float angle_z, float accel_x, float accel_y, float accel_z)
 {
 #if MODE_SYSTEMID_ENABLED == ENABLED
     struct log_SysIdD pkt_sidd = {
@@ -282,7 +242,7 @@ struct PACKED log_SysIdS {
 };
 
 // Write an rate packet
-void Copter::Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out)
+void Soleon::Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out)
 {
 #if MODE_SYSTEMID_ENABLED == ENABLED
     struct log_SysIdS pkt_sids = {
@@ -312,7 +272,7 @@ struct PACKED log_Heli {
 };
 
 // Write an helicopter packet
-void Copter::Log_Write_Heli()
+void Soleon::Log_Write_Heli()
 {
     struct log_Heli pkt_heli = {
         LOG_PACKET_HEADER_INIT(LOG_HELI_MSG),
@@ -358,11 +318,12 @@ struct PACKED log_Guided_Attitude_Target {
     float climb_rate;
 };
 
+/*
 // Write a Guided mode position target
 // pos_target is lat, lon, alt OR offset from ekf origin in cm
 // terrain should be 0 if pos_target.z is alt-above-ekf-origin, 1 if alt-above-terrain
 // vel_target is cm/s
-void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target)
+void Soleon::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target)
 {
     const log_Guided_Position_Target pkt {
         LOG_PACKET_HEADER_INIT(LOG_GUIDED_POSITION_TARGET_MSG),
@@ -387,7 +348,7 @@ void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, c
 // ang_vel: angular velocity, [roll rate, pitch_rate, yaw_rate] in radians/sec
 // thrust is between 0 to 1
 // climb_rate is in (m/s)
-void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate)
+void Soleon::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate)
 {
     const log_Guided_Attitude_Target pkt {
         LOG_PACKET_HEADER_INIT(LOG_GUIDED_ATTITUDE_TARGET_MSG),
@@ -404,11 +365,12 @@ void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, f
     };
     logger.WriteBlock(&pkt, sizeof(pkt));
 }
+*/
 
 // type and unit information can be found in
 // libraries/AP_Logger/Logstructure.h; search for "log_Units" for
 // units and "Format characters" for field type information
-const struct LogStructure Copter::log_structure[] = {
+const struct LogStructure Soleon::log_structure[] = {
     LOG_COMMON_STRUCTURES,
     
 // @LoggerMessage: PTUN
@@ -560,43 +522,42 @@ const struct LogStructure Copter::log_structure[] = {
       "GUIA",  "QBffffffff",    "TimeUS,Type,Roll,Pitch,Yaw,RollRt,PitchRt,YawRt,Thrust,ClimbRt", "s-dddkkk-n", "F-000000-0" , true },
 };
 
-void Copter::Log_Write_Vehicle_Startup_Messages()
+void Soleon::Log_Write_Vehicle_Startup_Messages()
 {
     // only 200(?) bytes are guaranteed by AP_Logger
     char frame_and_type_string[30];
-    copter.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
+    soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
     logger.Write_MessageF("%s", frame_and_type_string);
-    logger.Write_Mode((uint8_t)flightmode->mode_number(), control_mode_reason);
     ahrs.Log_Write_Home_And_Origin();
     gps.Write_AP_Logger_Log_Startup_messages();
 }
 
-void Copter::log_init(void)
+void Soleon::log_init(void)
 {
     logger.Init(log_structure, ARRAY_SIZE(log_structure));
 }
 
 #else // LOGGING_ENABLED
 
-void Copter::Log_Write_Control_Tuning() {}
-void Copter::Log_Write_Attitude(void) {}
-void Copter::Log_Write_EKF_POS() {}
-void Copter::Log_Write_Data(LogDataID id, int32_t value) {}
-void Copter::Log_Write_Data(LogDataID id, uint32_t value) {}
-void Copter::Log_Write_Data(LogDataID id, int16_t value) {}
-void Copter::Log_Write_Data(LogDataID id, uint16_t value) {}
-void Copter::Log_Write_Data(LogDataID id, float value) {}
-void Copter::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float tune_min, float tune_max) {}
-void Copter::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target) {}
-void Copter::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate) {}
-void Copter::Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out) {}
-void Copter::Log_Write_SysID_Data(float waveform_time, float waveform_sample, float waveform_freq, float angle_x, float angle_y, float angle_z, float accel_x, float accel_y, float accel_z) {}
-void Copter::Log_Write_Vehicle_Startup_Messages() {}
+void Soleon::Log_Write_Control_Tuning() {}
+void Soleon::Log_Write_Attitude(void) {}
+void Soleon::Log_Write_EKF_POS() {}
+void Soleon::Log_Write_Data(LogDataID id, int32_t value) {}
+void Soleon::Log_Write_Data(LogDataID id, uint32_t value) {}
+void Soleon::Log_Write_Data(LogDataID id, int16_t value) {}
+void Soleon::Log_Write_Data(LogDataID id, uint16_t value) {}
+void Soleon::Log_Write_Data(LogDataID id, float value) {}
+void Soleon::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float tune_min, float tune_max) {}
+void Soleon::Log_Write_Guided_Position_Target(ModeGuided::SubMode target_type, const Vector3f& pos_target, bool terrain_alt, const Vector3f& vel_target, const Vector3f& accel_target) {}
+void Soleon::Log_Write_Guided_Attitude_Target(ModeGuided::SubMode target_type, float roll, float pitch, float yaw, const Vector3f &ang_vel, float thrust, float climb_rate) {}
+void Soleon::Log_Write_SysID_Setup(uint8_t systemID_axis, float waveform_magnitude, float frequency_start, float frequency_stop, float time_fade_in, float time_const_freq, float time_record, float time_fade_out) {}
+void Soleon::Log_Write_SysID_Data(float waveform_time, float waveform_sample, float waveform_freq, float angle_x, float angle_y, float angle_z, float accel_x, float accel_y, float accel_z) {}
+void Soleon::Log_Write_Vehicle_Startup_Messages() {}
 
 #if FRAME_CONFIG == HELI_FRAME
-void Copter::Log_Write_Heli() {}
+void Soleon::Log_Write_Heli() {}
 #endif
 
-void Copter::log_init(void) {}
+void Soleon::log_init(void) {}
 
 #endif // LOGGING_ENABLED

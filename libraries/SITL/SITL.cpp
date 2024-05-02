@@ -960,7 +960,9 @@ void SIM::sim_state_send(mavlink_channel_t chan) const
             0.0,
             state.speedN,
             state.speedE,
-            state.speedD);
+            state.speedD,
+            0,   //-- hare added 2 values
+            0);
 }
 
 /* report SITL state to AP_Logger */

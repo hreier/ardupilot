@@ -270,26 +270,14 @@
 //////////////////////////////////////////////////////////////////////////////
 // Weathervane - allow vehicle to yaw into wind
 #ifndef WEATHERVANE_ENABLED
-# define WEATHERVANE_ENABLED ENABLED
+# define WEATHERVANE_ENABLED DISABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
 // Autorotate - autonomous auto-rotation - helicopters only
-#ifndef MODE_AUTOROTATE_ENABLED
-#if CONFIG_HAL_BOARD == HAL_BOARD_SITL
-    #if FRAME_CONFIG == HELI_FRAME
-        #ifndef MODE_AUTOROTATE_ENABLED
-        # define MODE_AUTOROTATE_ENABLED ENABLED
-        #endif
-    #else
-        # define MODE_AUTOROTATE_ENABLED DISABLED
-    #endif
-#else
-    # define MODE_AUTOROTATE_ENABLED DISABLED
-#endif
-#endif
+# define MODE_AUTOROTATE_ENABLED DISABLED 
 
 //////////////////////////////////////////////////////////////////////////////
 // RADIO CONFIGURATION
@@ -302,22 +290,22 @@
 //
 
 #ifndef FLIGHT_MODE_1
- # define FLIGHT_MODE_1                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_1                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_2
- # define FLIGHT_MODE_2                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_2                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_3
- # define FLIGHT_MODE_3                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_3                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_4
- # define FLIGHT_MODE_4                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_4                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_5
- # define FLIGHT_MODE_5                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_5                  0 //Mode::Number::STABILIZE
 #endif
 #ifndef FLIGHT_MODE_6
- # define FLIGHT_MODE_6                  Mode::Number::STABILIZE
+ # define FLIGHT_MODE_6                  0 //Mode::Number::STABILIZE
 #endif
 
 
@@ -591,9 +579,6 @@
   #error SmartRTL requires ModeRTL which is disabled
 #endif
 
-#if HAL_ADSB_ENABLED && !MODE_GUIDED_ENABLED
-  #error ADSB requires ModeGuided which is disabled
-#endif
 
 #if MODE_FOLLOW_ENABLED && !MODE_GUIDED_ENABLED
   #error Follow requires ModeGuided which is disabled
@@ -602,6 +587,43 @@
 #if MODE_GUIDED_NOGPS_ENABLED && !MODE_GUIDED_ENABLED
   #error ModeGuided-NoGPS requires ModeGuided which is disabled
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Soleon defines
+//
+#ifndef SO_CONTROLMODE_DEF
+# define SO_CONTROLMODE_DEF 1
+#endif
+
+#ifndef SO_FLOWSENSOR_DEF
+# define SO_FLOWSENSOR_DEF DISABLED
+#endif
+
+#ifndef SO_PRESSURESENS_DEF
+# define SO_PRESSURESENS_DEF DISABLED
+#endif
+
+#ifndef SO_ARMING_DEF
+# define SO_ARMING_DEF DISABLED
+#endif
+
+#ifndef SO_PRESSURE_PID_DEF
+# define SO_PRESSURE_PID_DEF 0.0
+#endif
+
+#ifndef SO_SERVO_OUT_SPRAYING_DEF  //servo: 800-2200
+# define SO_SERVO_OUT_SPRAYING_DEF 1900
+#endif
+
+#ifndef SO_SERVO_OUT_NOSPRAYING_DEF
+# define SO_SERVO_OUT_NOSPRAYING_DEF 1100
+#endif
+
+#ifndef SO_SPRAYRATE_EST_DEF
+# define SO_SPRAYRATE_EST_DEF 1.5
+#endif
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Developer Items
@@ -630,6 +652,7 @@
 #ifndef OSD_ENABLED
  #define OSD_ENABLED DISABLED
 #endif
+
 
 #ifndef HAL_FRAME_TYPE_DEFAULT
 #define HAL_FRAME_TYPE_DEFAULT AP_Motors::MOTOR_FRAME_TYPE_X

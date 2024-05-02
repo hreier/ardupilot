@@ -1,45 +1,34 @@
-#include "Copter.h"
+#include "Soleon.h"
 
 
 // Function that will read the radio data, limit servos and trigger a failsafe
 // ----------------------------------------------------------------------------
 
-void Copter::default_dead_zones()
-{
-    channel_roll->set_default_dead_zone(20);
-    channel_pitch->set_default_dead_zone(20);
-#if FRAME_CONFIG == HELI_FRAME
-    channel_throttle->set_default_dead_zone(10);
-    channel_yaw->set_default_dead_zone(15);
-#else
-    channel_throttle->set_default_dead_zone(30);
-    channel_yaw->set_default_dead_zone(20);
-#endif
-    rc().channel(CH_6)->set_default_dead_zone(0);
-}
 
-void Copter::init_rc_in()
+
+void Soleon::init_rc_in()
 {
-    channel_roll     = rc().channel(rcmap.roll()-1);
-    channel_pitch    = rc().channel(rcmap.pitch()-1);
-    channel_throttle = rc().channel(rcmap.throttle()-1);
-    channel_yaw      = rc().channel(rcmap.yaw()-1);
+    channel_speed    = rc().channel(so_rcmap.speed()-1);
+    channel_offset   = rc().channel(so_rcmap.offset()-1);
+    channel_override = rc().channel(so_rcmap.override()-1);
 
     // set rc channel ranges
-    channel_roll->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_pitch->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_yaw->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
-    channel_throttle->set_range(1000);
+    channel_speed->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    channel_offset->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    channel_override->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    //channel_throttle->set_range(1000);
 
     // set default dead zones
-    default_dead_zones();
+    channel_speed->set_default_dead_zone(0);   //20
+    channel_offset->set_default_dead_zone(0);
+    channel_override->set_default_dead_zone(0);
 
     // initialise throttle_zero flag
-    ap.throttle_zero = true;
+    //ap.throttle_zero = true;
 }
 
  // init_rc_out -- initialise motors
-void Copter::init_rc_out()
+void Soleon::init_rc_out()
 {
     motors->init((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
 
@@ -50,14 +39,14 @@ void Copter::init_rc_out()
     motors->set_update_rate(g.rc_speed);
 
 #if FRAME_CONFIG != HELI_FRAME
-    if (channel_throttle->configured()) {
+    /*if (channel_throttle->configured()) {
         // throttle inputs setup, use those to set motor PWM min and max if not already configured
         motors->convert_pwm_min_max_param(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
     } else {
         // throttle inputs default, force set motor PWM min and max to defaults so they will not be over-written by a future change in RC min / max
         motors->convert_pwm_min_max_param(1000, 2000);
     }
-    motors->update_throttle_range();
+    motors->update_throttle_range();*/
 #else
     // setup correct scaling for ESCs like the UAVCAN ESCs which
     // take a proportion of speed.
@@ -71,30 +60,30 @@ void Copter::init_rc_out()
     /*
       setup a default safety ignore mask, so that servo gimbals can be active while safety is on
      */
-    uint16_t safety_ignore_mask = (~copter.motors->get_motor_mask()) & 0x3FFF;
+    uint16_t safety_ignore_mask = (~soleon.motors->get_motor_mask()) & 0x3FFF;
     BoardConfig.set_default_safety_ignore_mask(safety_ignore_mask);
 #endif
 }
 
 
-void Copter::read_radio()
+void Soleon::read_radio()
 {
     const uint32_t tnow_ms = millis();
 
     if (rc().read_input()) {
         ap.new_radio_frame = true;
 
-        set_throttle_and_failsafe(channel_throttle->get_radio_in());
-        set_throttle_zero_flag(channel_throttle->get_control_in());
+       // set_throttle_and_failsafe(channel_throttle->get_radio_in());
+       // set_throttle_zero_flag(channel_throttle->get_control_in());
 
         // RC receiver must be attached if we've just got input
         ap.rc_receiver_present = true;
 
         // pass pilot input through to motors (used to allow wiggling servos while disarmed on heli, single, coax copters)
-        radio_passthrough_to_motors();
+       // radio_passthrough_to_motors();
 
-        const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
-        rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
+        //const float dt = (tnow_ms - last_radio_update_ms)*1.0e-3f;
+       // rc_throttle_control_in_filter.apply(channel_throttle->get_control_in(), dt);
         last_radio_update_ms = tnow_ms;
         return;
     }
@@ -122,11 +111,11 @@ void Copter::read_radio()
 
     // Log an error and enter failsafe.
     AP::logger().Write_Error(LogErrorSubsystem::RADIO, LogErrorCode::RADIO_LATE_FRAME);
-    set_failsafe_radio(true);
+//haRe    set_failsafe_radio(true);
 }
 
 #define FS_COUNTER 3        // radio failsafe kicks in after 3 consecutive throttle values below failsafe_throttle_value
-void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
+void Soleon::set_throttle_and_failsafe(uint16_t throttle_pwm)
 {
     // if failsafe not enabled pass through throttle and exit
     if(g.failsafe_throttle == FS_THR_DISABLED) {
@@ -146,7 +135,6 @@ void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
         failsafe.radio_counter++;
         if( failsafe.radio_counter >= FS_COUNTER ) {
             failsafe.radio_counter = FS_COUNTER;  // check to ensure we don't overflow the counter
-            set_failsafe_radio(true);
         }
     }else{
         // we have a good throttle so reduce failsafe counter
@@ -156,7 +144,6 @@ void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
 
             // disengage failsafe after three (nearly) consecutive valid throttle values
             if (failsafe.radio) {
-                set_failsafe_radio(false);
             }
         }
         // pass through throttle
@@ -168,7 +155,7 @@ void Copter::set_throttle_and_failsafe(uint16_t throttle_pwm)
 // throttle_zero is used to determine if the pilot intends to shut down the motors
 // Basically, this signals when we are not flying.  We are either on the ground
 // or the pilot has shut down the copter in the air and it is free-falling
-void Copter::set_throttle_zero_flag(int16_t throttle_control)
+void Soleon::set_throttle_zero_flag(int16_t throttle_control)
 {
     static uint32_t last_nonzero_throttle_ms = 0;
     uint32_t tnow_ms = millis();
@@ -186,19 +173,12 @@ void Copter::set_throttle_zero_flag(int16_t throttle_control)
     }
 }
 
-// pass pilot's inputs to motors library (used to allow wiggling servos while disarmed on heli, single, coax copters)
-void Copter::radio_passthrough_to_motors()
-{
-    motors->set_radio_passthrough(channel_roll->norm_input(),
-                                  channel_pitch->norm_input(),
-                                  channel_throttle->get_control_in_zero_dz()*0.001f,
-                                  channel_yaw->norm_input());
-}
+
 
 /*
   return the throttle input for mid-stick as a control-in value
  */
-int16_t Copter::get_throttle_mid(void)
+/*int16_t Soleon::get_throttle_mid(void)
 {
 #if TOY_MODE_ENABLED == ENABLED
     if (g2.toy_mode.enabled()) {
@@ -206,4 +186,4 @@ int16_t Copter::get_throttle_mid(void)
     }
 #endif
     return channel_throttle->get_control_mid();
-}
+}*/

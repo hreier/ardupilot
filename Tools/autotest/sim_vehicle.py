@@ -998,6 +998,7 @@ vehicle_map = {
     "Sub": "ArduSub",
     "Blimp" : "Blimp",
     "Rover": "Rover",
+    "Soleon": "ACoSoleon",
 }
 # add lower-case equivalents too
 for k in list(vehicle_map.keys()):
