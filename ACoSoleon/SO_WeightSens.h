@@ -20,7 +20,7 @@
   #define WEIGHTSENS_MAX_INSTANCES 1
 #endif
 
-//#define SCALE_LOGGING      //-- this activates logging of the Weight sensor module for debugging
+#define SCALE_LOGGING      //-- this activates logging of the Weight sensor module for debugging
 
 
 class SO_WeightSens_Backend;
