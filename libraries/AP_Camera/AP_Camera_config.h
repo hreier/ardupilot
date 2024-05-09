@@ -3,6 +3,7 @@
 #include <AP_HAL/AP_HAL_Boards.h>
 #include <AP_Mount/AP_Mount_config.h>
 #include <AP_Relay/AP_Relay_config.h>
+#include <GCS_MAVLink/GCS_config.h>
 
 #ifndef AP_CAMERA_ENABLED
 #define AP_CAMERA_ENABLED 1
@@ -13,7 +14,7 @@
 #endif
 
 #ifndef AP_CAMERA_MAVLINK_ENABLED
-#define AP_CAMERA_MAVLINK_ENABLED AP_CAMERA_BACKEND_DEFAULT_ENABLED
+#define AP_CAMERA_MAVLINK_ENABLED AP_CAMERA_BACKEND_DEFAULT_ENABLED && HAL_GCS_ENABLED
 #endif
 
 #ifndef AP_CAMERA_MAVLINKCAMV2_ENABLED
@@ -38,4 +39,13 @@
 
 #ifndef AP_CAMERA_SCRIPTING_ENABLED
 #define AP_CAMERA_SCRIPTING_ENABLED AP_CAMERA_BACKEND_DEFAULT_ENABLED && AP_SCRIPTING_ENABLED
+#endif
+
+#ifndef AP_CAMERA_SEND_FOV_STATUS_ENABLED
+#define AP_CAMERA_SEND_FOV_STATUS_ENABLED AP_MOUNT_POI_TO_LATLONALT_ENABLED
+#endif
+
+// set camera source is supported on cameras that may have more than one lens which is curently only cameras within gimbals/mounts
+#ifndef AP_CAMERA_SET_CAMERA_SOURCE_ENABLED
+#define AP_CAMERA_SET_CAMERA_SOURCE_ENABLED HAL_MOUNT_SET_CAMERA_SOURCE_ENABLED
 #endif

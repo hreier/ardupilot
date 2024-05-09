@@ -394,6 +394,9 @@ public:
     // get earth-frame Z-axis acceleration with gravity removed in cm/s/s with +ve being up
     float get_z_accel_cmss() const { return -(_ahrs.get_accel_ef().z + GRAVITY_MSS) * 100.0f; }
 
+    /// returns true when the forward pitch demand is limited by the maximum allowed tilt
+    bool get_fwd_pitch_is_limited() const { return _fwd_pitch_is_limited; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 protected:
@@ -408,7 +411,7 @@ protected:
     void lean_angles_to_accel_xy(float& accel_x_cmss, float& accel_y_cmss) const;
 
     // calculate_yaw_and_rate_yaw - calculate the vehicle yaw and rate of yaw.
-    bool calculate_yaw_and_rate_yaw();
+    void calculate_yaw_and_rate_yaw();
 
     // calculate_overspeed_gain - calculated increased maximum acceleration and jerk if over speed condition is detected
     float calculate_overspeed_gain();
@@ -461,6 +464,8 @@ protected:
     Vector3f    _accel_desired;         // desired acceleration in NEU cm/s/s (feed forward)
     Vector3f    _accel_target;          // acceleration target in NEU cm/s/s
     Vector3f    _limit_vector;          // the direction that the position controller is limited, zero when not limited
+
+    bool        _fwd_pitch_is_limited;     // true when the forward pitch demand is being limited to meet acceleration limits
 
     float       _pos_offset_target_z;   // vertical position offset target, frame NEU in cm relative to the EKF origin
     float       _pos_offset_z;          // vertical position offset, frame NEU in cm relative to the EKF origin

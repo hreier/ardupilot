@@ -31,7 +31,7 @@ def _load_dynamic_env_data(bld):
             # relative paths from the make build are relative to BUILDROOT
             d = os.path.join(bld.env.BUILDROOT, d)
         d = os.path.normpath(d)
-        if not d in idirs2:
+        if d not in idirs2:
             idirs2.append(d)
     _dynamic_env_data['include_dirs'] = idirs2
 
@@ -98,7 +98,7 @@ class upload_fw(Task.Task):
         except subprocess.CalledProcessError:
             #if where.exe can't find the file it returns a non-zero result which throws this exception
             where_python = ""
-        if not where_python or not "\Python\Python" in where_python or "python.exe" not in where_python:
+        if not where_python or "\Python\Python" not in where_python or "python.exe" not in where_python:
             print(self.get_full_wsl2_error_msg("Windows python.exe not found"))
             return False
         return True
@@ -114,7 +114,7 @@ class upload_fw(Task.Task):
         and make sure to add it to your path during the installation. Once installed, run this
         command in Powershell or Command Prompt to install some packages:
         
-        pip.exe install empy pyserial
+        pip.exe install empy==3.3.4 pyserial
         ****************************************
         ****************************************
         """ % error_msg)
@@ -411,7 +411,10 @@ def chibios_firmware(self):
     bootloader_bin = self.bld.srcnode.make_node("Tools/bootloaders/%s_bl.bin" % self.env.BOARD)
     if self.bld.env.HAVE_INTEL_HEX:
         if os.path.exists(bootloader_bin.abspath()):
-            hex_target = self.bld.bldnode.find_or_declare('bin/' + link_output.change_ext('.hex').name)
+            if int(self.bld.env.FLASH_RESERVE_START_KB) > 0:
+                hex_target = self.bld.bldnode.find_or_declare('bin/' + link_output.change_ext('_with_bl.hex').name)
+            else:
+                hex_target = self.bld.bldnode.find_or_declare('bin/' + link_output.change_ext('.hex').name)
             hex_task = self.create_task('build_intel_hex', src=[bin_target[0], bootloader_bin], tgt=hex_target)
             hex_task.set_run_after(cleanup_task)
         else:
@@ -461,13 +464,17 @@ def setup_canmgr_build(cfg):
             'CANARD_ALLOCATE_SEM=1'
             ]
 
-    if cfg.env.HAL_CANFD_SUPPORTED:
-        env.DEFINES += ['UAVCAN_SUPPORT_CANFD=1']
-    else:
-        env.DEFINES += ['UAVCAN_SUPPORT_CANFD=0']
-
     cfg.get_board().with_can = True
 
+def setup_canperiph_build(cfg):
+    '''enable CAN build for peripherals'''
+    env = cfg.env
+    env.DEFINES += [
+        'CANARD_ENABLE_DEADLINE=1',
+        ]
+
+    cfg.get_board().with_can = True
+    
 def load_env_vars(env):
     '''optionally load extra environment variables from env.py in the build directory'''
     print("Checking for env.py")
@@ -578,6 +585,10 @@ def configure(cfg):
     load_env_vars(cfg.env)
     if env.HAL_NUM_CAN_IFACES and not env.AP_PERIPH:
         setup_canmgr_build(cfg)
+    if env.HAL_NUM_CAN_IFACES and env.AP_PERIPH and not env.BOOTLOADER:
+        setup_canperiph_build(cfg)
+    if env.HAL_NUM_CAN_IFACES and env.AP_PERIPH and int(env.HAL_NUM_CAN_IFACES)>1 and not env.BOOTLOADER:
+        env.DEFINES += [ 'CANARD_MULTI_IFACE=1' ]
     setup_optimization(cfg.env)
 
 def generate_hwdef_h(env):
@@ -713,7 +724,7 @@ def build(bld):
     # errors if we accidentially try to use one of those functions either
     # directly or via another libc call
     wraplist = ['sscanf', 'fprintf', 'snprintf', 'vsnprintf','vasprintf','asprintf','vprintf','scanf',
-                'fiprintf','printf',
+                'printf',
                 'fopen', 'fflush', 'fwrite', 'fread', 'fputs', 'fgets',
                 'clearerr', 'fseek', 'ferror', 'fclose', 'tmpfile', 'getc', 'ungetc', 'feof',
                 'ftell', 'freopen', 'remove', 'vfprintf', 'fscanf',

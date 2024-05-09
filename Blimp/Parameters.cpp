@@ -41,6 +41,7 @@ const AP_Param::Info Blimp::var_info[] = {
     // @DisplayName: My ground station number
     // @Description: Allows restricting radio overrides to only come from my ground station
     // @Range: 1 255
+    // @Increment: 1
     // @User: Advanced
     GSCALAR(sysid_my_gcs,   "SYSID_MYGCS",     255),
 
@@ -340,9 +341,11 @@ const AP_Param::Info Blimp::var_info[] = {
     // @Path: ../libraries/AP_AHRS/AP_AHRS.cpp
     GOBJECT(ahrs,                   "AHRS_",    AP_AHRS),
 
+#if HAL_LOGGING_ENABLED
     // @Group: LOG
     // @Path: ../libraries/AP_Logger/AP_Logger.cpp
     GOBJECT(logger,           "LOG",  AP_Logger),
+#endif
 
     // @Group: BATT
     // @Path: ../libraries/AP_BattMonitor/AP_BattMonitor.cpp
@@ -721,6 +724,34 @@ const AP_Param::Info Blimp::var_info[] = {
     // @Range: 0 200
     // @Increment: 0.5
     // @User: Advanced
+
+    // @Param: POSYAW_PDMX
+    // @DisplayName: Position (yaw) axis controller PD sum maximum
+    // @Description: Position (yaw) axis controller PD sum maximum.  The maximum/minimum value that the sum of the P and D term can output
+    // @Range: 0 4000
+    // @Increment: 10
+    // @Units: d%
+    // @User: Advanced
+
+    // @Param: POSYAW_D_FF
+    // @DisplayName: Position (yaw) Derivative FeedForward Gain
+    // @Description: FF D Gain which produces an output that is proportional to the rate of change of the target
+    // @Range: 0 0.1
+    // @Increment: 0.001
+    // @User: Advanced
+
+    // @Param: POSYAW_NTF
+    // @DisplayName: Position (yaw) Target notch filter index
+    // @Description: Position (yaw) Target notch filter index
+    // @Range: 1 8
+    // @User: Advanced
+
+    // @Param: POSYAW_NEF
+    // @DisplayName: Position (yaw) Error notch filter index
+    // @Description: Position (yaw) Error notch filter index
+    // @Range: 1 8
+    // @User: Advanced
+
     GOBJECT(pid_pos_yaw, "POSYAW_", AC_PID),
 
     // @Group:

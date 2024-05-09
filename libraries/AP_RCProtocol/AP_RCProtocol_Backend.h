@@ -67,6 +67,10 @@ public:
         return frontend.rc_protocols_mask;
     }
 
+    bool protocol_enabled(enum AP_RCProtocol::rcprotocol_t protocol) const {
+        return frontend.protocol_enabled(protocol);
+    }
+
     // get RSSI
     int16_t get_RSSI(void) const {
         return rssi;
@@ -93,6 +97,10 @@ public:
     // is the receiver active, used to detect power loss and baudrate changes
     virtual bool is_rx_active() const {
         return true;
+    }
+
+    bool is_detected() const {
+        return frontend._detected_protocol != AP_RCProtocol::NONE && frontend.backend[frontend._detected_protocol] == this;
     }
 
 #if AP_VIDEOTX_ENABLED
@@ -122,7 +130,7 @@ protected:
     void log_data(AP_RCProtocol::rcprotocol_t prot, uint32_t timestamp, const uint8_t *data, uint8_t len) const;
 
     // decode channels from the standard 11bit format (used by CRSF and SBUS)
-    void decode_11bit_channels(const uint8_t* data, uint8_t nchannels, uint16_t *values, uint16_t mult, uint16_t div, uint16_t offset);
+    static void decode_11bit_channels(const uint8_t* data, uint8_t nchannels, uint16_t *values, uint16_t mult, uint16_t div, uint16_t offset);
 
 private:
     uint32_t rc_input_count;

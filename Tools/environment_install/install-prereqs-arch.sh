@@ -26,7 +26,7 @@ BASE_PKGS="base-devel ccache git gsfonts tk wget gcc"
 SITL_PKGS="python-pip python-setuptools python-wheel python-wxpython opencv python-numpy python-scipy"
 PX4_PKGS="lib32-glibc zip zlib ncurses"
 
-PYTHON_PKGS="future lxml pymavlink MAVProxy pexpect argparse matplotlib pyparsing geocoder pyserial empy dronecan"
+PYTHON_PKGS="future lxml pymavlink MAVProxy pexpect argparse matplotlib pyparsing geocoder pyserial empy==3.3.4 dronecan"
 
 # GNU Tools for ARM Embedded Processors
 # (see https://launchpad.net/gcc-arm-embedded/)
@@ -52,7 +52,7 @@ function maybe_prompt_user() {
 
 sudo usermod -a -G uucp "$USER"
 
-sudo pacman -Sy --noconfirm --needed $BASE_PKGS $SITL_PKGS $PX4_PKGS
+sudo pacman -Syu --noconfirm --needed $BASE_PKGS $SITL_PKGS $PX4_PKGS
 
 python3 -m venv "$HOME"/venv-ardupilot
 

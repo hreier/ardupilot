@@ -18,6 +18,10 @@
  */
 #pragma once
 
+#include "AP_GPS_config.h"
+
+#if AP_GPS_ENABLED
+
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <GCS_MAVLink/GCS_config.h>
 #include <AP_RTC/JitterCorrection.h>
@@ -28,6 +32,14 @@
 // enable this to log all bytes from the GPS. Also needs a call to
 // log_data() in each backend
 #define AP_GPS_DEBUG_LOGGING_ENABLED 0
+#endif
+
+#ifndef AP_GPS_MB_MIN_LAG
+#define AP_GPS_MB_MIN_LAG 0.05f
+#endif
+
+#ifndef AP_GPS_MB_MAX_LAG
+#define AP_GPS_MB_MAX_LAG 0.25f
 #endif
 
 #if AP_GPS_DEBUG_LOGGING_ENABLED
@@ -111,10 +123,6 @@ protected:
     uint32_t _last_itow_ms;
     bool _have_itow;
 
-    // common utility functions
-    int32_t swap_int32(int32_t v) const;
-    int16_t swap_int16(int16_t v) const;
-
     /*
       fill in 3D velocity from 2D components
      */
@@ -160,6 +168,9 @@ protected:
     void log_data(const uint8_t *data, uint16_t length);
 #endif
 
+    // set alt in location, honouring GPS driver option for ellipsoid height
+    void set_alt_amsl_cm(AP_GPS::GPS_State &_state, int32_t alt_amsl_cm);
+
 private:
     // itow from previous message
     uint64_t _pseudo_itow;
@@ -181,3 +192,5 @@ private:
 #endif
 
 };
+
+#endif  // AP_GPS_ENABLED

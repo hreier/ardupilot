@@ -14,6 +14,10 @@
  */
 #pragma once
 
+#include "AP_GPS_config.h"
+
+#if AP_GPS_ENABLED
+
 #include <AP_HAL/AP_HAL.h>
 #include <inttypes.h>
 #include <AP_Common/AP_Common.h>
@@ -59,15 +63,12 @@
 #define GPS_MOVING_BASELINE GPS_MAX_RECEIVERS>1
 #endif
 
-#ifndef HAL_MSP_GPS_ENABLED
-#define HAL_MSP_GPS_ENABLED HAL_MSP_SENSORS_ENABLED
-#endif
-
 #if GPS_MOVING_BASELINE
 #include "MovingBase.h"
 #endif // GPS_MOVING_BASELINE
 
 class AP_GPS_Backend;
+class RTCM3_Parser;
 
 /// @class AP_GPS
 /// GPS driver main class
@@ -131,6 +132,7 @@ public:
         GPS_TYPE_UAVCAN_RTK_ROVER = 23,
         GPS_TYPE_UNICORE_NMEA = 24,
         GPS_TYPE_UNICORE_MOVINGBASE_NMEA = 25,
+        GPS_TYPE_SBF_DUAL_ANTENNA = 26,
 #if HAL_SIM_GPS_ENABLED
         GPS_TYPE_SITL = 100,
 #endif
@@ -244,7 +246,7 @@ public:
     void update(void);
 
     // Pass mavlink data to message handlers (for MAV type)
-    void handle_msg(const mavlink_message_t &msg);
+    void handle_msg(mavlink_channel_t chan, const mavlink_message_t &msg);
 #if HAL_MSP_GPS_ENABLED
     void handle_msp(const MSP::msp_gps_data_message_t &pkt);
 #endif
@@ -605,7 +607,6 @@ protected:
     AP_Int16 _delay_ms[GPS_MAX_RECEIVERS];
     AP_Int8  _com_port[GPS_MAX_RECEIVERS];
     AP_Int8 _blend_mask;
-    AP_Float _blend_tc;
     AP_Int16 _driver_options;
     AP_Int8 _primary;
 #if HAL_ENABLE_DRONECAN_DRIVERS
@@ -624,6 +625,9 @@ protected:
         UBX_Use115200     = (1U << 2U),
         UAVCAN_MBUseDedicatedBus  = (1 << 3U),
         HeightEllipsoid   = (1U << 4),
+        GPSL5HealthOverride = (1U << 5),
+        AlwaysRTCMDecode = (1U << 6),
+        DisableRTCMDecode = (1U << 7),
     };
 
     // check if an option is set
@@ -676,6 +680,7 @@ private:
     struct detect_state {
         uint32_t last_baud_change_ms;
         uint8_t current_baud;
+        uint32_t probe_baud;
         bool auto_detected_baud;
         struct UBLOX_detect_state ublox_detect_state;
         struct SIRF_detect_state sirf_detect_state;
@@ -727,7 +732,7 @@ private:
     } rtcm_stats;
 
     // re-assemble GPS_RTCM_DATA message
-    void handle_gps_rtcm_data(const mavlink_message_t &msg);
+    void handle_gps_rtcm_data(mavlink_channel_t chan, const mavlink_message_t &msg);
     void handle_gps_inject(const mavlink_message_t &msg);
 
     //Inject a packet of raw binary to a GPS
@@ -739,7 +744,6 @@ private:
     Vector3f _blended_antenna_offset; // blended antenna offset
     float _blended_lag_sec; // blended receiver lag in seconds
     float _blend_weights[GPS_MAX_RECEIVERS]; // blend weight for each GPS. The blend weights must sum to 1.0 across all instances.
-    float _omega_lpf; // cutoff frequency in rad/sec of LPF applied to position offsets
     bool _output_is_blended; // true when a blended GPS solution being output
     uint8_t _blend_health_counter;  // 0 = perfectly health, 100 = very unhealthy
 
@@ -786,8 +790,24 @@ private:
     // logging support
     void Write_GPS(uint8_t instance);
 
+#if AP_GPS_RTCM_DECODE_ENABLED
+    /*
+      per mavlink channel RTCM decoder, enabled with RTCM decode
+       option in GPS_DRV_OPTIONS
+    */
+    struct {
+        RTCM3_Parser *parsers[MAVLINK_COMM_NUM_BUFFERS];
+        uint32_t sent_crc[32];
+        uint8_t sent_idx;
+        uint16_t seen_mav_channels;
+    } rtcm;
+    bool parse_rtcm_injection(mavlink_channel_t chan, const mavlink_gps_rtcm_data_t &pkt);
+#endif
+
 };
 
 namespace AP {
     AP_GPS &gps();
 };
+
+#endif  // AP_GPS_ENABLED
