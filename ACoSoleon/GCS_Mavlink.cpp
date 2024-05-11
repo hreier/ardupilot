@@ -176,7 +176,7 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
                                 soleon.soleon_ctrl_mode->_mp_line_dist,
                                 soleon.soleon_ctrl_mode->_mp_planned_spd);
 
-   // gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: tank level = %fl",  soleon.soleon_ctrl_mode->_fill_level);  //-- debugging
+    //gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: tank level = %fl",  soleon.soleon_ctrl_mode->_fill_level);  //-- debugging
     
 }
 
@@ -226,13 +226,7 @@ void GCS_MAVLINK_Soleon::send_pid_tuning()
 // send winch status message
 void GCS_MAVLINK_Soleon::send_winch_status() const
 {
-#if AP_WINCH_ENABLED
-    AP_Winch *winch = AP::winch();
-    if (winch == nullptr) {
-        return;
-    }
-    winch->send_status(*this);
-#endif
+ ;
 }
 
 uint8_t GCS_MAVLINK_Soleon::sysid_my_gcs() const
@@ -419,7 +413,9 @@ static const ap_message STREAM_RC_CHANNELS_msgs[] = {
 };
 static const ap_message STREAM_EXTRA1_msgs[] = {
     MSG_ATTITUDE,
+#if AP_SIM_ENABLED
     MSG_SIMSTATE,
+#endif
     MSG_AHRS2,
     MSG_PID_TUNING // Up to four PID_TUNING messages are sent, depending on GCS_PID_MASK parameter
 };
@@ -539,7 +535,7 @@ void GCS_MAVLINK_Soleon::handle_landing_target(const mavlink_landing_target_t &p
 #endif
 }
 
-MAV_RESULT GCS_MAVLINK_Soleon::_handle_command_preflight_calibration(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
+MAV_RESULT GCS_MAVLINK_Soleon::_handle_command_preflight_calibration(const mavlink_command_int_t &packet, const mavlink_message_t &msg)
 {
     /*Hare
     if (is_equal(packet.param6,1.0f)) {
@@ -559,7 +555,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_do_set_roi(const Location &roi_loc
     return MAV_RESULT_ACCEPTED;
 }
 
-MAV_RESULT GCS_MAVLINK_Soleon::handle_preflight_reboot(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
+MAV_RESULT GCS_MAVLINK_Soleon::handle_preflight_reboot(const mavlink_command_int_t &packet, const mavlink_message_t &msg)
 {
     // reject reboot if user has also specified they want the "Auto" ESC calibration on next reboot
     if (soleon.g.esc_calibrate == (uint8_t)Soleon::ESCCalibrationModes::ESCCAL_AUTO) {
@@ -642,6 +638,37 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
     case MAV_CMD_DO_PAUSE_CONTINUE:
         return handle_command_pause_continue(packet);
 
+    // script messages 
+    case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
+        switch ((uint8_t)packet.param1){ //--process the selector
+            case 0: //--HaRe only for test - remove it
+                soleon.soleon_ctrl_mode->_delta_fill = packet.param2;
+                gcs().send_text(MAV_SEVERITY_INFO, "SprayRateScript = %f", packet.param2);  ///-HaRe debug
+                break;
+
+            case 1: //-- mission plan startup command/configuration
+                soleon.soleon_ctrl_mode->_mp_liter_ha = packet.param2;
+                soleon.soleon_ctrl_mode->_mp_line_dist = packet.param3;
+                soleon.soleon_ctrl_mode->_mp_planned_spd = packet.param4;
+                break;
+            
+            case 2: //-- mission plan command
+                soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param2;
+                soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param3;  
+                break;
+            
+            default:
+                gcs().send_text(MAV_SEVERITY_WARNING, "DO_SEND_SCRIPT_MESSAGE wrong selector [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
+                break;
+        }
+        return MAV_RESULT_ACCEPTED;
+        
+    case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
+        soleon.soleon_ctrl_mode->_delta_fill = packet.param1;
+        gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
+        return MAV_RESULT_ACCEPTED;
+
+
     default:
         return GCS_MAVLINK::handle_command_int_packet(packet, msg);
     }
@@ -661,6 +688,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_mount(const mavlink_command_int_t 
 }
 #endif
 
+/*
 MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
 {
     switch(packet.command) {
@@ -694,53 +722,12 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
 
-/*
-#if MODE_AUTO_ENABLED == ENABLED
-    case MAV_CMD_DO_LAND_START:
-        if (soleon.mode_auto.jump_to_landing_sequence_auto_RTL(ModeReason::GCS_COMMAND)) {
-            return MAV_RESULT_ACCEPTED;
-        }
-        return MAV_RESULT_FAILED;
-#endif
-
-    case MAV_CMD_NAV_LOITER_UNLIM:
-        if (!soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
-            return MAV_RESULT_FAILED;
-        }
-        return MAV_RESULT_ACCEPTED;
-
-    case MAV_CMD_NAV_RETURN_TO_LAUNCH:
-        if (!soleon.set_mode(Mode::Number::RTL, ModeReason::GCS_COMMAND)) {
-            return MAV_RESULT_FAILED;
-        }
-        return MAV_RESULT_ACCEPTED;
-
-    case MAV_CMD_NAV_VTOL_LAND:
-    case MAV_CMD_NAV_LAND:
-        if (!soleon.set_mode(Mode::Number::LAND, ModeReason::GCS_COMMAND)) {
-            return MAV_RESULT_FAILED;
-        }
-        return MAV_RESULT_ACCEPTED;
-
-
-        // Solo user presses Fly button 
-    case MAV_CMD_SOLO_BTN_FLY_CLICK: {
-        if (soleon.failsafe.radio) {
-            return MAV_RESULT_ACCEPTED;
-        }
-
-        // set mode to Loiter or fall back to AltHold
-        if (!soleon.set_mode(Mode::Number::LOITER, ModeReason::GCS_COMMAND)) {
-            soleon.set_mode(Mode::Number::ALT_HOLD, ModeReason::GCS_COMMAND);
-        }
-        return MAV_RESULT_ACCEPTED;
-    }
-    */
+   
 
     default:
         return GCS_MAVLINK::handle_command_long_packet(packet, msg);
     }
-}
+}*/
 
 MAV_RESULT GCS_MAVLINK_Soleon::handle_command_pause_continue(const mavlink_command_int_t &packet)
 {
@@ -798,7 +785,8 @@ bool GCS_MAVLINK_Soleon::sane_vel_or_acc_vector(const Vector3f &vec) const
     return true;
 }
 
-void GCS_MAVLINK_Soleon::handleMessage(const mavlink_message_t &msg)
+
+void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
 {
 #if MODE_GUIDED_ENABLED == ENABLED
     // for mavlink SET_POSITION_TARGET messages
@@ -1137,13 +1125,14 @@ void GCS_MAVLINK_Soleon::handleMessage(const mavlink_message_t &msg)
 #endif
         
     default:
-        handle_common_message(msg);
+        GCS_MAVLINK::handle_message(msg);
         break;
     }     // end switch
 } // end handle mavlink
 
 
-MAV_RESULT GCS_MAVLINK_Soleon::handle_flight_termination(const mavlink_command_long_t &packet) {
+
+MAV_RESULT GCS_MAVLINK_Soleon::handle_flight_termination(const mavlink_command_int_t &packet) {
 
 
     return MAV_RESULT_ACCEPTED; //-HaRe

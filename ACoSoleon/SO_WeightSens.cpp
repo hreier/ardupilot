@@ -187,18 +187,6 @@ WeightSens::Status WeightSens::get_status(uint8_t id)
     else return drivers[id]->status();
 }
 
-// manage to forward backend messages
-bool WeightSens::is_new_gcs_message(uint8_t id)
-{
-    if (id >= WEIGHTSENS_MAX_INSTANCES) return false;
-    else return drivers[id]->is_new_gcs_message();
-}
-    
-const char * WeightSens::get_gcs_message(uint8_t id)
-{
-    if (id >= WEIGHTSENS_MAX_INSTANCES) return 0;
-    else return drivers[id]->get_gcs_message();
-}
 
 
 // Write an RFND (weightsens) packet

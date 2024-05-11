@@ -28,7 +28,7 @@
 #define MODE_THROW_ENABLED    DISABLED            // disable throw mode support
 #define MODE_ZIGZAG_ENABLED   DISABLED            // disable zigzag mode support
 //#define OSD_ENABLED           DISABLED            // disable on-screen-display support
-#define AP_WINCH_ENABLED    DISABLED  
+//#define AP_WINCH_ENABLED    DISABLED  /////----- HaRe to check!!!!!
 #define HAL_SPRAYER_ENABLED DISABLED  
 #define AC_PRECLAND_ENABLED DISABLED  
 #define AC_CUSTOMCONTROL_MULTI_ENABLED DISABLED  

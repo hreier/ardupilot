@@ -51,8 +51,7 @@ public:
         NotConnected = 0,
         NoData,
         Good,
-        SensorError,
-        setAdd
+        SensorError
     };
 
     // The WeightSens_State structure is filled in by the backend driver
@@ -109,11 +108,6 @@ public:
     // returns the WeightSens status
     WeightSens::Status get_status(uint8_t id);
     
-    // backend messages
-    bool is_new_gcs_message(uint8_t id);
-    const char * get_gcs_message(uint8_t id);
-
-
 
     static WeightSens *get_singleton(void) { return _singleton; }
 
