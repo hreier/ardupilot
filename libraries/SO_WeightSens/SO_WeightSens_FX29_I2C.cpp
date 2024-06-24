@@ -200,8 +200,8 @@ void SO_WeightSens_FX29_I2C::_measure_s1()
 }
 
 //-- read measured data from sensor 2 ---
-//#define FILT_LENGHT  3
-#define FILT_LENGHT  32
+//#define FILT_LENGHT  3 -> 32
+#define FILT_LENGHT  64
 void SO_WeightSens_FX29_I2C::_measure_s2()
 {
     be16_t val;
