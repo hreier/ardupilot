@@ -607,11 +607,6 @@ const AP_Param::Info Soleon::var_info[] = {
     GOBJECT(so_rcmap, "SO_RCMAP_",        SoRCMapper),
 
     
-    /*// @Group: SO_SC
-    // @Path: SO_WeightSens.cpp
-    GOBJECT(so_scale,        "SO_SC",       WeightSens),*/
-
-    
 
 #if HAL_NAVEKF2_AVAILABLE
     // @Group: EK2_
@@ -1146,9 +1141,15 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // https://github.com/skybrush-io/ardupilot
 
     // @Group: SO_SC
-    // @Path: SO_WeightSens.cpp
+    // @Path: ../libraries/SO_WeightSens/SO_WeightSens.cpp
     AP_SUBGROUPINFO(so_scale, "SO_SC", 63, ParametersG2, WeightSens),
 
+    // @Group: SO_PR
+    // @Path: ../libraries/SO_PressSens/SO_PressSens.cpp
+    AP_SUBGROUPINFO(so_press, "SO_PR", 59, ParametersG2, PressSens),  
+     ///---- https://ardupilot.org/dev/docs/code-overview-adding-a-new-parameter.html
+     // idx == 64 doesn't work
+     // actual we use workaround with idx == 59 (weathervane)
 
     AP_GROUPEND
 };

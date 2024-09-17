@@ -613,6 +613,7 @@ public:
     SRV_Channels servo_channels;
 
     WeightSens  so_scale;
+    PressSens   so_press;
 
 
 

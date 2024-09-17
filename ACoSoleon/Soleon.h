@@ -57,7 +57,8 @@
 #include <AP_Proximity/AP_Proximity.h>      // ArduPilot proximity sensor library
 #include <AP_OpticalFlow/AP_OpticalFlow.h>
 
-#include "SO_WeightSens/SO_WeightSens.h"        // Soleon RC input mapping library
+#include "SO_WeightSens/SO_WeightSens.h"        // Soleon weight sensor library
+#include "SO_PressSens/SO_PressSens.h"        // Soleon pressure sensor library
 
 #include "SO_RCMapper.h"        // Soleon RC input mapping library
 

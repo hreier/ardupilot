@@ -6,8 +6,7 @@
 #include <AP_MSP/AP_MSP_config.h>
 #include <GCS_MAVLink/GCS_config.h>
 
-#ifndef SO_WEIGHTSENS_ENABLED
-#define SO_WEIGHTSENS_ENABLED 1
+#ifndef SO_PRESS_SENS_ENABLED
+#define SO_PRESS_SENS_ENABLED 1
 #endif
-
 
