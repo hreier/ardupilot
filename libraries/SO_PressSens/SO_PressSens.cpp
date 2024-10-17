@@ -85,7 +85,7 @@ void PressSens::init()
   around 10Hz by main loop
  */
 
-int dbg_cnt; //--debug
+//int dbg_cnt; //--debug
 void PressSens::update(void)
 {
     for (uint8_t i=0; i<num_instances; i++) {
@@ -97,13 +97,12 @@ void PressSens::update(void)
     Log_RFND();
 #endif
 //------------debug---
-//if (dbg_cnt++ > 30)
-if (dbg_cnt++ > 80)
-  {
-    dbg_cnt = 0;
-
-    gcs().send_text(MAV_SEVERITY_WARNING, "an=%.2f; prs=%.2f; flw=%.2f; ml=%.0f; %d", drivers[0]->state.analog_val, drivers[0]->state.pressure, drivers[0]->state.flow, drivers[0]->state.ml_accu, (int) drivers[0]->state.status);
-  }
+//if (dbg_cnt++ > 80)
+//  {
+//    dbg_cnt = 0;
+//
+//    gcs().send_text(MAV_SEVERITY_WARNING, "an=%.2f; prs=%.2f; flw=%.2f; ml=%.0f; %d", drivers[0]->state.analog_val, drivers[0]->state.pressure, drivers[0]->state.flow, drivers[0]->state.ml_accu, (int) drivers[0]->state.status);
+//  }
 }
 
 bool PressSens::_add_backend(SO_PressSens_Backend *backend, uint8_t instance)

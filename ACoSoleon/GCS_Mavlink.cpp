@@ -620,6 +620,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_do_reposition(const mavlink_co
 
 MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_int_t &packet, const mavlink_message_t &msg)
 {
+
     switch(packet.command) {
 #if MODE_FOLLOW_ENABLED == ENABLED
     case MAV_CMD_DO_FOLLOW:
@@ -788,321 +789,12 @@ bool GCS_MAVLINK_Soleon::sane_vel_or_acc_vector(const Vector3f &vec) const
 
 void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
 {
-#if MODE_GUIDED_ENABLED == ENABLED
-    // for mavlink SET_POSITION_TARGET messages
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_POS_IGNORE =
-        POSITION_TARGET_TYPEMASK_X_IGNORE |
-        POSITION_TARGET_TYPEMASK_Y_IGNORE |
-        POSITION_TARGET_TYPEMASK_Z_IGNORE;
-
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_VEL_IGNORE =
-        POSITION_TARGET_TYPEMASK_VX_IGNORE |
-        POSITION_TARGET_TYPEMASK_VY_IGNORE |
-        POSITION_TARGET_TYPEMASK_VZ_IGNORE;
-
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_ACC_IGNORE =
-        POSITION_TARGET_TYPEMASK_AX_IGNORE |
-        POSITION_TARGET_TYPEMASK_AY_IGNORE |
-        POSITION_TARGET_TYPEMASK_AZ_IGNORE;
-
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_YAW_IGNORE =
-        POSITION_TARGET_TYPEMASK_YAW_IGNORE;
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_YAW_RATE_IGNORE =
-        POSITION_TARGET_TYPEMASK_YAW_RATE_IGNORE;
-    constexpr uint32_t MAVLINK_SET_POS_TYPE_MASK_FORCE_SET =
-        POSITION_TARGET_TYPEMASK_FORCE_SET;
-#endif
-
     switch (msg.msgid) {
-
-#if MODE_GUIDED_ENABLED == ENABLED
-    case MAVLINK_MSG_ID_SET_ATTITUDE_TARGET:   // MAV ID: 82
+    case MAVLINK_MSG_ID_VFR_HUD:           // MAV ID: 74
     {
-        // decode packet
-        mavlink_set_attitude_target_t packet;
-        mavlink_msg_set_attitude_target_decode(&msg, &packet);
-
-        // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!soleon.flightmode->in_guided_mode()) {
-            break;
-        }
-
-        const bool roll_rate_ignore   = packet.type_mask & ATTITUDE_TARGET_TYPEMASK_BODY_ROLL_RATE_IGNORE;
-        const bool pitch_rate_ignore  = packet.type_mask & ATTITUDE_TARGET_TYPEMASK_BODY_PITCH_RATE_IGNORE;
-        const bool yaw_rate_ignore    = packet.type_mask & ATTITUDE_TARGET_TYPEMASK_BODY_YAW_RATE_IGNORE;
-        const bool throttle_ignore    = packet.type_mask & ATTITUDE_TARGET_TYPEMASK_THROTTLE_IGNORE;
-        const bool attitude_ignore    = packet.type_mask & ATTITUDE_TARGET_TYPEMASK_ATTITUDE_IGNORE;
-
-        // ensure thrust field is not ignored
-        if (throttle_ignore) {
-            break;
-        }
-
-        Quaternion attitude_quat;
-        if (attitude_ignore) {
-            attitude_quat.zero();
-        } else {
-            attitude_quat = Quaternion(packet.q[0],packet.q[1],packet.q[2],packet.q[3]);
-
-            // Do not accept the attitude_quaternion
-            // if its magnitude is not close to unit length +/- 1E-3
-            // this limit is somewhat greater than sqrt(FLT_EPSL)
-            if (!attitude_quat.is_unit_length()) {
-                // The attitude quaternion is ill-defined
-                break;
-            }
-        }
-
-        // check if the message's thrust field should be interpreted as a climb rate or as thrust
-        const bool use_thrust = soleon.mode_guided.set_attitude_target_provides_thrust();
-
-        float climb_rate_or_thrust;
-        if (use_thrust) {
-            // interpret thrust as thrust
-            climb_rate_or_thrust = constrain_float(packet.thrust, -1.0f, 1.0f);
-        } else {
-            // convert thrust to climb rate
-            packet.thrust = constrain_float(packet.thrust, 0.0f, 1.0f);
-            if (is_equal(packet.thrust, 0.5f)) {
-                climb_rate_or_thrust = 0.0f;
-            } else if (packet.thrust > 0.5f) {
-                // climb at up to WPNAV_SPEED_UP
-                climb_rate_or_thrust = (packet.thrust - 0.5f) * 2.0f * soleon.wp_nav->get_default_speed_up();
-            } else {
-                // descend at up to WPNAV_SPEED_DN
-                climb_rate_or_thrust = (0.5f - packet.thrust) * 2.0f * -soleon.wp_nav->get_default_speed_down();
-            }
-        }
-
-        Vector3f ang_vel;
-        if (!roll_rate_ignore) {
-            ang_vel.x = packet.body_roll_rate;
-        }
-        if (!pitch_rate_ignore) {
-            ang_vel.y = packet.body_pitch_rate;
-        }
-        if (!yaw_rate_ignore) {
-            ang_vel.z = packet.body_yaw_rate;
-        }
-
-        soleon.mode_guided.set_angle(attitude_quat, ang_vel,
-                climb_rate_or_thrust, use_thrust);
-
+        handle_copter_hud_msg(msg, soleon.should_log(MASK_LOG_PM));  //-- ToDo: logging
         break;
     }
-
-    case MAVLINK_MSG_ID_SET_POSITION_TARGET_LOCAL_NED:     // MAV ID: 84
-    {
-        // decode packet
-        mavlink_set_position_target_local_ned_t packet;
-        mavlink_msg_set_position_target_local_ned_decode(&msg, &packet);
-
-        // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!soleon.flightmode->in_guided_mode()) {
-            break;
-        }
-
-        // check for supported coordinate frames
-        if (packet.coordinate_frame != MAV_FRAME_LOCAL_NED &&
-            packet.coordinate_frame != MAV_FRAME_LOCAL_OFFSET_NED &&
-            packet.coordinate_frame != MAV_FRAME_BODY_NED &&
-            packet.coordinate_frame != MAV_FRAME_BODY_OFFSET_NED) {
-            // input is not valid so stop
-            soleon.mode_guided.init(true);
-            break;
-        }
-
-        bool pos_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_POS_IGNORE;
-        bool vel_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_VEL_IGNORE;
-        bool acc_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_ACC_IGNORE;
-        bool yaw_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_YAW_IGNORE;
-        bool yaw_rate_ignore = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_YAW_RATE_IGNORE;
-        bool force_set       = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_FORCE_SET;
-
-        // Force inputs are not supported
-        // Do not accept command if force_set is true and acc_ignore is false
-        if (force_set && !acc_ignore) {
-            break;
-        }
-
-        // prepare position
-        Vector3f pos_vector;
-        if (!pos_ignore) {
-            // convert to cm
-            pos_vector = Vector3f(packet.x * 100.0f, packet.y * 100.0f, -packet.z * 100.0f);
-            // rotate to body-frame if necessary
-            if (packet.coordinate_frame == MAV_FRAME_BODY_NED ||
-                packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                soleon.rotate_body_frame_to_NE(pos_vector.x, pos_vector.y);
-            }
-            // add body offset if necessary
-            if (packet.coordinate_frame == MAV_FRAME_LOCAL_OFFSET_NED ||
-                packet.coordinate_frame == MAV_FRAME_BODY_NED ||
-                packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                pos_vector += soleon.inertial_nav.get_position_neu_cm();
-            }
-        }
-
-        // prepare velocity
-        Vector3f vel_vector;
-        if (!vel_ignore) {
-            vel_vector = Vector3f{packet.vx, packet.vy, -packet.vz};
-            if (!sane_vel_or_acc_vector(vel_vector)) {
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                return;
-            }
-            vel_vector *= 100;  // m/s -> cm/s
-            // rotate to body-frame if necessary
-            if (packet.coordinate_frame == MAV_FRAME_BODY_NED || packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                soleon.rotate_body_frame_to_NE(vel_vector.x, vel_vector.y);
-            }
-        }
-
-        // prepare acceleration
-        Vector3f accel_vector;
-        if (!acc_ignore) {
-            // convert to cm
-            accel_vector = Vector3f(packet.afx * 100.0f, packet.afy * 100.0f, -packet.afz * 100.0f);
-            // rotate to body-frame if necessary
-            if (packet.coordinate_frame == MAV_FRAME_BODY_NED || packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED) {
-                soleon.rotate_body_frame_to_NE(accel_vector.x, accel_vector.y);
-            }
-        }
-
-        // prepare yaw
-        float yaw_cd = 0.0f;
-        bool yaw_relative = false;
-        float yaw_rate_cds = 0.0f;
-        if (!yaw_ignore) {
-            yaw_cd = ToDeg(packet.yaw) * 100.0f;
-            yaw_relative = packet.coordinate_frame == MAV_FRAME_BODY_NED || packet.coordinate_frame == MAV_FRAME_BODY_OFFSET_NED;
-        }
-        if (!yaw_rate_ignore) {
-            yaw_rate_cds = ToDeg(packet.yaw_rate) * 100.0f;
-        }
-
-        // send request
-        if (!pos_ignore && !vel_ignore) {
-            soleon.mode_guided.set_destination_posvelaccel(pos_vector, vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
-        } else if (pos_ignore && !vel_ignore) {
-            soleon.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
-        } else if (pos_ignore && vel_ignore && !acc_ignore) {
-            soleon.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative);
-        } else if (!pos_ignore && vel_ignore && acc_ignore) {
-            soleon.mode_guided.set_destination(pos_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds, yaw_relative, false);
-        } else {
-            // input is not valid so stop
-            soleon.mode_guided.init(true);
-        }
-
-        break;
-    }
-
-    case MAVLINK_MSG_ID_SET_POSITION_TARGET_GLOBAL_INT:    // MAV ID: 86
-    {
-        // decode packet
-        mavlink_set_position_target_global_int_t packet;
-        mavlink_msg_set_position_target_global_int_decode(&msg, &packet);
-
-        // exit if vehicle is not in Guided mode or Auto-Guided mode
-        if (!soleon.flightmode->in_guided_mode()) {
-            break;
-        }
-
-        // todo: do we need to check for supported coordinate frames
-
-        bool pos_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_POS_IGNORE;
-        bool vel_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_VEL_IGNORE;
-        bool acc_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_ACC_IGNORE;
-        bool yaw_ignore      = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_YAW_IGNORE;
-        bool yaw_rate_ignore = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_YAW_RATE_IGNORE;
-        bool force_set       = packet.type_mask & MAVLINK_SET_POS_TYPE_MASK_FORCE_SET;
-
-        // Force inputs are not supported
-        // Do not accept command if force_set is true and acc_ignore is false
-        if (force_set && !acc_ignore) {
-            break;
-        }
-
-        // extract location from message
-        Location loc;
-        if (!pos_ignore) {
-            // sanity check location
-            if (!check_latlng(packet.lat_int, packet.lon_int)) {
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                break;
-            }
-            Location::AltFrame frame;
-            if (!mavlink_coordinate_frame_to_location_alt_frame((MAV_FRAME)packet.coordinate_frame, frame)) {
-                // unknown coordinate frame
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                break;
-            }
-            loc = {packet.lat_int, packet.lon_int, int32_t(packet.alt*100), frame};
-        }
-
-        // prepare velocity
-        Vector3f vel_vector;
-        if (!vel_ignore) {
-            vel_vector = Vector3f{packet.vx, packet.vy, -packet.vz};
-            if (!sane_vel_or_acc_vector(vel_vector)) {
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                return;
-            }
-            vel_vector *= 100;  // m/s -> cm/s
-        }
-
-        // prepare acceleration
-        Vector3f accel_vector;
-        if (!acc_ignore) {
-            // convert to cm
-            accel_vector = Vector3f(packet.afx * 100.0f, packet.afy * 100.0f, -packet.afz * 100.0f);
-        }
-
-        // prepare yaw
-        float yaw_cd = 0.0f;
-        float yaw_rate_cds = 0.0f;
-        if (!yaw_ignore) {
-            yaw_cd = ToDeg(packet.yaw) * 100.0f;
-        }
-        if (!yaw_rate_ignore) {
-            yaw_rate_cds = ToDeg(packet.yaw_rate) * 100.0f;
-        }
-
-        // send targets to the appropriate guided mode controller
-        if (!pos_ignore && !vel_ignore) {
-            // convert Location to vector from ekf origin for posvel controller
-            if (loc.get_alt_frame() == Location::AltFrame::ABOVE_TERRAIN) {
-                // posvel controller does not support alt-above-terrain
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                break;
-            }
-            Vector3f pos_neu_cm;
-            if (!loc.get_vector_from_origin_NEU(pos_neu_cm)) {
-                // input is not valid so stop
-                soleon.mode_guided.init(true);
-                break;
-            }
-            soleon.mode_guided.set_destination_posvel(pos_neu_cm, vel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
-        } else if (pos_ignore && !vel_ignore) {
-            soleon.mode_guided.set_velaccel(vel_vector, accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
-        } else if (pos_ignore && vel_ignore && !acc_ignore) {
-            soleon.mode_guided.set_accel(accel_vector, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
-        } else if (!pos_ignore && vel_ignore && acc_ignore) {
-            soleon.mode_guided.set_destination(loc, !yaw_ignore, yaw_cd, !yaw_rate_ignore, yaw_rate_cds);
-        } else {
-            // input is not valid so stop
-            soleon.mode_guided.init(true);
-        }
-
-        break;
-    }
-#endif
 
     case MAVLINK_MSG_ID_RADIO:
     case MAVLINK_MSG_ID_RADIO_STATUS:       // MAV ID: 109
@@ -1234,3 +926,21 @@ uint8_t GCS_MAVLINK_Soleon::high_latency_wind_direction() const
     return 0;
 }
 #endif // HAL_HIGH_LATENCY2_ENABLED
+
+void GCS_MAVLINK_Soleon::handle_copter_hud_msg(const mavlink_message_t &msg, bool log_hud)
+{
+    static int test_cnt;
+    float my_speed;
+    mavlink_vfr_hud_t packet;
+  
+    mavlink_msg_vfr_hud_decode(&msg, &packet);
+    my_speed = norm(packet.groundspeed, packet.climb);
+
+    if (test_cnt++ > 4){
+        test_cnt = 0;
+        //gcs().send_text(MAV_SEVERITY_INFO, "Mavlink msgid: %d; sysid: %d; compid: %d; ang: %d", msg.msgid, msg.sysid, msg.compid, packet.heading);   //--debug
+        gcs().send_text(MAV_SEVERITY_WARNING, "as=%0.2f gs=%0.2f cl=%0.2f ms=%0.2f an=%d", packet.airspeed, packet.groundspeed, packet.climb ,my_speed ,packet.heading );   //--debug
+    }
+    
+}
+

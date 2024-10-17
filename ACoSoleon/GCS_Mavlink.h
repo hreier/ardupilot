@@ -42,6 +42,8 @@ protected:
 #endif
 
     void handle_landing_target(const mavlink_landing_target_t &packet, uint32_t timestamp_ms) override;
+    void handle_copter_hud_msg(const mavlink_message_t &msg, bool log_hud);
+
 
     bool set_home_to_current_location(bool lock) override WARN_IF_UNUSED;
     bool set_home(const Location& loc, bool lock) override WARN_IF_UNUSED;
