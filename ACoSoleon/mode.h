@@ -68,6 +68,7 @@ public:
     }
     virtual void exit() {};
     virtual void run() = 0;
+    virtual bool is_spraying() = 0;
 
 
     // return a string for this flightmode
@@ -133,6 +134,7 @@ public:
 
     bool init() override;
     void run() override;
+    bool is_spraying() override; 
 
 
 protected:
@@ -152,6 +154,7 @@ public:
 
     bool init() override;
     void run() override;
+    bool is_spraying() override; 
 
 
 protected:
@@ -175,6 +178,7 @@ public:
 
     bool init() override;
     void run() override;
+    bool is_spraying() override; 
 
 
 protected:

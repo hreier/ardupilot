@@ -68,6 +68,7 @@ void ModeCtrlSprayPPM::run()
     manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
     _fill_level = g2.so_scale.get_measure(0); 
+    //_mp_sprayrate = g2.so_press.get_measure(0);  //-- this will be used for regulated modes
 
     //modulate_value_trim(30, 30);  //- for test --> this will be removed; _fill_level comes from wägemodule...
     //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- may be needs to be validated if between the limits???
@@ -76,3 +77,7 @@ void ModeCtrlSprayPPM::run()
     SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, _ppm_pump);
 }
 
+bool ModeCtrlSprayPPM::is_spraying()
+{
+    return should_be_spraying;
+}

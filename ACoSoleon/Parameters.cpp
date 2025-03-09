@@ -912,7 +912,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
 
 #ifdef USER_PARAMS_ENABLED
-    AP_SUBGROUPINFO(user_parameters, "USR", 28, ParametersG2, UserParameters),
+    AP_SUBGROUPINFO(user_parameters, "SO", 28, ParametersG2, UserParameters),
 #endif
 
 #if AUTOTUNE_ENABLED == ENABLED

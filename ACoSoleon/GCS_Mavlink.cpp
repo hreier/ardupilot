@@ -939,7 +939,8 @@ void GCS_MAVLINK_Soleon::handle_copter_hud_msg(const mavlink_message_t &msg, boo
     if (test_cnt++ > 4){
         test_cnt = 0;
         //gcs().send_text(MAV_SEVERITY_INFO, "Mavlink msgid: %d; sysid: %d; compid: %d; ang: %d", msg.msgid, msg.sysid, msg.compid, packet.heading);   //--debug
-        gcs().send_text(MAV_SEVERITY_WARNING, "as=%0.2f gs=%0.2f cl=%0.2f ms=%0.2f an=%d", packet.airspeed, packet.groundspeed, packet.climb ,my_speed ,packet.heading );   //--debug
+     //HaRe: disabled for the moment!!!!!!!   gcs().send_text(MAV_SEVERITY_WARNING, "as=%0.2f gs=%0.2f cl=%0.2f ms=%0.2f an=%d", packet.airspeed, packet.groundspeed, packet.climb ,my_speed ,packet.heading );   //--debug
+       my_speed=my_speed*test_cnt;  //- to make the compiler passing
     }
     
 }

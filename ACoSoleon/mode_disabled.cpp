@@ -28,3 +28,8 @@ void ModeCtrlDisabled::run()
     //gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode <%f> is running", SO::TankSupervision()->get_level());  ///-HaRe debug
   
 }
+
+bool ModeCtrlDisabled::is_spraying()
+{
+    return false;
+}

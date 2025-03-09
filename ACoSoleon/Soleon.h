@@ -61,6 +61,7 @@
 #include "SO_PressSens/SO_PressSens.h"        // Soleon pressure sensor library
 
 #include "SO_RCMapper.h"        // Soleon RC input mapping library
+#include "SO_BkgProcessing.h"   // Soleon background processing
 
 
 // Configuration
@@ -198,6 +199,7 @@ public:
     friend class ModeZigZag;
     friend class ModeAutorotate;
     friend class SO_TankSupervision;
+    friend class SoBkgProcessing;
 
     Soleon(void);
 

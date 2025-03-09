@@ -134,7 +134,7 @@ void Soleon::init_ardupilot()
     
     // initialize the pressure module
     g2.so_press.init();
-
+    
 #if HAL_PROXIMITY_ENABLED
     // init proximity sensor
     g2.proximity.init();

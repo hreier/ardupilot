@@ -152,7 +152,7 @@ SO_PressSens_Backend *PressSens::get_backend(uint8_t id) const {
     return drivers[id];
 };
 
-// returns the PressSens measured value [kg / l]
+// returns the PressSens estimated flow value [l/min]
 float PressSens::get_measure(uint8_t id)
 {
     if (id >= PRESS_SENS_MAX_INSTANCES) return 0;

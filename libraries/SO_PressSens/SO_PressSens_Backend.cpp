@@ -58,7 +58,8 @@ void SO_PressSens_Backend::set_status(PressSens::Status _status)
 // get the measured value from backend
 float SO_PressSens_Backend::get_measure()
 {
-    return state.pressure;
+   // return state.pressure;
+    return state.flow;
 }
 
 

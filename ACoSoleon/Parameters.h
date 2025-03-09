@@ -614,6 +614,7 @@ public:
 
     WeightSens  so_scale;
     PressSens   so_press;
+    SoBkgProcessing so_bkg;
 
 
 

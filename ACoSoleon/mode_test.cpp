@@ -99,3 +99,7 @@ void ModeCtrlTest::run()
 
 }
 
+bool ModeCtrlTest::is_spraying()
+{
+    return false;
+}

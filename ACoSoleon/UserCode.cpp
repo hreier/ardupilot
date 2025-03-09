@@ -40,6 +40,7 @@ void Soleon::userhook_SlowLoop()
 void Soleon::userhook_SuperSlowLoop()
 {
     // put your 1Hz code here
+    g2.so_bkg.tanklevel_monitor();
 }
 #endif
 
