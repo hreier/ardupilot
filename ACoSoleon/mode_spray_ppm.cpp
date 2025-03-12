@@ -80,5 +80,5 @@ void ModeCtrlSprayPPM::run()
 bool ModeCtrlSprayPPM::is_spraying()
 {
     //return should_be_spraying;
-    return (_ppm_pump <= g.so_servo_out_nospraying.get());
+    return (_ppm_pump > g.so_servo_out_nospraying.get());
 }

@@ -6,7 +6,7 @@
 
 #include "ap_version.h"
 
-#define THISFIRMWARE "Soleon AirController V1.0.0-RC2"
+#define THISFIRMWARE "Soleon AirController V1.0.0-RC3"
 
 // the following line is parsed by the autotest scripts
 #define FIRMWARE_VERSION 1,0,0,FIRMWARE_VERSION_TYPE_DEV
