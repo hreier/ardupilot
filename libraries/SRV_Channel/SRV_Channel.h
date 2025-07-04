@@ -68,8 +68,8 @@ public:
         k_elevator              = 19,            ///< elevator
         k_elevator_with_input   = 20,            ///< elevator, with rc input, deprecated
         k_rudder                = 21,            ///< secondary rudder channel
-        k_sprayer_pump          = 22,            ///< crop sprayer pump channel
-        k_sprayer_spinner       = 23,            ///< crop sprayer spinner channel
+        k_sprayer_pump_r        = 22,            ///< soleon sprayer pump channel (right)
+        k_sprayer_pump_l        = 23,            ///< soleon sprayer pump channel (left)
         k_flaperon_left         = 24,            ///< flaperon, left wing
         k_flaperon_right        = 25,            ///< flaperon, right wing
         k_steering              = 26,            ///< ground steering, used to separate from rudder

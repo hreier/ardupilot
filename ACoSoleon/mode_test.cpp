@@ -25,7 +25,7 @@ bool ModeCtrlTest::init()
 void ModeCtrlTest::run()
 {
     // exit immediately if the pump function has not been set-up for any servo
-    if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump)) {
+    if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump_r)) {
         return;
     }
 

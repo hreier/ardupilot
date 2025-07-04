@@ -18,7 +18,7 @@ bool ModeCtrlSprayPPM::init()
 void ModeCtrlSprayPPM::run()
 {
     // exit immediately if the pump function has not been set-up for any servo
-    if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump)) {
+    if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump_r)) {
         return;
     }
 
@@ -74,7 +74,7 @@ void ModeCtrlSprayPPM::run()
     //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- may be needs to be validated if between the limits???
 
     override_ppm();              //- remote controller switch can force to run/stop the pump
-    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, _ppm_pump);
+    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, _ppm_pump);
 }
 
 bool ModeCtrlSprayPPM::is_spraying()

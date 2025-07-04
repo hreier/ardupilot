@@ -86,8 +86,8 @@ const AP_Param::GroupInfo SRV_Channel::var_info[] = {
     // @Values{Plane}: 19:Elevator
     // @Values: 21:Rudder
     // @Values{Plane}: 21:Rudder
-    // @Values: 22:SprayerPump,23:SprayerSpinner
-    // @Values{Plane, Copter, Rover}: 22:SprayerPump,23:SprayerSpinner
+    // @Values: 22:SprayerPumpR,23:SprayerPumpL
+    // @Values{Plane, Copter, Rover}: 22:SprayerPumpR,23:SprayerPumpL
     // @Values: 24:FlaperonLeft,25:FlaperonRight
     // @Values{Plane}: 24:FlaperonLeft,25:FlaperonRight
     // @Values: 26:GroundSteering

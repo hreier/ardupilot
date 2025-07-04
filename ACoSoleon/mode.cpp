@@ -35,18 +35,24 @@ bool Mode::bootsequence(void)
 
     if (d_time >= (((uint32_t)mode_number()+1) * PULS_LENGHT)){
         _time_stamp = AP_HAL::millis();
+
+      //  SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
+      //  SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_l, g.so_servo_out_nospraying.get());
+
         return false; //- done
     }
     
-    SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump, spray_pwm);
+    SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump_r, spray_pwm);
 
     d_time %= PULS_LENGHT;
 
     if (d_time < PULS_LENGHT/2){
-        if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_spraying.get());
+     //   if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_spraying.get());
+        if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_spraying.get());
     }
     else {
-        if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump, g.so_servo_out_nospraying.get());
+     //   if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
+        if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
     }
 
     return true; 

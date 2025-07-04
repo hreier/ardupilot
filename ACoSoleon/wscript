@@ -6,15 +6,10 @@ def build(bld):
     bld.ap_stlib(
         name=vehicle + '_libs',
         ap_vehicle=vehicle,
-    #    ap_libraries=bld.ap_common_vehicle_libraries() + [
         ap_libraries=ap_common_soleon_libraries() + [
             'AC_AttitudeControl',
-    #        'AC_InputManager',
             'AC_PrecLand',
-    #        'AC_Sprayer',
-    #        'AC_Autorotation',
             'AC_WPNav',
-    #        'AP_Camera',
             'AP_IRLock',
             'AP_InertialNav',
             'AP_Motors',
@@ -30,7 +25,6 @@ def build(bld):
             'AP_LTM_Telem',
             'AP_Devo_Telem',
             'AP_OSD',
-    #        'AC_AutoTune',
             'AP_KDECAN',
             'SO_WeightSens',
             'SO_PressSens',
