@@ -27,36 +27,90 @@ Mode::Mode(void) :
 // this shows the active Controlmode with the PUMP
 // returns true as long bootsequence is ongoing
 // returns false if bootsequence is done
-#define PULS_LENGHT 1000
+#define PULS_LENGHT 2000
 bool Mode::bootsequence(void)
 {
     uint16_t spray_pwm; 
     uint32_t d_time = AP_HAL::millis() - _time_stamp;
+    AP_Relay *ap_relay = AP::relay();
 
     if (d_time >= (((uint32_t)mode_number()+1) * PULS_LENGHT)){
         _time_stamp = AP_HAL::millis();
 
-      //  SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
-      //  SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_l, g.so_servo_out_nospraying.get());
-
+        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
+        SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_l, g.so_servo_out_nospraying.get());
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 0);
+        
         return false; //- done
     }
     
     SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump_r, spray_pwm);
+        //if (ap_relay != nullptr) {
+            ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 1);
+            ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 1);
+            ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 1);
+            ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 1);
+        //    }
 
     d_time %= PULS_LENGHT;
 
     if (d_time < PULS_LENGHT/2){
-     //   if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_spraying.get());
+        if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_l, g.so_servo_out_nospraying.get());
         if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_spraying.get());
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 1);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 1);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 0);
     }
     else {
      //   if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
+        if (spray_pwm != g.so_servo_out_spraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_l, g.so_servo_out_spraying.get());
         if (spray_pwm != g.so_servo_out_nospraying.get()) SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_r, g.so_servo_out_nospraying.get());
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 1);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 0);
+        ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 1);
     }
 
     return true; 
 }
+
+//-------------------------------------------------------------------------
+// This updates the SprayerValveRelays according to the mp_cmd (command from missionplan)
+
+void Mode::updateSprayerValveRelays(uint8_t mp_cmd)
+{
+    AP_Relay *ap_relay = AP::relay();
+    
+    if (mp_cmd & MASK_CMD_SPR_RIGHT_FRONT)  ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 1);
+    else                                    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FR, 0);
+
+    if (mp_cmd & MASK_CMD_SPR_RIGHT_REAR)   ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 1);
+    else                                    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RR, 0);
+
+    if (mp_cmd & MASK_CMD_SPR_LEFT_FRONT)   ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 1);
+    else                                    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_FL, 0);
+
+    if (mp_cmd & MASK_CMD_SPR_LEFT_REAR)    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 1);
+    else                                    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 0);
+}
+
+
+//-------------------------------------------------------------------------
+// This updates the Pump ppm values according to mp_cmd and ppm_values 
+void Mode::updateSprayerPumpPPMs(uint8_t mp_cmd, float ppm_left, float ppm_right, float ppm_off)
+{
+    if (mp_cmd & MASK_CMD_PUMP_RIGHT)  SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_r, ppm_right);
+    else                               SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, ppm_off);
+
+    if (mp_cmd & MASK_CMD_PUMP_LEFT)   SRV_Channels::set_output_pwm_trimmed(SRV_Channel::k_sprayer_pump_l, ppm_left);
+    else                               SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_l, ppm_off);
+}
+
+
 
 //-------------------------------------------------------------------------
 // This modulates in_value with the channel_offset trim (offset_trim_proz)

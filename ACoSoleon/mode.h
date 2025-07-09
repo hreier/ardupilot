@@ -44,13 +44,15 @@ public:
         // fork at https://github.com/skybrush-io/ardupilot
     };
   
-    // Missionplan commands enumeration
-    enum class mp_cmd_t : uint8_t {
-        SPR_OFF =      0,  // Pumps off
-        SPR_RIGHT =    1,  // spray the right site
-        SPR_LEFT =     2,  // spray the left site
-        SPR_BOTH =     3   // spray on both sites (left + right)
-        };
+    // Missionplan command _mp_cmd
+    // _mp_cmd:   Command bits
+    #define MASK_CMD_SPR_RIGHT_REAR               (1<<0)
+    #define MASK_CMD_SPR_LEFT_REAR                (1<<1)
+    #define MASK_CMD_SPR_RIGHT_FRONT              (1<<2)
+    #define MASK_CMD_SPR_LEFT_FRONT               (1<<3)
+    #define MASK_CMD_SPR_ACTIVE                (MASK_CMD_SPR_RIGHT_FRONT | MASK_CMD_SPR_RIGHT_REAR | MASK_CMD_SPR_LEFT_FRONT | MASK_CMD_SPR_LEFT_REAR)
+    #define MASK_CMD_PUMP_RIGHT                (MASK_CMD_SPR_RIGHT_FRONT | MASK_CMD_SPR_RIGHT_REAR)
+    #define MASK_CMD_PUMP_LEFT                 (MASK_CMD_SPR_LEFT_FRONT | MASK_CMD_SPR_LEFT_REAR)
 
 
     // constructor
@@ -78,7 +80,8 @@ public:
 //private:
     //---- Soleon Spraycontrollers (mostly from missionplan) ----
     float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate, _ppm_pump;
-    mp_cmd_t  _mp_cmd; 
+//    mp_cmd_t  _mp_cmd; 
+    uint8_t _mp_cmd; 
     float _delta_fill;
     bool _mode_booting;
 
@@ -103,6 +106,9 @@ protected:
     virtual float modulate_value_trim(float in_value, float max_deviation);
     virtual bool bootsequence(void);
     virtual void manage_offset_trim(bool verbose);
+    void updateSprayerValveRelays(uint8_t mp_cmd);
+    void updateSprayerPumpPPMs(uint8_t mp_cmd, float ppm_left, float ppm_right, float ppm_off);
+
 
     // convenience references to avoid code churn in conversion:
     Parameters &g;

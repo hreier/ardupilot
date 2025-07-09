@@ -13,7 +13,7 @@ bool ModeCtrlSprayPPM::init()
     return true;
 }
 
-#define start_delay 0
+//#define start_delay 0
 // Controller disabled - runs the disabled controller mode
 void ModeCtrlSprayPPM::run()
 {
@@ -28,53 +28,29 @@ void ModeCtrlSprayPPM::run()
         return;
     }
 
-      
-    switch (_mp_cmd) {
-        case mp_cmd_t::SPR_OFF :
-            _mp_status = (_mp_status & 0xfc);
-            should_be_spraying = false;
-            break;
-        
-        case mp_cmd_t::SPR_RIGHT :
-            _mp_status = (_mp_status & 0xfc) | 0x1;
-            should_be_spraying = true;
-            break;
-
-        case mp_cmd_t::SPR_LEFT:
-            _mp_status = (_mp_status & 0xfc) | 0x2;
-            should_be_spraying = true;
-            break;
-
-        case mp_cmd_t::SPR_BOTH:
-            _mp_status = (_mp_status & 0xfc) | 0x3;
-            should_be_spraying = true;
-            break;
-
-        default:
-            gcs().send_text(MAV_SEVERITY_WARNING, "illegal mission plan command: %d", (int) _mp_cmd);
-            should_be_spraying = false;
-            break;
-        }
-
-    if (should_be_spraying) {
-        _mp_sprayrate = g.so_sprayrate_est.get();
-        _ppm_pump = g.so_servo_out_spraying.get();
-        }
-    else {
-        _mp_sprayrate = 0;
-        _ppm_pump = g.so_servo_out_nospraying.get();
-        }
-    
-    manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
+    _ppm_pump = g.so_servo_out_spraying.get();
+    if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
+    else               _mp_sprayrate = 0;
+    //_mp_sprayrate = g2.so_press.get_measure(0);  //-- this will somehow be used for regulated modes
 
     _fill_level = g2.so_scale.get_measure(0); 
-    //_mp_sprayrate = g2.so_press.get_measure(0);  //-- this will be used for regulated modes
 
-    //modulate_value_trim(30, 30);  //- for test --> this will be removed; _fill_level comes from wägemodule...
-    //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- may be needs to be validated if between the limits???
+    //--- _mp_status update!
+    if (_mp_cmd & MASK_CMD_PUMP_RIGHT)  _mp_status = _mp_status | MASK_STAT_SPR_RIGHT;
+    else                                _mp_status = _mp_status & ~MASK_STAT_SPR_RIGHT;
 
-    override_ppm();              //- remote controller switch can force to run/stop the pump
-    SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_r, _ppm_pump);
+    if (_mp_cmd & MASK_CMD_PUMP_LEFT)   _mp_status = _mp_status | MASK_CMD_PUMP_LEFT;
+    else                                _mp_status = _mp_status & ~MASK_CMD_PUMP_LEFT;
+
+    manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
+
+    //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- Manage the trimming; may be needs to be validated if between the limits???
+
+    override_ppm();              //- remote controller switch can force to run/stop the pump (NOTE: this changes the _mp_status)
+
+    updateSprayerValveRelays(_mp_cmd);
+    updateSprayerPumpPPMs(_mp_cmd, _ppm_pump, _ppm_pump, g.so_servo_out_nospraying.get());
+
 }
 
 bool ModeCtrlSprayPPM::is_spraying()

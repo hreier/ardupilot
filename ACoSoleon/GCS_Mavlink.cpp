@@ -654,7 +654,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
                 break;
             
             case 2: //-- mission plan command
-                soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param2;
+                soleon.soleon_ctrl_mode->_mp_cmd  = (u_int8_t) packet.param2;
                 soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param3;  
                 break;
             

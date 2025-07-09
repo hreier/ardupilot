@@ -23,10 +23,10 @@ public:
         IGNITION = 2,
         PARACHUTE = 3,
         CAMERA = 4,
-        BRUSHED_REVERSE_1 = 5,
-        BRUSHED_REVERSE_2 = 6,
-        BRUSHED_REVERSE_3 = 7,
-        BRUSHED_REVERSE_4 = 8,
+        SO_VALVE_FR = 5,            //-- Soleon Valve Front right
+        SO_VALVE_FL = 6,            //-- Soleon Valve Front left
+        SO_VALVE_RR = 7,            //-- Soleon Valve Rear right
+        SO_VALVE_RL = 8,            //-- Soleon Valve Rear left
         ICE_STARTER = 9,
         DroneCAN_HARDPOINT_0  = 10,
         DroneCAN_HARDPOINT_1  = 11,
@@ -70,4 +70,5 @@ public:
     AP_Enum<FUNCTION> function;            // relay function
     AP_Int16 pin;                          // gpio pin number
     AP_Enum<DefaultState> default_state;  // default state
+    AP_Int8 inverted;                       // inverted signal
 };

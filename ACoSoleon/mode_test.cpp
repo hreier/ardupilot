@@ -8,7 +8,7 @@ bool ModeCtrlTest::init()
     _fill_level = 30.0f;
     _delta_fill = 0.0f;
     _mp_status = 0;
-    _mp_cmd = mp_cmd_t::SPR_OFF;
+    _mp_cmd = 0;
     _mp_liter_ha =0;
     _mp_line_dist =0;
     _mp_planned_spd =0;
@@ -20,7 +20,7 @@ bool ModeCtrlTest::init()
     return true;
 }
 
-
+bool test = false;
 // Controller disabled - runs the disabled controller mode
 void ModeCtrlTest::run()
 {
@@ -34,70 +34,46 @@ void ModeCtrlTest::run()
         _mode_booting = bootsequence();
         return;
     }
+
+    if (!test){
+        gcs().send_text(MAV_SEVERITY_INFO, "passed");
+        test = true;
+    }
+   // return;
     
- 
-    //--- simultate sprayer...
-     _fill_level -= _delta_fill;
-    if (_fill_level < 0.0f) _fill_level = 30.0f;
-    
-    _mp_sprayrate = _delta_fill;
+    // ---- use override switch to test the sprayer ---
+    RC_Channel::AuxSwitchPos override_sw = channel_override->get_aux_switch_pos();
+    float ppm_pumps = g.so_servo_out_spraying.get();
+    float ppm_pumps_off = g.so_servo_out_nospraying.get();
+    uint8_t command;
 
-    if (_mp_liter_ha > 0.0f){
-    _mp_status |= 0x04;
-
-    switch (_mp_cmd) {
-        case mp_cmd_t::SPR_OFF :
-            _mp_status = (_mp_status & 0xfc);
-            _delta_fill = 0;
-            break;
-        
-        case mp_cmd_t::SPR_RIGHT :
-            _mp_status = (_mp_status & 0xfc) | 0x1;
-            _delta_fill = 0.001;
-            break;
-
-        case mp_cmd_t::SPR_LEFT:
-            _mp_status = (_mp_status & 0xfc) | 0x2;
-            _delta_fill = 0.05;
-           break;
-
-        case mp_cmd_t::SPR_BOTH:
-            _mp_status = (_mp_status & 0xfc) | 0x3;
-            _delta_fill = 0.1;
-            break;
-
+/*     if (!test){
+        gcs().send_text(MAV_SEVERITY_INFO, "passed:%d", (u_int16_t) override_sw);
+        test = true;
+    }
+   // return;
+ */
+    switch (override_sw)
+    {
         default:
-            gcs().send_text(MAV_SEVERITY_WARNING, "illegal mission plan command: %d", (int) _mp_cmd);
+        case RC_Channel::AuxSwitchPos::LOW:
+            command = 0;    //- spray off
             break;
-        }
 
-    } 
-    else{
-        _mp_status = 0;
+        case RC_Channel::AuxSwitchPos::MIDDLE:
+            command = 3;    //- spray back both
+            break;
+
+        case RC_Channel::AuxSwitchPos::HIGH:
+            command = 12;    //- spray front both
+            break;
     }
 
-    //--- print the RC-signals for debugging
-    if ((AP_HAL::millis() - _time_stamp) < 5000) return;
-
-    _time_stamp  = AP_HAL::millis();
-   /* gcs().send_text(MAV_SEVERITY_INFO, "Speed: %d; Offset: %d; Override: %d;", \
-          channel_speed->get_radio_in(), channel_offset->get_radio_in(), channel_override->get_radio_in());  ///-HaRe debug
-          
-          AuxSwitchPos get_aux_switch_pos()
-          bool RC_Channel::read_3pos_switch(RC_Channel::AuxSwitchPos &ret) 
-
-          chan->get_aux_switch_pos() == RC_Channel::AuxSwitchPos::LOW
-
-          float       norm_input() const;
-          float       norm_input_dz() const;
-          uint8_t     percent_input() const;
-          
-          */
-    gcs().send_text(MAV_SEVERITY_INFO, "SpeedPWM: %d; Speed: %d; SpeedProz: %d", \
-          channel_speed->get_radio_in(), channel_speed->get_control_in(), channel_speed->percent_input());  ///-HaRe debug
-          
+    updateSprayerValveRelays(command);
+    updateSprayerPumpPPMs(command, ppm_pumps, ppm_pumps, ppm_pumps_off);
 
 }
+
 
 bool ModeCtrlTest::is_spraying()
 {
