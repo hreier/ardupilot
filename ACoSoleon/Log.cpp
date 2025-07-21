@@ -525,9 +525,9 @@ const struct LogStructure Soleon::log_structure[] = {
 void Soleon::Log_Write_Vehicle_Startup_Messages()
 {
     // only 200(?) bytes are guaranteed by AP_Logger
-    char frame_and_type_string[30];
-    soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
-    logger.Write_MessageF("%s", frame_and_type_string);
+    // char frame_and_type_string[30];
+    // soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
+    // logger.Write_MessageF("%s", frame_and_type_string);
     ahrs.Log_Write_Home_And_Origin();
     gps.Write_AP_Logger_Log_Startup_messages();
 }

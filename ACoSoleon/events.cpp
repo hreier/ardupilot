@@ -180,66 +180,7 @@ void Soleon::failsafe_terrain_set_status(bool data_ok)
 
 
 
-// check for gps glitch failsafe
-void Soleon::gpsglitch_check()
-{
-    // get filter status
-    nav_filter_status filt_status = inertial_nav.get_filter_status();
-    bool gps_glitching = filt_status.flags.gps_glitching;
 
-    // log start or stop of gps glitch.  AP_Notify update is handled from within AP_AHRS
-    if (ap.gps_glitching != gps_glitching) {
-        ap.gps_glitching = gps_glitching;
-        if (gps_glitching) {
-            AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::GPS_GLITCH);
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"GPS Glitch or Compass error");
-        } else {
-            AP::logger().Write_Error(LogErrorSubsystem::GPS, LogErrorCode::ERROR_RESOLVED);
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"Glitch cleared");
-        }
-    }
-}
-
-// dead reckoning alert and failsafe
-void Soleon::failsafe_deadreckon_check()
-{
-    // update dead reckoning state
-    const char* dr_prefix_str = "Dead Reckoning";
-
-    // get EKF filter status
-    bool ekf_dead_reckoning = inertial_nav.get_filter_status().flags.dead_reckoning;
-
-    // alert user to start or stop of dead reckoning
-    const uint32_t now_ms = AP_HAL::millis();
-    if (dead_reckoning.active != ekf_dead_reckoning) {
-        dead_reckoning.active = ekf_dead_reckoning;
-        if (dead_reckoning.active) {
-            dead_reckoning.start_ms = now_ms;
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"%s started", dr_prefix_str);
-        } else {
-            dead_reckoning.start_ms = 0;
-            dead_reckoning.timeout = false;
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"%s stopped", dr_prefix_str);
-        }
-    }
-
-    // check for timeout
-    if (dead_reckoning.active && !dead_reckoning.timeout) {
-        const uint32_t dr_timeout_ms = uint32_t(constrain_float(g2.failsafe_dr_timeout * 1000.0f, 0.0f, UINT32_MAX));
-        if (now_ms - dead_reckoning.start_ms > dr_timeout_ms) {
-            dead_reckoning.timeout = true;
-            gcs().send_text(MAV_SEVERITY_CRITICAL,"%s timeout", dr_prefix_str);
-        }
-    }
-
-    // exit immediately if deadreckon failsafe is disabled
-    if (g2.failsafe_dr_enable <= 0) {
-        failsafe.deadreckon = false;
-        return;
-    }
-
- 
-}
 
 
 void Soleon::do_failsafe_action(FailsafeAction action, ModeReason reason){

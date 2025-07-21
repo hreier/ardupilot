@@ -11,19 +11,11 @@ MAV_TYPE GCS_Soleon::frame_type() const
       information and won't display UIs such as flight mode
       selection
     */
-#if FRAME_CONFIG == HELI_FRAME
-    const MAV_TYPE mav_type_default = MAV_TYPE_HELICOPTER;
-#else
-    const MAV_TYPE mav_type_default = MAV_TYPE_QUADROTOR;
-#endif
-    if (soleon.motors == nullptr) {
-        return mav_type_default;
-    }
-    MAV_TYPE mav_type = soleon.motors->get_frame_mav_type();
-    if (mav_type == MAV_TYPE_GENERIC) {
-        mav_type = mav_type_default;
-    }
-    return mav_type;
+//    const MAV_TYPE mav_type_default = MAV_TYPE_HELICOPTER; 
+//   const MAV_TYPE mav_type_default = MAV_TYPE_QUADROTOR;
+    const MAV_TYPE mav_type_default = MAV_TYPE_GENERIC;
+    
+    return mav_type_default;
 }
 
 MAV_MODE GCS_MAVLINK_Soleon::base_mode() const
@@ -31,11 +23,6 @@ MAV_MODE GCS_MAVLINK_Soleon::base_mode() const
     uint8_t _base_mode = MAV_MODE_FLAG_STABILIZE_ENABLED;
 
     _base_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
-
-    // we are armed if we are not initialising
-    if (soleon.motors != nullptr && soleon.motors->armed()) {
-        _base_mode |= MAV_MODE_FLAG_SAFETY_ARMED;
-    }
 
     // indicate we have set a custom mode
     _base_mode |= MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
@@ -209,10 +196,12 @@ float GCS_MAVLINK_Soleon::vfr_hud_airspeed() const
 
 int16_t GCS_MAVLINK_Soleon::vfr_hud_throttle() const
 {
-    if (soleon.motors == nullptr) {
-        return 0;
-    }
-    return (int16_t)(soleon.motors->get_throttle() * 100);
+    // if (soleon.motors == nullptr) {
+    //     return 0;
+    // }
+    // return (int16_t)(soleon.motors->get_throttle() * 100);
+
+    return 0;
 }
 
 /*
@@ -261,6 +250,8 @@ bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
     case MSG_SERVO_OUT:
     case MSG_AOA_SSA:
     case MSG_LANDING:
+    case MSG_FENCE_STATUS:
+    case MSG_OPTICAL_FLOW:
         // unused
        break;
 
@@ -510,13 +501,6 @@ bool GCS_MAVLINK_Soleon::params_ready() const
 void GCS_MAVLINK_Soleon::send_banner()
 {
     GCS_MAVLINK::send_banner();
-    if (soleon.motors == nullptr) {
-        send_text(MAV_SEVERITY_INFO, "motors not allocated");
-        return;
-    }
-    char frame_and_type_string[30];
-    soleon.motors->get_frame_and_type_string(frame_and_type_string, ARRAY_SIZE(frame_and_type_string));
-    send_text(MAV_SEVERITY_INFO, "%s", frame_and_type_string);
 }
 
 void GCS_MAVLINK_Soleon::handle_command_ack(const mavlink_message_t &msg)
@@ -815,7 +799,6 @@ void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
         soleon.g2.toy_mode.handle_message(msg);
         break;
 #endif
-        
     default:
         GCS_MAVLINK::handle_message(msg);
         break;

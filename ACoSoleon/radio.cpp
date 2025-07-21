@@ -27,42 +27,12 @@ void Soleon::init_rc_in()
     //ap.throttle_zero = true;
 }
 
- // init_rc_out -- initialise motors
+ // init_rc_out -- initialise rc outputs
 void Soleon::init_rc_out()
 {
-    motors->init((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
+     // enable aux servos to cope with multiple output channels per motor
+     SRV_Channels::enable_aux_servos();
 
-    // enable aux servos to cope with multiple output channels per motor
-    SRV_Channels::enable_aux_servos();
-
-    // update rate must be set after motors->init() to allow for motor mapping
-    motors->set_update_rate(g.rc_speed);
-
-#if FRAME_CONFIG != HELI_FRAME
-    /*if (channel_throttle->configured()) {
-        // throttle inputs setup, use those to set motor PWM min and max if not already configured
-        motors->convert_pwm_min_max_param(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
-    } else {
-        // throttle inputs default, force set motor PWM min and max to defaults so they will not be over-written by a future change in RC min / max
-        motors->convert_pwm_min_max_param(1000, 2000);
-    }
-    motors->update_throttle_range();*/
-#else
-    // setup correct scaling for ESCs like the UAVCAN ESCs which
-    // take a proportion of speed.
-    hal.rcout->set_esc_scaling(channel_throttle->get_radio_min(), channel_throttle->get_radio_max());
-#endif
-
-    // refresh auxiliary channel to function map
-    SRV_Channels::update_aux_servo_function();
-
-#if FRAME_CONFIG != HELI_FRAME
-    /*
-      setup a default safety ignore mask, so that servo gimbals can be active while safety is on
-     */
-    uint16_t safety_ignore_mask = (~soleon.motors->get_motor_mask()) & 0x3FFF;
-    BoardConfig.set_default_safety_ignore_mask(safety_ignore_mask);
-#endif
 }
 
 
@@ -104,10 +74,10 @@ void Soleon::read_radio()
         // throttle failsafe not enabled
         return;
     }
-    if (!ap.rc_receiver_present && !motors->armed()) {
-        // we only failsafe if we are armed OR we have ever seen an RC receiver
-        return;
-    }
+    // if (!ap.rc_receiver_present && !motors->armed()) {
+    //     // we only failsafe if we are armed OR we have ever seen an RC receiver
+    //     return;
+    // }
 
     // Log an error and enter failsafe.
     AP::logger().Write_Error(LogErrorSubsystem::RADIO, LogErrorCode::RADIO_LATE_FRAME);
@@ -126,7 +96,7 @@ void Soleon::set_throttle_and_failsafe(uint16_t throttle_pwm)
     if (throttle_pwm < (uint16_t)g.failsafe_throttle_value) {
 
         // if we are already in failsafe or motors not armed pass through throttle and exit
-        if (failsafe.radio || !(ap.rc_receiver_present || motors->armed())) {
+        if (failsafe.radio || !(ap.rc_receiver_present /*|| motors->armed()*/)) {
             return;
         }
 
@@ -164,7 +134,7 @@ void Soleon::set_throttle_zero_flag(int16_t throttle_control)
     // or using motor interlock and it's enabled, then motors are running, 
     // and we are flying. Immediately set as non-zero
     if ((!ap.using_interlock && (throttle_control > 0) && !SRV_Channels::get_emergency_stop()) ||
-        (ap.using_interlock && motors->get_interlock()) ||
+//        (ap.using_interlock && motors->get_interlock()) ||
         ap.armed_with_airmode_switch || air_mode == AirMode::AIRMODE_ENABLED) {
         last_nonzero_throttle_ms = tnow_ms;
         ap.throttle_zero = false;

@@ -110,7 +110,6 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     SCHED_TASK(loop_rate_logging, LOOP_RATE,    50,  75),
 #endif
     SCHED_TASK(one_hz_loop,            1,    100,  81),
-    SCHED_TASK(gpsglitch_check,       10,     50,  90),
 
     SCHED_TASK_CLASS(GCS,                  (GCS*)&soleon._gcs,          update_receive, 400, 180, 102),
     SCHED_TASK_CLASS(GCS,                  (GCS*)&soleon._gcs,          update_send,    400, 550, 105),
@@ -237,7 +236,7 @@ void Soleon::update_batt_compass(void)
 
     if(AP::compass().available()) {
         // update compass with throttle value - used for compassmot
-        compass.set_throttle(motors->get_throttle());
+        //compass.set_throttle(motors->get_throttle());
         compass.set_voltage(battery.voltage());
         compass.read();
     }
@@ -258,9 +257,6 @@ void Soleon::ten_hz_logging_loop()
     // log EKF attitude data always at 10Hz unless ATTITUDE_FAST, then do it in the 25Hz loop
     if (!should_log(MASK_LOG_ATTITUDE_FAST)) {
         Log_Write_EKF_POS();
-    }
-    if (should_log(MASK_LOG_MOTBATT)) {
-        motors->Log_Write();
     }
     if (should_log(MASK_LOG_RCIN)) {
         logger.Write_RCIN();
@@ -324,8 +320,6 @@ void Soleon::three_hz_loop()
     // check if we've lost terrain data
     failsafe_terrain_check();
 
-    // check for deadreckoning failsafe
-    failsafe_deadreckon_check();
 }
 
 // one_hz_loop - runs at 1Hz
@@ -333,16 +327,6 @@ void Soleon::one_hz_loop()
 {
     if (should_log(MASK_LOG_ANY)) {
         Log_Write_Data(LogDataID::AP_STATE, ap.value);
-    }
-
-    if (!motors->armed()) {
-        // check the user hasn't updated the frame class or type
-        motors->set_frame_class_and_type((AP_Motors::motor_frame_class)g2.frame_class.get(), (AP_Motors::motor_frame_type)g.frame_type.get());
-
-#if FRAME_CONFIG != HELI_FRAME
-        // set all throttle channel settings
-        motors->update_throttle_range();
-#endif
     }
 
     // update assigned functions and enable auxiliary servos

@@ -8,15 +8,6 @@ void Soleon::update_home_from_EKF()
         return;
     }
 
-    // special logic if home is set in-flight
-    if (motors->armed()) {
-        set_home_to_current_location_inflight();
-    } else {
-        // move home to current ekf location (this will set home_state to HOME_SET)
-        if (!set_home_to_current_location(false)) {
-            // ignore failure
-        }
-    }
 }
 
 // set_home_to_current_location_inflight - set home to current GPS location (horizontally) and EKF origin vertically

@@ -178,7 +178,7 @@ void Soleon::init_ardupilot()
 
     ins.set_log_raw_bit(MASK_LOG_IMU_RAW);
 
-    motors->output_min();  // output lowest possible value to motors
+ //   motors->output_min();  // output lowest possible value to motors
 
     // attempt to set the intial_mode, else set to STABILIZE
     if (!set_mode((enum Mode::Number)g.so_controlmode.get(), ModeReason::INITIALISED)) {
@@ -231,13 +231,7 @@ bool Soleon::ekf_has_absolute_position() const
     // with EKF use filter status and ekf check
     nav_filter_status filt_status = inertial_nav.get_filter_status();
 
-    // if disarmed we accept a predicted horizontal position
-    if (!motors->armed()) {
-        return ((filt_status.flags.horiz_pos_abs || filt_status.flags.pred_horiz_pos_abs));
-    } else {
-        // once armed we require a good absolute position and EKF must not be in const_pos_mode
-        return (filt_status.flags.horiz_pos_abs && !filt_status.flags.const_pos_mode);
-    }
+   return (filt_status.flags.horiz_pos_abs && !filt_status.flags.const_pos_mode); 
 }
 
 // ekf_has_relative_position - returns true if the EKF can provide a position estimate relative to it's starting position
@@ -271,11 +265,13 @@ bool Soleon::ekf_has_relative_position() const
     nav_filter_status filt_status = inertial_nav.get_filter_status();
 
     // if disarmed we accept a predicted horizontal relative position
-    if (!motors->armed()) {
-        return (filt_status.flags.pred_horiz_pos_rel);
-    } else {
-        return (filt_status.flags.horiz_pos_rel && !filt_status.flags.const_pos_mode);
-    }
+    // if (!motors->armed()) {
+    //     return (filt_status.flags.pred_horiz_pos_rel);
+    // } else {
+    //     return (filt_status.flags.horiz_pos_rel && !filt_status.flags.const_pos_mode);
+    // }
+
+    return (filt_status.flags.horiz_pos_rel && !filt_status.flags.const_pos_mode);
 }
 
 // returns true if the ekf has a good altitude estimate (required for modes which do AltHold)
@@ -317,7 +313,7 @@ bool Soleon::should_log(uint32_t mask)
  */
 void Soleon::allocate_motors(void)
 {
-    switch ((AP_Motors::motor_frame_class)g2.frame_class.get()) {
+/*     switch ((AP_Motors::motor_frame_class)g2.frame_class.get()) {
 #if FRAME_CONFIG != HELI_FRAME
         case AP_Motors::MOTOR_FRAME_QUAD:
         case AP_Motors::MOTOR_FRAME_HEXA:
@@ -408,7 +404,7 @@ void Soleon::allocate_motors(void)
 #endif
 
     // param count could have changed
-    AP_Param::invalidate_count();
+    AP_Param::invalidate_count(); */
 }
 
 bool Soleon::is_tradheli() const

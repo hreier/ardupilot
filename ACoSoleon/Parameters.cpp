@@ -599,7 +599,7 @@ const AP_Param::Info Soleon::var_info[] = {
 #else
     // @Group: MOT_
     // @Path: ../libraries/AP_Motors/AP_MotorsMulticopter.cpp
-    GOBJECTVARPTR(motors, "MOT_",      &soleon.motors_var_info),
+ //   GOBJECTVARPTR(motors, "MOT_",      &soleon.motors_var_info),
 #endif
 
     // @Group: SO_RCMAP

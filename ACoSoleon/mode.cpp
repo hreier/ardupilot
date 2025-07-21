@@ -16,7 +16,7 @@ Mode::Mode(void) :
     pos_control(soleon.pos_control),
     inertial_nav(soleon.inertial_nav),
     ahrs(soleon.ahrs),
-    motors(soleon.motors),
+//    motors(soleon.motors),
     channel_speed(soleon.channel_speed),
     channel_offset(soleon.channel_offset),
     channel_override(soleon.channel_override),
@@ -248,27 +248,7 @@ bool Soleon::gcs_mode_enabled(const Mode::Number mode_num)
         (uint8_t)Mode::Number::CTRL_DISABLED,
         (uint8_t)Mode::Number::CTRL_SPRAY_PPM,
         (uint8_t)Mode::Number::CTRL_TEST,
-        (uint8_t)Mode::Number::AUTO,
-        (uint8_t)Mode::Number::GUIDED,
-        (uint8_t)Mode::Number::LOITER,
-        (uint8_t)Mode::Number::CIRCLE,
-        (uint8_t)Mode::Number::DRIFT,
-        (uint8_t)Mode::Number::SPORT,
-        (uint8_t)Mode::Number::FLIP,
-        (uint8_t)Mode::Number::AUTOTUNE,
-        (uint8_t)Mode::Number::POSHOLD,
-        (uint8_t)Mode::Number::BRAKE,
-        (uint8_t)Mode::Number::THROW,
-        (uint8_t)Mode::Number::AVOID_ADSB,
-        (uint8_t)Mode::Number::GUIDED_NOGPS,
-        (uint8_t)Mode::Number::SMART_RTL,
-        (uint8_t)Mode::Number::FLOWHOLD,
-        (uint8_t)Mode::Number::FOLLOW,
-        (uint8_t)Mode::Number::ZIGZAG,
-        (uint8_t)Mode::Number::SYSTEMID,
-        (uint8_t)Mode::Number::AUTOROTATE,
-        (uint8_t)Mode::Number::AUTO_RTL,
-        (uint8_t)Mode::Number::TURTLE
+
     };
 
     if (!block_GCS_mode_change((uint8_t)mode_num, mode_list, ARRAY_SIZE(mode_list))) {

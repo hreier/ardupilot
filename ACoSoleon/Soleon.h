@@ -367,10 +367,6 @@ private:
         uint32_t start_ms;  // system time that EKF began deadreckoning
     } dead_reckoning;
 
-    // Motor Output
-    MOTOR_CLASS *motors;
-    const struct AP_Param::GroupInfo *motors_var_info;
-
     int32_t _home_bearing;
     uint32_t _home_distance;
 
@@ -644,8 +640,6 @@ private:
     void failsafe_gcs_off_event(void);
     void failsafe_terrain_check();
     void failsafe_terrain_set_status(bool data_ok);
-    void gpsglitch_check();
-    void failsafe_deadreckon_check();
 
     void do_failsafe_action(FailsafeAction action, ModeReason reason);
     void announce_failsafe(const char *type, const char *action_undertaken=nullptr);

@@ -54,9 +54,9 @@ void Soleon::failsafe_check()
         // disarm the motors->
         in_failsafe = true;
         // reduce motors to minimum (we do not immediately disarm because we want to log the failure)
-        if (motors->armed()) {
-            motors->output_min();
-        }
+        // if (motors->armed()) {
+        //     motors->output_min();
+        // }
 
         AP::logger().Write_Error(LogErrorSubsystem::CPU, LogErrorCode::FAILSAFE_OCCURRED);
     }
@@ -64,10 +64,10 @@ void Soleon::failsafe_check()
     if (failsafe_enabled && in_failsafe && tnow - failsafe_last_timestamp > 1000000) {
         // disarm motors every second
         failsafe_last_timestamp = tnow;
-        if(motors->armed()) {
-            motors->armed(false);
-            motors->output();
-        }
+        // if(motors->armed()) {
+        //     motors->armed(false);
+        //     motors->output();
+        //}
     }
 }
 

@@ -12,7 +12,6 @@ def build(bld):
             'AC_WPNav',
             'AP_IRLock',
             'AP_InertialNav',
-            'AP_Motors',
             'AP_RCMapper',
             'AP_Avoidance',
             'AP_AdvancedFailsafe',
@@ -35,7 +34,7 @@ def build(bld):
         program_name='aco-soleon',
         program_groups=['bin', 'soleon'],
         use=vehicle + '_libs',
-       # defines=['FRAME_CONFIG=MULTICOPTER_FRAME'],
+        #defines=['FRAME_CONFIG=MULTICOPTER_FRAME'],
         )
 
 
@@ -44,7 +43,6 @@ COMMON_SOLEON_DEPENDENT_LIBRARIES = [
     'AP_AccelCal',
     'AP_ADC',
     'AP_AHRS',
-    'AP_Airspeed',
     'AP_Baro',
     'AP_BattMonitor',
     'AP_BoardConfig',
@@ -65,7 +63,6 @@ COMMON_SOLEON_DEPENDENT_LIBRARIES = [
     'AP_NavEKF2',
     'AP_NavEKF3',
     'AP_Notify',
-    'AP_OpticalFlow',
     'AP_Param',
     'AP_Rally',
     'AP_RangeFinder',

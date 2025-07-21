@@ -9,10 +9,11 @@ uint8_t GCS_Soleon::sysid_this_mav() const
 
 const char* GCS_Soleon::frame_string() const
 {
-    if (soleon.motors == nullptr) {
-        return "MultiCopter";
-    }
-    return soleon.motors->get_frame_string();
+//    if (soleon.motors == nullptr) {
+//        return "MultiCopter";
+//    }
+//    return soleon.motors->get_frame_string();
+    return "SO-PayLoad";
 }
 
 bool GCS_Soleon::simple_input_active() const
@@ -115,7 +116,7 @@ void GCS_Soleon::update_vehicle_sensor_status_flags(void)
     control_sensors_enabled |= MAV_SYS_STATUS_SENSOR_PROPULSION;
     // only mark propulsion healthy if all of the motors are producing
     // nominal thrust
-    if (!soleon.motors->get_thrust_boost()) {
-        control_sensors_health |= MAV_SYS_STATUS_SENSOR_PROPULSION;
-    }
+    // if (!soleon.motors->get_thrust_boost()) {
+    //     control_sensors_health |= MAV_SYS_STATUS_SENSOR_PROPULSION;
+    // }
 }
