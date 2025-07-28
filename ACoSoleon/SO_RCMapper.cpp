@@ -29,6 +29,14 @@ const AP_Param::GroupInfo SoRCMapper::var_info[] = {
     // @RebootRequired: True
     AP_GROUPINFO("OVRIDE",       2, SoRCMapper, _ch_override, 3),
 
+    // @Param: ONMODE
+    // @DisplayName: Channel enable to override mission plan commands  
+    // @Description: Override channel number. 1-16: channel for the override signal
+    // @Range: 1 16
+    // @Increment: 1
+    // @User: Advanced
+    // @RebootRequired: True
+    AP_GROUPINFO("ONMODE",       3, SoRCMapper, _ch_on_mode, 4),
 
     AP_GROUPEND
 };

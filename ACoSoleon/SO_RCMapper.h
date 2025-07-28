@@ -26,6 +26,9 @@ public:
     /// override - return input channel number for override
     uint8_t override() const { return _ch_override; }
 
+    /// on_mode - return input channel number for on_mode (switch to define behavior of ON - override)
+    uint8_t on_mode() const { return _ch_on_mode; }
+
     static const struct AP_Param::GroupInfo var_info[];
 
 private:
@@ -33,6 +36,7 @@ private:
     AP_Int8 _ch_offset;
     AP_Int8 _ch_override;
     AP_Int8 _ch_speed;
+    AP_Int8 _ch_on_mode;
     static SoRCMapper *_singleton;
 };
 

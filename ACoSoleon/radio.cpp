@@ -11,17 +11,20 @@ void Soleon::init_rc_in()
     channel_speed    = rc().channel(so_rcmap.speed()-1);
     channel_offset   = rc().channel(so_rcmap.offset()-1);
     channel_override = rc().channel(so_rcmap.override()-1);
+    channel_on_mode  = rc().channel(so_rcmap.on_mode()-1);
 
     // set rc channel ranges
     channel_speed->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
     channel_offset->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
     channel_override->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
+    channel_on_mode->set_angle(ROLL_PITCH_YAW_INPUT_MAX);
     //channel_throttle->set_range(1000);
 
     // set default dead zones
     channel_speed->set_default_dead_zone(0);   //20
     channel_offset->set_default_dead_zone(0);
     channel_override->set_default_dead_zone(0);
+    channel_on_mode->set_default_dead_zone(0);
 
     // initialise throttle_zero flag
     //ap.throttle_zero = true;

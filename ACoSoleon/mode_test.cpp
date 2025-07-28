@@ -4,7 +4,7 @@
 // Controller disabled - initialise the disabled controller mode
 bool ModeCtrlTest::init()
 {
-    gcs().send_text(MAV_SEVERITY_INFO, "SoleonControlMode init: <%s>", name()); //-- the activation routine send similar message
+    gcs().send_text(MAV_SEVERITY_INFO, "SoCtrlMode init: <%s>", name()); //-- the activation routine send similar message
     _fill_level = 30.0f;
     _delta_fill = 0.0f;
     _mp_status = 0;

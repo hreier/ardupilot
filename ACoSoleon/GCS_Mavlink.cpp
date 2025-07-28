@@ -12,8 +12,8 @@ MAV_TYPE GCS_Soleon::frame_type() const
       selection
     */
 //    const MAV_TYPE mav_type_default = MAV_TYPE_HELICOPTER; 
-//   const MAV_TYPE mav_type_default = MAV_TYPE_QUADROTOR;
-    const MAV_TYPE mav_type_default = MAV_TYPE_GENERIC;
+    const MAV_TYPE mav_type_default = MAV_TYPE_QUADROTOR;
+//    const MAV_TYPE mav_type_default = MAV_TYPE_GENERIC;  //--- Note: If set the so-parameter texts/descriptions not shown in Missionplanner!!!
     
     return mav_type_default;
 }
@@ -240,9 +240,26 @@ bool GCS_Soleon::vehicle_initialised() const {
 bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
 {
     switch(id) {
-
+    //--- make the Payload to be quite
+    case MSG_AHRS:
+    case MSG_ATTITUDE:
+    case MSG_BATTERY_STATUS:
+    case MSG_GPS_RAW:
+    case MSG_POWER_STATUS:
+    case MSG_RAW_IMU:
+    case MSG_RC_CHANNELS:
+    case MSG_SCALED_IMU2:
+    case MSG_SCALED_IMU3:
+    case MSG_SCALED_PRESSURE:
+    case MSG_SCALED_PRESSURE2:
+    case MSG_SERVO_OUTPUT_RAW:
+    case MSG_VFR_HUD:
+    case MSG_VIBRATION:
+//    case MSG_SIM_STATE: 
+    case     MSG_AHRS2:
 
     
+    //----
     case MSG_POSITION_TARGET_GLOBAL_INT:
     case MSG_TERRAIN:
     case MSG_ADSB_VEHICLE:

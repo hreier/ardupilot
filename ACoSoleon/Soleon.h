@@ -215,16 +215,12 @@ private:
     // used to detect MAVLink acks from GCS to stop compassmot
     uint8_t command_ack_counter;
 
-    // primary input control channels
-   // RC_Channel *channel_roll;
-   // RC_Channel *channel_pitch;
-   // RC_Channel *channel_throttle;
-   // RC_Channel *channel_yaw;
 
     // soleon controller input control channels
     RC_Channel *channel_speed;
     RC_Channel *channel_offset;
     RC_Channel *channel_override;
+    RC_Channel *channel_on_mode;
 
 
     AP_Logger logger;

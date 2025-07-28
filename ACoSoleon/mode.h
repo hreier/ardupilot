@@ -31,6 +31,8 @@ public:
     #define MASK_CMD_SPR_ACTIVE                (MASK_CMD_SPR_RIGHT_FRONT | MASK_CMD_SPR_RIGHT_REAR | MASK_CMD_SPR_LEFT_FRONT | MASK_CMD_SPR_LEFT_REAR)
     #define MASK_CMD_PUMP_RIGHT                (MASK_CMD_SPR_RIGHT_FRONT | MASK_CMD_SPR_RIGHT_REAR)
     #define MASK_CMD_PUMP_LEFT                 (MASK_CMD_SPR_LEFT_FRONT | MASK_CMD_SPR_LEFT_REAR)
+    #define MASK_CMD_PUMP_FRONT                (MASK_CMD_SPR_RIGHT_FRONT | MASK_CMD_SPR_LEFT_FRONT)
+    #define MASK_CMD_SPR_REAR                  (MASK_CMD_SPR_RIGHT_REAR | MASK_CMD_SPR_LEFT_REAR)
 
 
     // constructor
@@ -58,7 +60,6 @@ public:
 //private:
     //---- Soleon Spraycontrollers (mostly from missionplan) ----
     float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate, _ppm_pump;
-//    mp_cmd_t  _mp_cmd; 
     uint8_t _mp_cmd; 
     float _delta_fill;
     bool _mode_booting;
@@ -80,7 +81,7 @@ public:
    
 
 protected:
-    virtual void override_ppm();
+    virtual void overrideBySwitch(uint8_t & command, uint8_t & status);
     virtual float modulate_value_trim(float in_value, float max_deviation);
     virtual bool bootsequence(void);
     virtual void manage_offset_trim(bool verbose);
@@ -99,6 +100,7 @@ protected:
     RC_Channel *&channel_speed;
     RC_Channel *&channel_offset;
     RC_Channel *&channel_override;
+    RC_Channel *&channel_on_mode;
     float &G_Dt;
 
     
@@ -146,6 +148,7 @@ protected:
     const char *name4() const override { return "SPPM"; }
 
     bool should_be_spraying;
+    uint8_t _mp_cmd_act;      //-- used for class internal processing 
 
 };
 

@@ -16,10 +16,10 @@ Mode::Mode(void) :
     pos_control(soleon.pos_control),
     inertial_nav(soleon.inertial_nav),
     ahrs(soleon.ahrs),
-//    motors(soleon.motors),
     channel_speed(soleon.channel_speed),
     channel_offset(soleon.channel_offset),
     channel_override(soleon.channel_override),
+    channel_on_mode(soleon.channel_on_mode),
     G_Dt(soleon.G_Dt)
 { };
 
@@ -126,12 +126,11 @@ float Mode::modulate_value_trim(float in_value, float max_deviation)
     return (in_value + offset_val);
 }
 
+
 //-------------------------------------------------------------------------
-// This overrides the Pump server PPM signal depending on the override RCin
-// handles the _mp_status ready bit;
-// manipulates _ppm_pump if overriding
-// Note: this needs to be last manipulation before to update servo channel
-void Mode::override_ppm(void)
+// This overrides the mission plan sprayer command depending on the override RCin signal (Switch on remote controller)
+// This also handles the _mp_status ready bit;
+void Mode::overrideBySwitch(uint8_t & command, uint8_t & status)
 {
     RC_Channel::AuxSwitchPos override_sw = channel_override->get_aux_switch_pos();
 
@@ -140,22 +139,41 @@ void Mode::override_ppm(void)
         //-- Pump forced to stand still
         default:
         case RC_Channel::AuxSwitchPos::LOW:
-            _mp_status &= ~0x04;                            //- set sprayer status to not ready 
-            _ppm_pump = g.so_servo_out_nospraying.get();    //- override with no spaying ppm-value
-            offset_trim_proz = 0;
+            command &= ~MASK_CMD_SPR_ACTIVE;       //- set command to inactive 
+            status &= ~MASK_STAT_CTRL_READY;       //- set sprayer status to not ready   
             break;
 
         //-- Pump controlled by mission
         case RC_Channel::AuxSwitchPos::MIDDLE:
-            _mp_status |= 0x04;                             //- sprayer is ready 
+            status |= MASK_STAT_CTRL_READY;        //- sprayer is ready; controlled by missionplan
             break;
 
         //-- Pump forced to run
         case RC_Channel::AuxSwitchPos::HIGH:
-            _mp_status &= ~0x04;                            //- set sprayer status to not ready 
-            _ppm_pump = g.so_servo_out_spraying.get();      //- override with spaying ppm-value
+            RC_Channel::AuxSwitchPos on_mode_sw = channel_on_mode->get_aux_switch_pos();
+            switch (on_mode_sw)   //- let control the valves according to on-mode switch on remote controller
+            {
+            default:
+            case RC_Channel::AuxSwitchPos::LOW:         //-- spray with rear nozzles --
+                command &= ~MASK_CMD_SPR_ACTIVE;         
+                command |= MASK_CMD_SPR_REAR;           //- set command to open rear valves
+                status &= ~MASK_STAT_CTRL_READY;        //- set sprayer status to not ready 
+                break;
+
+            case RC_Channel::AuxSwitchPos::MIDDLE:      //-- spray with all nozzles --
+                command |= MASK_CMD_SPR_ACTIVE;         //- set command to open all valves
+                status &= ~MASK_STAT_CTRL_READY;        //- set sprayer status to not ready 
+                break;
+
+            case RC_Channel::AuxSwitchPos::HIGH:        //-- spray with front nozzles --
+                command &= ~MASK_CMD_SPR_ACTIVE;         
+                command |= MASK_CMD_PUMP_FRONT;         //- set command to open front valves
+                status &= ~MASK_STAT_CTRL_READY;        //- set sprayer status to not ready 
+                break;
+            }
             break;
     }
+
 }
 
 //-------------------------------------------------------------------------
@@ -285,7 +303,7 @@ void Soleon::set_mode(Mode &newmode, ModeReason reason)
 
 	// log mode change
 	logger.Write_Mode((uint8_t)soleon_ctrl_mode->mode_number(), reason);
-    gcs().send_text(MAV_SEVERITY_INFO, "Soleon Controller mode %s loaded (reason: %d)", soleon_ctrl_mode->name(), (int)reason);
+    gcs().send_text(MAV_SEVERITY_INFO, "SoCtrlMode loaded: <%s> (reason: %d)", soleon_ctrl_mode->name(), (int)reason);
     //gcs().send_message(MSG_HEARTBEAT);
 
 }
@@ -330,7 +348,7 @@ void Soleon::update_soleon_ctrl_mode()
     
     //- look if the control mode has be changed (configuration change)
     if (soleon_ctrl_mode->mode_number() !=  (enum Mode::Number)g.so_controlmode.get()){
-        set_mode((enum Mode::Number)g.so_controlmode.get(), ModeReason::RC_COMMAND);
+        set_mode((enum Mode::Number)g.so_controlmode.get(), ModeReason::INITIALISED);
     }
 }
 
