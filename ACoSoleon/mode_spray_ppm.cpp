@@ -49,8 +49,8 @@ void ModeCtrlSprayPPM::run()
     if (_mp_cmd_act & MASK_CMD_PUMP_RIGHT)  _mp_status = _mp_status | MASK_STAT_SPR_RIGHT;
     else                                    _mp_status = _mp_status & ~MASK_STAT_SPR_RIGHT;
 
-    if (_mp_cmd_act & MASK_CMD_PUMP_LEFT)    _mp_status = _mp_status | MASK_CMD_PUMP_LEFT;
-    else                                     _mp_status = _mp_status & ~MASK_CMD_PUMP_LEFT;
+    if (_mp_cmd_act & MASK_CMD_PUMP_LEFT)    _mp_status = _mp_status | MASK_STAT_SPR_LEFT;
+    else                                     _mp_status = _mp_status & ~MASK_STAT_SPR_LEFT;
 
     _fill_level = g2.so_scale.get_measure(0); 
 

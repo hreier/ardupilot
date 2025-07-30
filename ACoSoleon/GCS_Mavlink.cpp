@@ -247,18 +247,15 @@ bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
     case MSG_GPS_RAW:
     case MSG_POWER_STATUS:
     case MSG_RAW_IMU:
-    case MSG_RC_CHANNELS:
     case MSG_SCALED_IMU2:
     case MSG_SCALED_IMU3:
     case MSG_SCALED_PRESSURE:
     case MSG_SCALED_PRESSURE2:
-    case MSG_SERVO_OUTPUT_RAW:
     case MSG_VFR_HUD:
     case MSG_VIBRATION:
 //    case MSG_SIM_STATE: 
     case     MSG_AHRS2:
 
-    
     //----
     case MSG_POSITION_TARGET_GLOBAL_INT:
     case MSG_TERRAIN:
@@ -269,6 +266,10 @@ bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
     case MSG_LANDING:
     case MSG_FENCE_STATUS:
     case MSG_OPTICAL_FLOW:
+
+    // --- the next 2 messages should be enabled/disabled via parameter for diagnosis (currently enabled)!!!
+//    case MSG_RC_CHANNELS:   //---HaRe ToDo: this sends message with 2Hz; should be activated only if configured
+//    case MSG_SERVO_OUTPUT_RAW:   //---ToDo: this sends message with 2Hz; should be activated only if configured
         // unused
        break;
 
