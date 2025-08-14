@@ -68,11 +68,14 @@ public:
     float        _fill_level;
     
     // _mp_status:   Status bits
-    #define MASK_STAT_SPR_RIGHT              (1<<0)
-    #define MASK_STAT_SPR_LEFT               (1<<1)
+    #define MASK_STAT_SPR_RIGHT_REAR         (1<<0)
+    #define MASK_STAT_SPR_LEFT_REAR          (1<<1)
     #define MASK_STAT_CTRL_READY             (1<<2)
     #define MASK_STAT_ERR_PMP                (1<<3)
     #define MASK_STAT_ERR_NOZZLE             (1<<4)
+    #define MASK_STAT_SPR_RIGHT_FRONT        (1<<6)
+    #define MASK_STAT_SPR_LEFT_FRONT         (1<<7)
+
     uint8_t      _mp_status;
     
     uint32_t     _time_stamp; 
@@ -87,6 +90,7 @@ protected:
     virtual void manage_offset_trim(bool verbose);
     void updateSprayerValveRelays(uint8_t mp_cmd);
     void updateSprayerPumpPPMs(uint8_t mp_cmd, float ppm_left, float ppm_right, float ppm_off);
+    void updateSprayerStatus(uint8_t mp_cmd, uint8_t & mp_status);
 
 
     // convenience references to avoid code churn in conversion:

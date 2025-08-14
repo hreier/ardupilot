@@ -110,6 +110,20 @@ void Mode::updateSprayerPumpPPMs(uint8_t mp_cmd, float ppm_left, float ppm_right
     else                               SRV_Channels::set_output_pwm(SRV_Channel::k_sprayer_pump_l, ppm_off);
 }
 
+void Mode::updateSprayerStatus(uint8_t mp_cmd, uint8_t & mp_status)
+{
+    if (_mp_cmd & MASK_CMD_SPR_RIGHT_REAR) mp_status = mp_status | MASK_STAT_SPR_RIGHT_REAR;
+    else                                   mp_status = mp_status & ~MASK_STAT_SPR_RIGHT_REAR;
+
+    if (_mp_cmd & MASK_CMD_SPR_LEFT_REAR)  mp_status = mp_status | MASK_STAT_SPR_LEFT_REAR;
+    else                                   mp_status = mp_status & ~MASK_STAT_SPR_LEFT_REAR;
+
+    if (_mp_cmd & MASK_CMD_SPR_RIGHT_FRONT) mp_status = mp_status | MASK_STAT_SPR_RIGHT_FRONT;
+    else                                    mp_status = mp_status & ~MASK_STAT_SPR_RIGHT_FRONT;
+
+    if (_mp_cmd & MASK_CMD_SPR_LEFT_FRONT)  mp_status = mp_status | MASK_STAT_SPR_LEFT_FRONT;
+    else                                    mp_status = mp_status & ~MASK_STAT_SPR_LEFT_FRONT;
+}
 
 
 //-------------------------------------------------------------------------

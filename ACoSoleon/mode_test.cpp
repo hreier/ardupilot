@@ -38,12 +38,9 @@ void ModeCtrlTest::run()
     updateSprayerPumpPPMs(_mp_cmd_act, _ppm_pump, _ppm_pump, g.so_servo_out_nospraying.get());
 
     //--- update status informations
-    if (_mp_cmd_act & MASK_CMD_PUMP_RIGHT)  _mp_status = _mp_status | MASK_STAT_SPR_RIGHT;
-    else                                    _mp_status = _mp_status & ~MASK_STAT_SPR_RIGHT;
-
-    if (_mp_cmd_act & MASK_CMD_PUMP_LEFT)    _mp_status = _mp_status | MASK_STAT_SPR_LEFT;
-    else                                     _mp_status = _mp_status & ~MASK_STAT_SPR_LEFT;
-
+    updateSprayerStatus(_mp_cmd_act, _mp_status);
+    
+    //--- update the filllevel 
     _fill_level = g2.so_scale.get_measure(0); 
 
     if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
