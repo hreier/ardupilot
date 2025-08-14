@@ -172,6 +172,8 @@ protected:
     const char *name() const override { return "CTR_TESTING"; }
     const char *name4() const override { return "TEST"; }
 
+    uint8_t _mp_cmd_act;
+
 private:
 
     

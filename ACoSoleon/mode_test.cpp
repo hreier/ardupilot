@@ -20,14 +20,9 @@ bool ModeCtrlTest::init()
     return true;
 }
 
-bool test = false;
 // Controller disabled - runs the disabled controller mode
 void ModeCtrlTest::run()
 {
-    // exit immediately if the pump function has not been set-up for any servo
-    if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump_r)) {
-        return;
-    }
 
     //-- show the boot sequence
     if (_mode_booting) {
@@ -35,43 +30,24 @@ void ModeCtrlTest::run()
         return;
     }
 
-    if (!test){
-        gcs().send_text(MAV_SEVERITY_INFO, "passed");
-        test = true;
-    }
-   // return;
-    
-    // ---- use override switch to test the sprayer ---
-    RC_Channel::AuxSwitchPos override_sw = channel_override->get_aux_switch_pos();
-    float ppm_pumps = g.so_servo_out_spraying.get();
-    float ppm_pumps_off = g.so_servo_out_nospraying.get();
-    uint8_t command;
+    _ppm_pump = g.so_servo_out_spraying.get();
+    _mp_cmd_act = _mp_cmd; //--- first get the active command from missionplan (_mp_cmd)  
 
-/*     if (!test){
-        gcs().send_text(MAV_SEVERITY_INFO, "passed:%d", (u_int16_t) override_sw);
-        test = true;
-    }
-   // return;
- */
-    switch (override_sw)
-    {
-        default:
-        case RC_Channel::AuxSwitchPos::LOW:
-            command = 0;    //- spray off
-            break;
+     // ---- update valve relays and ppm values ----
+    updateSprayerValveRelays(_mp_cmd_act);
+    updateSprayerPumpPPMs(_mp_cmd_act, _ppm_pump, _ppm_pump, g.so_servo_out_nospraying.get());
 
-        case RC_Channel::AuxSwitchPos::MIDDLE:
-            command = 3;    //- spray back both
-            break;
+    //--- update status informations
+    if (_mp_cmd_act & MASK_CMD_PUMP_RIGHT)  _mp_status = _mp_status | MASK_STAT_SPR_RIGHT;
+    else                                    _mp_status = _mp_status & ~MASK_STAT_SPR_RIGHT;
 
-        case RC_Channel::AuxSwitchPos::HIGH:
-            command = 12;    //- spray front both
-            break;
-    }
+    if (_mp_cmd_act & MASK_CMD_PUMP_LEFT)    _mp_status = _mp_status | MASK_STAT_SPR_LEFT;
+    else                                     _mp_status = _mp_status & ~MASK_STAT_SPR_LEFT;
 
-    updateSprayerValveRelays(command);
-    updateSprayerPumpPPMs(command, ppm_pumps, ppm_pumps, ppm_pumps_off);
+    _fill_level = g2.so_scale.get_measure(0); 
 
+    if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
+    else               _mp_sprayrate = 0;
 }
 
 

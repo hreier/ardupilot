@@ -33,8 +33,6 @@ void ModeCtrlSprayPPM::run()
 
     //_mp_sprayrate = g2.so_press.get_measure(0);  //-- this will somehow be used for regulated modes
 
-
-
     manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
     //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- Manage the trimming; may be needs to be validated if between the limits???
@@ -51,8 +49,6 @@ void ModeCtrlSprayPPM::run()
 
     if (_mp_cmd_act & MASK_CMD_PUMP_LEFT)    _mp_status = _mp_status | MASK_STAT_SPR_LEFT;
     else                                     _mp_status = _mp_status & ~MASK_STAT_SPR_LEFT;
-
-    _fill_level = g2.so_scale.get_measure(0); 
 
     if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
     else               _mp_sprayrate = 0;
