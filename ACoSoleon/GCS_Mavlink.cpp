@@ -4,6 +4,19 @@
 #include <AP_RPM/AP_RPM_config.h>
 #include <AP_EFI/AP_EFI_config.h>
 
+// ---- tunnel payload types
+#define SO_PLTYPE_COMMAND       0xF000
+#define SO_PLTYPE_COMMAND_RESP  0xF001
+#define SO_PLTYPE_INTVAL_F010   0xF010     //-- from payload send after interval request ---getTunnelPayloadtype(); may be to made dynamic)
+
+// ---- Soleon commands (SO_PLTYPE_COMMAND)
+#define SO_PLCMD_RES_ALL        1       //-- Reset all
+#define SO_PLCMD_RES_CNTRS      2       //-- Reset counters
+#define SO_PLCMD_RES_CONTROLLER 3       //-- Reset controller
+#define SO_PLCMD_RES_ERRORS     4       //-- Reset Error counters + flags
+#define SO_PLCMD_RES_MAVLINK    5       //-- Reset mavlink diagnose 
+
+
 MAV_TYPE GCS_Soleon::frame_type() const
 {
     /*
@@ -152,8 +165,10 @@ void GCS_MAVLINK_Soleon::send_position_target_local_ned()
 
 //-- sends the status of the Soleon AirController
 //int temp;
-void GCS_MAVLINK_Soleon::send_so_status(void) const
+void GCS_MAVLINK_Soleon::send_so_status(void)
 {
+    so_tunnel_f010.cntrTxStatus++;
+
     mavlink_msg_so_status_send(chan,
                                 AP_HAL::millis(), 
                                 soleon.soleon_ctrl_mode->_mp_status,  
@@ -163,10 +178,31 @@ void GCS_MAVLINK_Soleon::send_so_status(void) const
                                 soleon.soleon_ctrl_mode->_mp_line_dist,
                                 soleon.soleon_ctrl_mode->_mp_planned_spd);
 
-    //gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: tank level = %fl",  soleon.soleon_ctrl_mode->_fill_level);  //-- debugging
     
 }
 
+void GCS_MAVLINK_Soleon::send_so_tunnel(void) 
+{
+    unsigned long size = sizeof(so_tunnel_f010);
+    
+    update_so_tunnel_f010();  //-- update the so_tunnel_f010 data
+
+//    mav_array_memcpy((void*)tunnel_buf, (void*)so_tunnel_f010, size);
+    
+    _mav_put_uint8_t_array((char *)tunnel_buf, 0, so_tunnel_f010.buf, size);
+    
+
+    mavlink_msg_tunnel_send(chan, 
+                   mavlink_system.sysid, 
+                   mavlink_system.compid, 
+                   SO_PLTYPE_INTVAL_F010,  // <---- getTunnelPayloadtype(); may be to made dynamic
+                   size, 
+                   tunnel_buf);
+
+    
+    //gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: tank level = %fl",  soleon.soleon_ctrl_mode->_fill_level);  //-- debugging
+
+}
 
 void GCS_MAVLINK_Soleon::send_nav_controller_output() const
 {
@@ -275,6 +311,10 @@ bool GCS_MAVLINK_Soleon::try_send_message(enum ap_message id)
 
     case MSG_SO_STATUS:
         send_so_status();
+        break;
+
+    case MSG_SO_TUNNEL:
+        send_so_tunnel();
         break;
 
 
@@ -664,12 +704,22 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
                 gcs().send_text(MAV_SEVERITY_WARNING, "DO_SEND_SCRIPT_MESSAGE wrong selector [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
                 break;
         }
+        so_tunnel_f010.cntrRxMp++;
         return MAV_RESULT_ACCEPTED;
         
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
         soleon.soleon_ctrl_mode->_delta_fill = packet.param1;
         gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
         return MAV_RESULT_ACCEPTED;
+
+    case MAV_CMD_REQUEST_MESSAGE:
+    case MAV_CMD_SET_MESSAGE_INTERVAL:
+        if ((uint32_t)packet.param1 == MAVLINK_MSG_ID_TUNNEL)
+        {  //-- set interval for TUNNEL arrived --> store/update the payload type (param3) for tunnel handler
+           // updateTunnelPayloadtype(packet.param3); 
+           gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: SET_MSG_INTERVAL %d %x", (int)packet.param2, (unsigned int)packet.param3);  //-- debugging 
+        }
+        return GCS_MAVLINK::handle_command_int_packet(packet, msg);
 
 
     default:
@@ -691,46 +741,7 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_mount(const mavlink_command_int_t 
 }
 #endif
 
-/*
-MAV_RESULT GCS_MAVLINK_Soleon::handle_command_long_packet(const mavlink_command_long_t &packet, const mavlink_message_t &msg)
-{
-    switch(packet.command) {
 
-    case MAV_CMD_DO_SEND_SCRIPT_MESSAGE:
-        switch ((uint8_t)packet.param1){ //--process the selector
-            case 0: //--HaRe only for test - remove it
-                soleon.soleon_ctrl_mode->_delta_fill = packet.param2;
-                gcs().send_text(MAV_SEVERITY_INFO, "SprayRateScript = %f", packet.param2);  ///-HaRe debug
-                break;
-
-            case 1: //-- mission plan startup command/configuration
-                soleon.soleon_ctrl_mode->_mp_liter_ha = packet.param2;
-                soleon.soleon_ctrl_mode->_mp_line_dist = packet.param3;
-                soleon.soleon_ctrl_mode->_mp_planned_spd = packet.param4;
-                break;
-            
-            case 2: //-- mission plan command
-                soleon.soleon_ctrl_mode->_mp_cmd  = (Mode::mp_cmd_t) packet.param2;
-                soleon.soleon_ctrl_mode->_mp_dist_waypoint = packet.param3;  
-                break;
-            
-            default:
-                gcs().send_text(MAV_SEVERITY_WARNING, "DO_SEND_SCRIPT_MESSAGE wrong selector [%d] ", (uint8_t) packet.param1);  ///-HaRe debug
-                break;
-        }
-        return MAV_RESULT_ACCEPTED;
-        
-    case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
-        soleon.soleon_ctrl_mode->_delta_fill = packet.param1;
-        gcs().send_text(MAV_SEVERITY_INFO, "SprayRate = %f", packet.param1);  ///-HaRe debug
-        return MAV_RESULT_ACCEPTED;
-
-   
-
-    default:
-        return GCS_MAVLINK::handle_command_long_packet(packet, msg);
-    }
-}*/
 
 MAV_RESULT GCS_MAVLINK_Soleon::handle_command_pause_continue(const mavlink_command_int_t &packet)
 {
@@ -792,6 +803,14 @@ bool GCS_MAVLINK_Soleon::sane_vel_or_acc_vector(const Vector3f &vec) const
 void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
 {
     switch (msg.msgid) {
+    case MAVLINK_MSG_ID_TUNNEL:
+    {
+        handle_msg_tunnel(msg);
+        ///--- do bin i  --->>>> reset für counters einbauen (alle resets)...
+        //gcs().send_text(MAV_SEVERITY_WARNING, "Debugging: MAVLINK_MSG_ID_TUNNEL came in");  //-- debugging
+        break;
+    }
+
     case MAVLINK_MSG_ID_VFR_HUD:           // MAV ID: 74
     {
         handle_copter_hud_msg(msg, soleon.should_log(MASK_LOG_PM));  //-- ToDo: logging
@@ -822,6 +841,53 @@ void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
         break;
     }     // end switch
 } // end handle mavlink
+
+
+void GCS_MAVLINK_Soleon::handle_msg_tunnel(const mavlink_message_t &msg)
+{
+    mavlink_tunnel_t packet;
+
+    mavlink_msg_tunnel_decode(&msg, &packet);
+
+    gcs().send_text(MAV_SEVERITY_WARNING, "MAVLINK_MSG_ID_TUNNEL -- pltype=%x plbyte=%d", packet.payload_type, packet.payload[0]);  //-- debugging
+
+    if (packet.payload_type != SO_PLTYPE_COMMAND) return;     //--- payload type not matching
+
+    switch ((int)packet.payload[0])
+    {
+    case SO_PLCMD_RES_CNTRS:
+        soleon.clearSoleonCtrlCntr();
+        so_tunnel_f010.cntrRxMp = 0;
+        so_tunnel_f010.cntrTxStatus= 0;    
+        break;
+
+    case SO_PLCMD_RES_CONTROLLER:
+        so_tunnel_f010.ppmPumpLeft = 0;
+        so_tunnel_f010.ppmPumpRight = 0; 
+        so_tunnel_f010.ppmPumpLeftMax = 0;
+        so_tunnel_f010.ppmPumpRightMax = 0; 
+        so_tunnel_f010.eValLeftMax = 0;
+        so_tunnel_f010.eValRightMax = 0;
+        break;
+
+
+    case SO_PLCMD_RES_ERRORS:
+        so_tunnel_f010.errorFlags = 0;
+        so_tunnel_f010.cntPressLeftWindups = 0; 
+        so_tunnel_f010.cntPressRightWindups = 0;
+        so_tunnel_f010.cntMavLinkErrors = 0; 
+        break;
+
+    case SO_PLCMD_RES_MAVLINK:
+        mavlink_reset_channel_status(0);
+        mavlink_reset_channel_status(1);
+        so_tunnel_f010.dbg3Uint32++;
+        break;
+
+    }
+    
+}
+
 
 
 
@@ -945,4 +1011,55 @@ void GCS_MAVLINK_Soleon::handle_copter_hud_msg(const mavlink_message_t &msg, boo
     }
     
 }
+
+//-- this fills and updates the datastructure before sending this via tunnel to missionplanner 'soleon service' plugin
+/// https://github.com/mavlink/c_library_v2/blob/master/mavlink_helpers.h
+bool GCS_MAVLINK_Soleon::update_so_tunnel_f010(void) 
+{
+    mavlink_status_t * pt_mavlink_status;
+
+    pt_mavlink_status = mavlink_get_channel_status(0);
+    so_tunnel_f010.buffer_overrun_0 = pt_mavlink_status->buffer_overrun;
+    so_tunnel_f010.msg_received_0 = pt_mavlink_status->msg_received;
+    so_tunnel_f010.packet_rx_drop_count_0 = pt_mavlink_status->packet_rx_drop_count;
+    so_tunnel_f010.packet_rx_success_count_0 = pt_mavlink_status->packet_rx_success_count;
+    so_tunnel_f010.parse_error_0 = pt_mavlink_status->parse_error;
+    
+    pt_mavlink_status = mavlink_get_channel_status(1);
+    so_tunnel_f010.buffer_overrun_1 = pt_mavlink_status->buffer_overrun;
+    so_tunnel_f010.msg_received_1 = pt_mavlink_status->msg_received;
+    so_tunnel_f010.packet_rx_drop_count_1 = pt_mavlink_status->packet_rx_drop_count;
+    so_tunnel_f010.packet_rx_success_count_1 = pt_mavlink_status->packet_rx_success_count;
+    so_tunnel_f010.parse_error_1 = pt_mavlink_status->parse_error;
+    
+    so_tunnel_f010.timestamp = AP_HAL::millis();
+    so_tunnel_f010.cntrCtrLoops=soleon.getSoleonCtrlCntr();  //clearSoleonCtrlCntr
+//    so_tunnel_f010.cntrRxMp=21;  
+//    so_tunnel_f010.cntrTxStatus=22;
+//    so_tunnel_f010.dbg1Float=30;
+//    so_tunnel_f010.dbg2Float=31;
+//    so_tunnel_f010.dbg3Uint32=32;
+//    so_tunnel_f010.dbg4Uint32=33;
+
+    so_tunnel_f010.cntMavLinkErrors = so_tunnel_f010.packet_rx_drop_count_1 + so_tunnel_f010.packet_rx_drop_count_0;
+
+    so_tunnel_f010.offsetTrim = soleon.soleon_ctrl_mode->getOffsetTrim();
+    so_tunnel_f010.owerRideOnSw = (uint8_t) soleon.channel_on_mode->get_aux_switch_pos(); 
+    so_tunnel_f010.owerRideSw = (uint8_t) soleon.channel_override->get_aux_switch_pos(); 
+    so_tunnel_f010.pressureLeft=11.12;
+    so_tunnel_f010.pressureRight=soleon.g2.so_press.getPressure(0);  //--- PressureValue 
+    so_tunnel_f010.errorFlags=0xFE31FE31;
+
+    so_tunnel_f010.cntPressLeftWindups=30;
+    so_tunnel_f010.cntPressRightWindups=31;
+    so_tunnel_f010.eValLeftMax=32;
+    so_tunnel_f010.eValRightMax=33;
+    so_tunnel_f010.ppmPumpLeft = soleon.soleon_ctrl_mode->getPumpPPMleft();
+    so_tunnel_f010.ppmPumpLeftMax=71;
+    so_tunnel_f010.ppmPumpRight = soleon.soleon_ctrl_mode->getPumpPPMright();
+    so_tunnel_f010.ppmPumpRightMax=73;
+
+    return true;
+}; 
+
 

@@ -47,6 +47,7 @@ public:
     bool has_data() const;
 
     float get_measure();
+    float getPressure();
     char * get_gcs_message() {msg_updated = false; return gcs_message;}
     bool is_new_gcs_message() {return msg_updated;}
 

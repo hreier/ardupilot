@@ -110,6 +110,9 @@ public:
     // returns the PressSens measured value [kg / l]
     float get_measure(uint8_t id);
 
+    // returns the Pressure value [bar]
+    float getPressure(uint8_t id);
+
     // returns the PressSens status
     PressSens::Status get_status(uint8_t id);
     

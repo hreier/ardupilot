@@ -330,6 +330,8 @@ private:
     // There are multiple states defined such as STABILIZE, ACRO,
     Mode *soleon_ctrl_mode;
     Mode::Number prev_control_mode;
+    uint32_t soleon_ctrl_cntr;
+
 
     //RCMapper rcmap;
     SoRCMapper so_rcmap;
@@ -696,6 +698,9 @@ private:
     bool current_mode_requires_mission() const override;
     void update_soleon_ctrl_mode();
     void notify_flight_mode();
+    uint32_t getSoleonCtrlCntr (void) {return soleon_ctrl_cntr;};
+    void clearSoleonCtrlCntr (void) {soleon_ctrl_cntr = 0;};
+
 
     // Check if this mode can be entered from the GCS
     bool gcs_mode_enabled(const Mode::Number mode_num);

@@ -1086,7 +1086,8 @@ ap_message GCS_MAVLINK::mavlink_id_to_ap_message_id(const uint32_t mavlink_id) c
         { MAVLINK_MSG_ID_RELAY_STATUS, MSG_RELAY_STATUS},
 #endif
         { MAVLINK_MSG_ID_SO_STATUS, MSG_SO_STATUS},
-            };
+        { MAVLINK_MSG_ID_TUNNEL, MSG_SO_TUNNEL},
+    };
 
     for (uint8_t i=0; i<ARRAY_SIZE(map); i++) {
         if (map[i].mavlink_id == mavlink_id) {

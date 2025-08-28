@@ -62,6 +62,10 @@ float SO_PressSens_Backend::get_measure()
     return state.flow;
 }
 
+float SO_PressSens_Backend::getPressure()
+{
+    return state.pressure;
+}
 
 
 bool SO_PressSens_Backend::set_gcs_message(const char *msg)

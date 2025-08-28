@@ -51,7 +51,10 @@ public:
     virtual void exit() {};
     virtual void run() = 0;
     virtual bool is_spraying() = 0;
-
+    float getOffsetTrim() {return offset_trim_proz;} ;
+    uint16_t getPumpPPMleft(); 
+    uint16_t getPumpPPMright(); 
+    
 
     // return a string for this flightmode
     virtual const char *name() const = 0;

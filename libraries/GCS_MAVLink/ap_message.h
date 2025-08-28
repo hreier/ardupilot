@@ -91,5 +91,6 @@ enum ap_message : uint8_t {
     MSG_AUTOPILOT_STATE_FOR_GIMBAL_DEVICE,
     MSG_RELAY_STATUS,
     MSG_SO_STATUS,        //-- Soleon Aircontroller Status message
+    MSG_SO_TUNNEL,        //-- Soleon Tunnel message
     MSG_LAST // MSG_LAST must be the last entry in this enum
 };

@@ -152,12 +152,13 @@ SO_PressSens_Backend *PressSens::get_backend(uint8_t id) const {
     return drivers[id];
 };
 
-// returns the PressSens estimated flow value [l/min]
-float PressSens::get_measure(uint8_t id)
+// returns the Pressure value [bar]
+float PressSens::getPressure(uint8_t id) 
 {
     if (id >= PRESS_SENS_MAX_INSTANCES) return 0;
-    else return drivers[id]->get_measure();
+    else return drivers[id]->getPressure();
 }
+
 
 // returns the PressSens status
 PressSens::Status PressSens::get_status(uint8_t id)

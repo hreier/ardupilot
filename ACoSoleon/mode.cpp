@@ -239,6 +239,26 @@ void Mode::manage_offset_trim(bool verbose)
 }
 
 
+uint16_t Mode::getPumpPPMleft()
+{
+    uint16_t value = 0;
+    
+    SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump_l, value);
+    return value;
+
+}
+
+
+uint16_t Mode::getPumpPPMright()
+{
+    uint16_t value = 0;
+    
+    SRV_Channels::get_output_pwm(SRV_Channel::k_sprayer_pump_r, value);
+    return value;
+} 
+
+
+///----------------------
 // return the static controller object corresponding to supplied mode
 Mode *Soleon::mode_from_mode_num(const Mode::Number mode)
 {
@@ -364,6 +384,8 @@ void Soleon::update_soleon_ctrl_mode()
     if (soleon_ctrl_mode->mode_number() !=  (enum Mode::Number)g.so_controlmode.get()){
         set_mode((enum Mode::Number)g.so_controlmode.get(), ModeReason::INITIALISED);
     }
+
+    soleon_ctrl_cntr++;
 }
 
 // exit_mode - high level call to organise cleanup as a flight mode is exited

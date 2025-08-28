@@ -33,7 +33,6 @@ protected:
     MAV_RESULT handle_command_mount(const mavlink_command_int_t &packet, const mavlink_message_t &msg) override;
 #endif
     MAV_RESULT handle_command_int_packet(const mavlink_command_int_t &packet, const mavlink_message_t &msg) override;
-   // MAV_RESULT handle_command_long_packet(const mavlink_command_long_t &packet, const mavlink_message_t &msg) override;
     MAV_RESULT handle_command_int_do_reposition(const mavlink_command_int_t &packet);
     MAV_RESULT handle_command_pause_continue(const mavlink_command_int_t &packet);
 
@@ -86,7 +85,69 @@ private:
     void send_winch_status() const override;
 
     void send_wind() const;
-    void send_so_status(void) const;
+    void send_so_status(void);
+    void send_so_tunnel(void);
+
+    typedef union {
+      struct{
+        //--- 
+        uint64_t timestamp;                   ///< Timestamp, in microseconds since UNIX epoch GMT
+    
+        //--- DEBUG
+        float    dbg1Float;
+        float    dbg2Float;
+        uint32_t dbg3Uint32;
+        uint16_t dbg4Uint32;
+    
+        //--- COUNTERS
+        uint32_t cntrCtrLoops;
+        uint16_t cntrRxMp;
+        uint16_t cntrTxStatus;
+    
+        //--- MEASURES
+        float pressureLeft;
+        float pressureRight;
+        uint8_t owerRideSw;       //-- forcedOff; MissionPlan; forcedOn
+        uint8_t owerRideOnSw;     //-- front; all; back
+        float offsetTrim;       //--5% to 5% (l/ha)
+    
+        //--- CONTROLLER
+        uint16_t ppmPumpLeft;
+        uint16_t ppmPumpRight;
+        uint16_t ppmPumpLeftMax;
+        uint16_t ppmPumpRightMax;
+        float    eValLeftMax;
+        float    eValRightMax;
+    
+        //--- ERRORS
+        uint32_t errorFlags;
+        uint16_t cntPressLeftWindups;
+        uint16_t cntPressRightWindups;
+        uint16_t cntMavLinkErrors;
+    
+        //--- mavlink_status channel_0
+        uint8_t msg_received_0;               ///< Number of received messages
+        uint8_t buffer_overrun_0;             ///< Number of buffer overruns
+        uint8_t parse_error_0;                ///< Number of parse errors
+        uint16_t packet_rx_success_count_0;   ///< Received packets
+        uint16_t packet_rx_drop_count_0;      ///< Number of packet drops
+    
+        //--- mavlink_status channel_1
+        uint8_t msg_received_1;               ///< Number of received messages
+        uint8_t buffer_overrun_1;             ///< Number of buffer overruns
+        uint8_t parse_error_1;                ///< Number of parse errors
+        uint16_t packet_rx_success_count_1;   ///< Received packets
+        uint16_t packet_rx_drop_count_1;      ///< Number of packet drops
+      };
+      uint8_t buf[1];
+    } so_tunnel_f010_t;
+
+    so_tunnel_f010_t so_tunnel_f010;
+    uint8_t tunnel_buf[128];
+
+    bool update_so_tunnel_f010(void); 
+    void handle_msg_tunnel(const mavlink_message_t &msg);
+
 
 
 #if HAL_HIGH_LATENCY2_ENABLED
