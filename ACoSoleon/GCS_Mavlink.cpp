@@ -193,7 +193,7 @@ void GCS_MAVLINK_Soleon::send_so_tunnel(void)
     
 
     mavlink_msg_tunnel_send(chan, 
-                   mavlink_system.sysid, 
+                   0,  //mavlink_system.sysid,   ///--- broadcast == 0
                    mavlink_system.compid, 
                    SO_PLTYPE_INTVAL_F010,  // <---- getTunnelPayloadtype(); may be to made dynamic
                    size, 
