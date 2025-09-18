@@ -392,6 +392,7 @@ public:
         k_param_so_servo_out_nospraying,
         k_param_so_rcmap,
         k_param_so_sprayrate_est,
+        k_param_so_log_bitmask,
     
     //    k_param_so_scale,
     
@@ -495,6 +496,7 @@ public:
     AP_Int16        so_servo_out_spraying;
     AP_Int16        so_servo_out_nospraying;
     AP_Float        so_sprayrate_est;
+    AP_Int32        so_log_bitmask;
  //   AP_Int8         so_flow_sensor;
  //   AP_Int8         so_pressure_sensor;
  //   AP_Int8         so_arming;

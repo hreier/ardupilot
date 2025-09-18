@@ -813,14 +813,14 @@ void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
 
     case MAVLINK_MSG_ID_VFR_HUD:           // MAV ID: 74
     {
-        handle_copter_hud_msg(msg, soleon.should_log(MASK_LOG_PM));  //-- ToDo: logging
+        handle_copter_hud_msg(msg, soleon.should_log(MASK_SO_LOG_PM));  //-- ToDo: logging
         break;
     }
 
     case MAVLINK_MSG_ID_RADIO:
     case MAVLINK_MSG_ID_RADIO_STATUS:       // MAV ID: 109
     {
-        handle_radio_status(msg, soleon.should_log(MASK_LOG_PM));
+        handle_radio_status(msg, soleon.should_log(MASK_SO_LOG_PM));
         break;
     }
 

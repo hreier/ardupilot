@@ -20,14 +20,15 @@
   #define WEIGHTSENS_MAX_INSTANCES 1
 #endif
 
-#define SCALE_LOGGING      //-- this activates logging of the Weight sensor module for debugging
-
 
 class SO_WeightSens_Backend;
 
 class WeightSens
 {
     friend class SO_WeightSens_Backend;
+    
+    /* Do not allow copies */
+  //  CLASS_NO_COPY(WeightSens);
 
 public:
     WeightSens();
@@ -69,8 +70,6 @@ public:
     // parameters for each instance
     static const struct AP_Param::GroupInfo var_info[];
 
-    void set_log_rfnd_bit(uint32_t log_rfnd_bit) { _log_rfnd_bit = log_rfnd_bit; }
-
     /*
       Return the number of weight sensor instances. 
       intended for future extension....
@@ -107,6 +106,10 @@ public:
 
     // returns the WeightSens status
     WeightSens::Status get_status(uint8_t id);
+
+    void set_log_bit_mask(uint32_t log_bit_mask);
+
+    uint32_t get_log_bit_mask(void) { return _log_bit_mask; }
     
 
     static WeightSens *get_singleton(void) { return _singleton; }
@@ -126,8 +129,7 @@ private:
     void detect_instance(uint8_t instance);
     bool _add_backend(SO_WeightSens_Backend *driver, uint8_t instance);
 
-    uint32_t _log_rfnd_bit = -1;
-    void Log_RFND() const;
+    uint32_t _log_bit_mask = -1;
 };
 
 namespace SO {

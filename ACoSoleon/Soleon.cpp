@@ -76,7 +76,6 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     // camera mount's fast update
     FAST_TASK_CLASS(AP_Mount, &soleon.camera_mount, update_fast),
 #endif
-    FAST_TASK(Log_Video_Stabilisation),
 
     SCHED_TASK(rc_loop,              250,    130,  3),
     SCHED_TASK(throttle_loop,         50,     75,  6),
@@ -165,7 +164,7 @@ void Soleon::get_scheduler_tasks(const AP_Scheduler::Task *&tasks,
 {
     tasks = &scheduler_tasks[0];
     task_count = ARRAY_SIZE(scheduler_tasks);
-    log_bit = MASK_LOG_PM;
+    log_bit = MASK_SO_LOG_PM;
 }
 
 constexpr int8_t Soleon::_failsafe_priorities[7];
@@ -208,6 +207,7 @@ bool Soleon::current_mode_requires_mission() const
 #endif
 }
 
+//-----------------------------------------------------
 // rc_loops - reads user input from copter
 // called at 100hz
 void Soleon::rc_loop()
@@ -242,6 +242,7 @@ void Soleon::update_batt_compass(void)
     }
 }
 
+//-----------------------------------------------------
 // Full rate logging of attitude, rate and pid loops
 // should be run at loop rate
 void Soleon::loop_rate_logging()
@@ -249,68 +250,38 @@ void Soleon::loop_rate_logging()
 
 }
 
+//-----------------------------------------------------
 // ten_hz_logging_loop
 // should be run at 10hz
 void Soleon::ten_hz_logging_loop()
 {
 
-    // log EKF attitude data always at 10Hz unless ATTITUDE_FAST, then do it in the 25Hz loop
-    if (!should_log(MASK_LOG_ATTITUDE_FAST)) {
-        Log_Write_EKF_POS();
-    }
-    if (should_log(MASK_LOG_RCIN)) {
+    if (should_log(MASK_SO_LOG_RCIN)) {
         logger.Write_RCIN();
-        if (rssi.enabled()) {
-            logger.Write_RSSI();
-        }
+        //if (rssi.enabled()) {
+        //    logger.Write_RSSI();
+        //}
     }
-    if (should_log(MASK_LOG_RCOUT)) {
+    if (should_log(MASK_SO_LOG_RCOUT)) {
         logger.Write_RCOUT();
-    }
-
-    if (should_log(MASK_LOG_IMU) || should_log(MASK_LOG_IMU_FAST) || should_log(MASK_LOG_IMU_RAW)) {
-        AP::ins().Write_Vibration();
     }
 
 #if FRAME_CONFIG == HELI_FRAME
     Log_Write_Heli();
 #endif
-#if AP_WINCH_ENABLED
-    if (should_log(MASK_LOG_ANY)) {
-        g2.winch.write_log();
-    }
-#endif
-#if HAL_MOUNT_ENABLED
-    if (should_log(MASK_LOG_CAMERA)) {
-        camera_mount.write_log();
-    }
-#endif
 }
 
+//-----------------------------------------------------
 // twentyfive_hz_logging - should be run at 25hz
 void Soleon::twentyfive_hz_logging()
 {
-    if (should_log(MASK_LOG_ATTITUDE_FAST)) {
-        Log_Write_EKF_POS();
-    }
+//    if (should_log(MASK_LOG_ATTITUDE_FAST)) {
+//        Log_Write_EKF_POS();
+//    }
 
-    if (should_log(MASK_LOG_IMU) && !(should_log(MASK_LOG_IMU_FAST))) {
-        AP::ins().Write_IMU();
-    }
-
-#if MODE_AUTOROTATE_ENABLED == ENABLED
-    if (should_log(MASK_LOG_ATTITUDE_MED) || should_log(MASK_LOG_ATTITUDE_FAST)) {
-        //update autorotation log
-        g2.arot.Log_Write_Autorotation();
-    }
-#endif
-#if HAL_GYROFFT_ENABLED
-    if (should_log(MASK_LOG_FTN_FAST)) {
-        gyro_fft.write_log_messages();
-    }
-#endif
 }
 
+//-----------------------------------------------------
 // three_hz_loop - 3hz loop
 void Soleon::three_hz_loop()
 {
@@ -322,10 +293,11 @@ void Soleon::three_hz_loop()
 
 }
 
+//-----------------------------------------------------
 // one_hz_loop - runs at 1Hz
 void Soleon::one_hz_loop()
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         Log_Write_Data(LogDataID::AP_STATE, ap.value);
     }
 
@@ -347,9 +319,9 @@ void Soleon::init_simple_bearing()
     super_simple_sin_yaw = simple_sin_yaw;
 
     // log the simple bearing
-    if (should_log(MASK_LOG_ANY)) {
-        Log_Write_Data(LogDataID::INIT_SIMPLE_BEARING, ahrs.yaw_sensor);
-    }
+    //if (should_log(MASK_SO_LOG_ANY)) {
+    //    Log_Write_Data(LogDataID::INIT_SIMPLE_BEARING, ahrs.yaw_sensor);
+    //}
 }
 
 // update_simple_mode - rotates pilot input if we are in simple mode
@@ -394,15 +366,6 @@ void Soleon::update_altitude()
     // read in baro altitude
     read_barometer();
 
-    if (should_log(MASK_LOG_CTUN)) {
-        Log_Write_Control_Tuning();
-        if (!should_log(MASK_LOG_FTN_FAST)) {
-            AP::ins().write_notch_log_messages();
-#if HAL_GYROFFT_ENABLED
-            gyro_fft.write_log_messages();
-#endif
-        }
-    }
 }
 
 // vehicle specific waypoint info helpers
@@ -434,7 +397,7 @@ bool Soleon::get_rate_ef_targets(Vector3f& rate_ef_targets) const
   constructor for main Soleon class
  */
 Soleon::Soleon(void)
-    : logger(g.log_bitmask),
+    : logger(g.so_log_bitmask),
     flight_modes(&g.flight_mode1),
     simple_cos_yaw(1.0f),
     super_simple_cos_yaw(1.0),
@@ -444,6 +407,7 @@ Soleon::Soleon(void)
     param_loader(var_info),
     soleon_ctrl_mode(&ctrl_disabled)
 {
+
 }
 
 

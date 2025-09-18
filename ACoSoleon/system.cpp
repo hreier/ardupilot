@@ -85,15 +85,12 @@ void Soleon::init_ardupilot()
     hal.scheduler->register_timer_failsafe(failsafe_check_static, 1000);
 
     // Do GPS init
-    gps.set_log_gps_bit(MASK_LOG_GPS);
+   // gps.set_log_gps_bit(MASK_LOG_GPS);
     gps.init(serial_manager);
 
-    AP::compass().set_log_bit(MASK_LOG_COMPASS);
+  //  AP::compass().set_log_bit(MASK_LOG_COMPASS);
     AP::compass().init();
 
-#if AP_AIRSPEED_ENABLED
-    airspeed.set_log_bit(MASK_LOG_IMU);
-#endif
 
 #if AP_OPTICALFLOW_ENABLED
     // initialise optical flow sensor
@@ -126,7 +123,7 @@ void Soleon::init_ardupilot()
 
     // read Baro pressure at ground
     //-----------------------------
-    barometer.set_log_baro_bit(MASK_LOG_IMU);
+   // barometer.set_log_baro_bit(MASK_LOG_IMU);
     barometer.calibrate();
 
     // initialise the scale module
@@ -176,7 +173,7 @@ void Soleon::init_ardupilot()
     // enable CPU failsafe
     failsafe_enable();
 
-    ins.set_log_raw_bit(MASK_LOG_IMU_RAW);
+   // ins.set_log_raw_bit(MASK_LOG_IMU_RAW);
 
  //   motors->output_min();  // output lowest possible value to motors
 

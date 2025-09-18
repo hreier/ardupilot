@@ -23,6 +23,8 @@ public:
     virtual void init_serial(uint8_t serial_instance) {};
 
     virtual void handle_msg(const mavlink_message_t &msg) { return; }
+    
+    virtual void do_LOG() = 0;   //-- function for the logging stuff
 
 #if AP_SCRIPTING_ENABLED
     // Returns false if scripting backing hasn't been setup

@@ -110,28 +110,15 @@ enum LoggingParameters {
      LOG_GUIDED_ATTITUDE_TARGET_MSG
 };
 
-#define MASK_LOG_ATTITUDE_FAST          (1<<0)
-#define MASK_LOG_ATTITUDE_MED           (1<<1)
-#define MASK_LOG_GPS                    (1<<2)
-#define MASK_LOG_PM                     (1<<3)
-#define MASK_LOG_CTUN                   (1<<4)
-#define MASK_LOG_NTUN                   (1<<5)
-#define MASK_LOG_RCIN                   (1<<6)
-#define MASK_LOG_IMU                    (1<<7)
-#define MASK_LOG_CMD                    (1<<8)
-#define MASK_LOG_CURRENT                (1<<9)
-#define MASK_LOG_RCOUT                  (1<<10)
-#define MASK_LOG_OPTFLOW                (1<<11)
-#define MASK_LOG_PID                    (1<<12)
-#define MASK_LOG_COMPASS                (1<<13)
-#define MASK_LOG_INAV                   (1<<14) // deprecated
-#define MASK_LOG_CAMERA                 (1<<15)
-#define MASK_LOG_MOTBATT                (1UL<<17)
-#define MASK_LOG_IMU_FAST               (1UL<<18)
-#define MASK_LOG_IMU_RAW                (1UL<<19)
-#define MASK_LOG_VIDEO_STABILISATION    (1UL<<20)
-#define MASK_LOG_FTN_FAST               (1UL<<21)
-#define MASK_LOG_ANY                    0xFFFF
+//----- Soleon Logmask bits
+#define MASK_SO_LOG_RCIN                (1<<0)
+#define MASK_SO_LOG_RCOUT               (1<<1)
+#define MASK_SO_LOG_CMD                 (1<<2)   //-- currently not implemented??
+#define MASK_SO_LOG_PM                  (1<<3)
+#define MASK_SO_LOG_SCALE               (1<<4)
+#define MASK_SO_LOG_PRESS               (1<<5)
+#define MASK_SO_LOG_ANY                  0xFFFF
+
 
 // Radio failsafe definitions (FS_THR parameter)
 #define FS_THR_DISABLED                            0

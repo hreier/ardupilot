@@ -2,6 +2,7 @@
    This is weight module sensor backend implementation for the FX29 sensors with I2C interface
  */
  
+#include <GCS_MAVLink/GCS.h>
 
 #include "SO_WeightSens_FX29_I2C.h"
 
@@ -136,21 +137,7 @@ void SO_WeightSens_FX29_I2C::_measure()
     _dev->set_address(params.address+2);
     _dev->transfer(0, 0, buf, 0);
 
-#ifdef SCALE_LOGGING
-    AP::logger().Write("SCAL", "TimeUS,OutFilt,RowSum,Row0,Row1,Row2,err0,err1,err2", "QfffffIII",
-            AP_HAL::micros64(),
-            (double)state.weight_kg,
-            (double)(sens0_row+sens1_row+sens2_row),
-            (double)sens0_row,
-            (double)sens1_row,
-            (double)sens2_row,
-            (double)sens0_err,
-            (double)sens1_err,
-            (double)sens2_err
-            );
-#endif  //- SCALE_LOGGING
-
-
+    do_LOG();   //-- log the data
     
     timer_stm_ptr =  &SO_WeightSens_FX29_I2C::_measure_s0;
 }
@@ -241,4 +228,32 @@ float SO_WeightSens_FX29_I2C::fx29_to_kgL (int16_t fx29_measure)
 }
 
 
+// Logging the FX29_I2C sensor 
+void SO_WeightSens_FX29_I2C::do_LOG()
+{
+    uint32_t log_bit_mask = SO::weightsens()->get_log_bit_mask();
 
+   // GCS_SEND_TEXT(MAV_SEVERITY_NOTICE, "do bin i: %d", (int)log_bit_mask);
+
+    if (log_bit_mask == uint32_t(-1)) {
+        return;       
+    }
+
+    AP_Logger &logger = AP::logger();
+    if (!logger.should_log(log_bit_mask)) {
+        return;
+    }
+    
+    AP::logger().Write("SCAL", "TimeUS,OutFilt,RowSum,Row0,Row1,Row2,err0,err1,err2", "QfffffIII",
+            AP_HAL::micros64(),
+            (double)state.weight_kg,
+            (double)(sens0_row+sens1_row+sens2_row),
+            (double)sens0_row,
+            (double)sens1_row,
+            (double)sens2_row,
+            (double)sens0_err,
+            (double)sens1_err,
+            (double)sens2_err
+            );
+
+ }

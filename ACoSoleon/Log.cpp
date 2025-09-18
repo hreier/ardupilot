@@ -48,11 +48,6 @@ void Soleon::Log_Write_PIDS()
 
 }
 
-// Write an EKF and POS packet
-void Soleon::Log_Write_EKF_POS()
-{
-    AP::ahrs().Log_Write();
-}
 
 struct PACKED log_Data_Int16t {
     LOG_PACKET_HEADER;
@@ -65,7 +60,7 @@ struct PACKED log_Data_Int16t {
 UNUSED_FUNCTION
 void Soleon::Log_Write_Data(LogDataID id, int16_t value)
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         struct log_Data_Int16t pkt = {
             LOG_PACKET_HEADER_INIT(LOG_DATA_INT16_MSG),
             time_us     : AP_HAL::micros64(),
@@ -87,7 +82,7 @@ struct PACKED log_Data_UInt16t {
 UNUSED_FUNCTION 
 void Soleon::Log_Write_Data(LogDataID id, uint16_t value)
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         struct log_Data_UInt16t pkt = {
             LOG_PACKET_HEADER_INIT(LOG_DATA_UINT16_MSG),
             time_us     : AP_HAL::micros64(),
@@ -108,7 +103,7 @@ struct PACKED log_Data_Int32t {
 // Write an int32_t data packet
 void Soleon::Log_Write_Data(LogDataID id, int32_t value)
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         struct log_Data_Int32t pkt = {
             LOG_PACKET_HEADER_INIT(LOG_DATA_INT32_MSG),
             time_us  : AP_HAL::micros64(),
@@ -129,7 +124,7 @@ struct PACKED log_Data_UInt32t {
 // Write a uint32_t data packet
 void Soleon::Log_Write_Data(LogDataID id, uint32_t value)
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         struct log_Data_UInt32t pkt = {
             LOG_PACKET_HEADER_INIT(LOG_DATA_UINT32_MSG),
             time_us     : AP_HAL::micros64(),
@@ -151,7 +146,7 @@ struct PACKED log_Data_Float {
 UNUSED_FUNCTION
 void Soleon::Log_Write_Data(LogDataID id, float value)
 {
-    if (should_log(MASK_LOG_ANY)) {
+    if (should_log(MASK_SO_LOG_ANY)) {
         struct log_Data_Float pkt = {
             LOG_PACKET_HEADER_INIT(LOG_DATA_FLOAT_MSG),
             time_us     : AP_HAL::micros64(),
@@ -185,13 +180,6 @@ void Soleon::Log_Write_Parameter_Tuning(uint8_t param, float tuning_val, float t
     logger.WriteBlock(&pkt_tune, sizeof(pkt_tune));
 }
 
-void Soleon::Log_Video_Stabilisation()
-{
-    if (!should_log(MASK_LOG_VIDEO_STABILISATION)) {
-        return;
-    }
-    ahrs.write_video_stabilisation();
-}
 
 struct PACKED log_SysIdD {
     LOG_PACKET_HEADER;
@@ -535,6 +523,11 @@ void Soleon::Log_Write_Vehicle_Startup_Messages()
 void Soleon::log_init(void)
 {
     logger.Init(log_structure, ARRAY_SIZE(log_structure));
+    
+    logger.set_force_log_disarmed(true);  //--- activate soleon logging also if not armed ---
+
+    g2.so_scale.set_log_bit_mask(MASK_SO_LOG_SCALE);  //-- set the logger mask for the scale
+
 }
 
 #else // LOGGING_ENABLED

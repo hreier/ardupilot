@@ -24,6 +24,8 @@ public:
 
     // update state
     void update(void) override;
+    
+    void do_LOG(void) override;
 
 protected:
     uint8_t setAdd, scanAdd, foundAdd, add_cnt;

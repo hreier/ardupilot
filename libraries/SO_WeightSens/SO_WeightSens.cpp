@@ -12,6 +12,8 @@
 #include <AP_SerialManager/AP_SerialManager.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 #include <AP_HAL/I2CDevice.h>
+#include <GCS_MAVLink/GCS.h>
+
 
 extern const AP_HAL::HAL &hal;
 
@@ -75,8 +77,15 @@ void WeightSens::init()
         // initialise status
         state[i].status = Status::NotConnected;
         state[i].range_valid_count = 0;
+       // GCS_SEND_TEXT(MAV_SEVERITY_NOTICE, "OKKi DOKKy");
     }
 }
+
+void WeightSens::set_log_bit_mask(uint32_t log_bit_mask) 
+{ 
+    _log_bit_mask = log_bit_mask;
+}
+
 
 /*
   update WeightSens state for all instances. This should be called at
@@ -95,9 +104,7 @@ void WeightSens::update(void)
             drivers[i]->update();
         }
     }
-#if HAL_LOGGING_ENABLED
-    Log_RFND();
-#endif
+
 }
 
 bool WeightSens::_add_backend(SO_WeightSens_Backend *backend, uint8_t instance)
@@ -187,38 +194,6 @@ WeightSens::Status WeightSens::get_status(uint8_t id)
     else return drivers[id]->status();
 }
 
-
-
-// Write an RFND (weightsens) packet
-void WeightSens::Log_RFND() const
-{
-    if (_log_rfnd_bit == uint32_t(-1)) {
-        return;
-        
-    }
-
-    AP_Logger &logger = AP::logger();
-    if (!logger.should_log(_log_rfnd_bit)) {
-        return;
-    }
-
-    for (uint8_t i=0; i<WEIGHTSENS_MAX_INSTANCES; i++) {
-        const SO_WeightSens_Backend *s = get_backend(i);
-        if (s == nullptr) {
-            continue;
-        }
-
-        const struct log_RFND pkt = {
-                LOG_PACKET_HEADER_INIT(LOG_RFND_MSG),
-                time_us      : AP_HAL::micros64(),
-                instance     : i,
-                dist         : 0,  //s->distance_cm(),
-                status       : (uint8_t)s->status(),
-                orient       : 0,  //s->orientation(),
-        };
-        AP::logger().WriteBlock(&pkt, sizeof(pkt));
-    }
-}
 
 bool WeightSens::prearm_healthy(char *failure_msg, const uint8_t failure_msg_len) const
 {

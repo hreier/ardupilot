@@ -338,8 +338,6 @@ void Soleon::set_mode(Mode &newmode, ModeReason reason)
 	// log mode change
 	logger.Write_Mode((uint8_t)soleon_ctrl_mode->mode_number(), reason);
     gcs().send_text(MAV_SEVERITY_INFO, "SoCtrlMode loaded: <%s> (reason: %d)", soleon_ctrl_mode->name(), (int)reason);
-    //gcs().send_message(MSG_HEARTBEAT);
-
 }
 
 bool Soleon::set_mode(Mode::Number mode, ModeReason reason)
