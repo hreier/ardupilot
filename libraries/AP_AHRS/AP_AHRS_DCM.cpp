@@ -103,6 +103,7 @@ AP_AHRS_DCM::update()
     IGNORE_RETURN(AP::ahrs().get_origin(last_origin));
 
 #if HAL_LOGGING_ENABLED
+/* -- HaRe: disabled - uncommment if needed 
     const uint32_t now_ms = AP_HAL::millis();
     if (now_ms - last_log_ms >= 100) {
         // log DCM at 10Hz
@@ -116,6 +117,7 @@ AP_AHRS_DCM::update()
                                     degrees(pitch),
                                     wrap_360(degrees(yaw)));
     }
+*/
 #endif // HAL_LOGGING_ENABLED
 }
 

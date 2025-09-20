@@ -503,6 +503,9 @@ void AP_IOMCU::write_log()
 {
     uint32_t now = AP_HAL::millis();
     if (now - last_log_ms >= 1000U) {
+        return;  ///-- HaRe: disabled this log - remove this line to reenable this log 
+
+
         last_log_ms = now;
 #if HAL_LOGGING_ENABLED
         if (AP_Logger::get_singleton()) {

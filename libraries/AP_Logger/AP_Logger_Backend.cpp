@@ -182,7 +182,7 @@ void AP_Logger_Backend::WriteMoreStartupMessages()
 
 bool AP_Logger_Backend::Write_Emit_FMT(uint8_t msg_type)
 {
-#if APM_BUILD_TYPE(APM_BUILD_Replay)
+    #if APM_BUILD_TYPE(APM_BUILD_Replay)
     if (msg_type < REPLAY_LOG_NEW_MSG_MIN || msg_type > REPLAY_LOG_NEW_MSG_MAX) {
         // don't re-emit FMU msgs unless they are in the replay range
         return true;
@@ -647,6 +647,7 @@ bool AP_Logger_Backend::logging_enabled() const
 
 void AP_Logger_Backend::Write_AP_Logger_Stats_File(const struct df_stats &_stats)
 {
+    /* -- HaRe: disabled - uncommment if needed 
     const struct log_DSF pkt {
         LOG_PACKET_HEADER_INIT(LOG_DF_FILE_STATS),
         time_us         : AP_HAL::micros64(),
@@ -658,6 +659,7 @@ void AP_Logger_Backend::Write_AP_Logger_Stats_File(const struct df_stats &_stats
         buf_space_avg   : (_stats.blocks) ? (_stats.buf_space_sigma / _stats.blocks) : 0,
     };
     WriteBlock(&pkt, sizeof(pkt));
+    */
 }
 
 void AP_Logger_Backend::df_stats_gather(const uint16_t bytes_written, uint32_t space_remaining)

@@ -1764,6 +1764,7 @@ bool AP_DroneCAN::prearm_check(char* fail_msg, uint8_t fail_msg_len) const
 void AP_DroneCAN::logging(void)
 {
 #if HAL_LOGGING_ENABLED
+    /* -- HaRe: disabled - uncommment if needed 
     const uint32_t now_ms = AP_HAL::millis();
     if (now_ms - last_log_ms < 1000) {
         return;
@@ -1803,6 +1804,7 @@ void AP_DroneCAN::logging(void)
                                 _esc_send_count,
                                 _srv_send_count,
                                 _fail_send_count);
+    */
 #endif // HAL_LOGGING_ENABLED
 }
 

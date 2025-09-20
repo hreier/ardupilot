@@ -87,7 +87,8 @@ void AP_BoardConfig::set_imu_temp(float current)
         heater.output = constrain_float(heater.output, 0, 100);
     }
 
-#if HAL_LOGGING_ENABLED
+/*  ---HaRe: disabled - uncomment if needed 
+    #if HAL_LOGGING_ENABLED
     if (now - heater.last_log_ms >= 1000) {
 // @LoggerMessage: HEAT
 // @Description: IMU Heater data
@@ -106,6 +107,7 @@ void AP_BoardConfig::set_imu_temp(float current)
         heater.last_log_ms = now;
     }
 #endif // HAL_LOGGING_ENABLED
+*/
 
 #if 0
     gcs().send_text(MAV_SEVERITY_INFO, "Heater: Out=%.1f Temp=%.1f",
