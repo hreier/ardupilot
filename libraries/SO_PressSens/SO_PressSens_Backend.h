@@ -46,8 +46,8 @@ public:
     // true if sensor is returning data
     bool has_data() const;
 
-    float get_measure();
-    float getPressure();
+    float get_measure() const;
+    float getPressure() const;
     char * get_gcs_message() {msg_updated = false; return gcs_message;}
     bool is_new_gcs_message() {return msg_updated;}
 

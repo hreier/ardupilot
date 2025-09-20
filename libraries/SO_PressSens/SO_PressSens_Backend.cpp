@@ -56,13 +56,13 @@ void SO_PressSens_Backend::set_status(PressSens::Status _status)
 }
 
 // get the measured value from backend
-float SO_PressSens_Backend::get_measure()
+float SO_PressSens_Backend::get_measure() const
 {
    // return state.pressure;
     return state.flow;
 }
 
-float SO_PressSens_Backend::getPressure()
+float SO_PressSens_Backend::getPressure() const 
 {
     return state.pressure;
 }

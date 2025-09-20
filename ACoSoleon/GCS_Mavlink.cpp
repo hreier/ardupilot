@@ -1046,7 +1046,7 @@ bool GCS_MAVLINK_Soleon::update_so_tunnel_f010(void)
     so_tunnel_f010.offsetTrim = soleon.soleon_ctrl_mode->getOffsetTrim();
     so_tunnel_f010.owerRideOnSw = (uint8_t) soleon.channel_on_mode->get_aux_switch_pos(); 
     so_tunnel_f010.owerRideSw = (uint8_t) soleon.channel_override->get_aux_switch_pos(); 
-    so_tunnel_f010.pressureLeft=11.12;
+    so_tunnel_f010.pressureLeft=soleon.g2.so_press.getPressure(1);
     so_tunnel_f010.pressureRight=soleon.g2.so_press.getPressure(0);  //--- PressureValue 
     so_tunnel_f010.errorFlags=0xFE31FE31;
 

@@ -527,7 +527,7 @@ void Soleon::log_init(void)
     logger.set_force_log_disarmed(true);  //--- activate soleon logging also if not armed ---
 
     g2.so_scale.set_log_bit_mask(MASK_SO_LOG_SCALE);  //-- set the logger mask for the scale
-
+    g2.so_press.set_log_bit_mask(MASK_SO_LOG_PRESS);  //-- set the logger mask for the pressure sensor (flow estimation)
 }
 
 #else // LOGGING_ENABLED

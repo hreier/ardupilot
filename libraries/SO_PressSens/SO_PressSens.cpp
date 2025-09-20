@@ -94,7 +94,7 @@ void PressSens::update(void)
         }
     }
 #if HAL_LOGGING_ENABLED
-    Log_RFND();
+    Log_Pressures();
 #endif
 //------------debug---
 //if (dbg_cnt++ > 80)
@@ -169,16 +169,15 @@ PressSens::Status PressSens::get_status(uint8_t id)
 
 
 
-// Write an RFND (press_sens) packet
-void PressSens::Log_RFND() const
-{
-    if (_log_rfnd_bit == uint32_t(-1)) {
-        return;
-        
+// Write an packet from pressure sensors
+void PressSens::Log_Pressures() const
+{    
+    if (_log_press_bit == uint32_t(-1)) {
+        return;        
     }
 
     AP_Logger &logger = AP::logger();
-    if (!logger.should_log(_log_rfnd_bit)) {
+    if (!logger.should_log(_log_press_bit)) {
         return;
     }
 
@@ -188,15 +187,24 @@ void PressSens::Log_RFND() const
             continue;
         }
 
-        const struct log_RFND pkt = {
-                LOG_PACKET_HEADER_INIT(LOG_RFND_MSG),
-                time_us      : AP_HAL::micros64(),
-                instance     : i,
-                dist         : 0,  //s->distance_cm(),
-                status       : (uint8_t)s->status(),
-                orient       : 0,  //s->orientation(),
-        };
-        AP::logger().WriteBlock(&pkt, sizeof(pkt));
+        if (i == 0){
+            AP::logger().Write("PRSR", "TimeUS,instance,status,pressure,flow", "QBBff",
+                AP_HAL::micros64(),
+                (uint8_t)i,
+                (uint8_t)s->status(),
+                (double)s->getPressure(),
+                (double)s->get_measure()
+                );
+        }
+        else {
+           AP::logger().Write("PRSL", "TimeUS,instance,status,pressure,flow", "QBBff",
+                AP_HAL::micros64(),
+                (uint8_t)i,
+                (uint8_t)s->status(),
+                (double)s->getPressure(),
+                (double)s->get_measure()
+                );
+        }
     }
 }
 

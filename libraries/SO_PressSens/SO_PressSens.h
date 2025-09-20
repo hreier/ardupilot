@@ -17,7 +17,7 @@
 
 // Maximum number of weight sensor module instances available on this platform
 #ifndef PRESS_SENS_MAX_INSTANCES 
-  #define PRESS_SENS_MAX_INSTANCES 1
+  #define PRESS_SENS_MAX_INSTANCES 2
 #endif
 
 #define PRESS_MODULE_LOGGING      //-- this activates logging of the Weight sensor module for debugging
@@ -77,7 +77,7 @@ public:
     // parameters for each instance
     static const struct AP_Param::GroupInfo var_info[];
 
-    void set_log_rfnd_bit(uint32_t log_rfnd_bit) { _log_rfnd_bit = log_rfnd_bit; }
+    void set_log_bit_mask(uint32_t log_press_bit) { _log_press_bit = log_press_bit; }
 
     /*
       Return the number of press sensor instances. 
@@ -132,8 +132,8 @@ private:
     void detect_instance(uint8_t instance);
     bool _add_backend(SO_PressSens_Backend *driver, uint8_t instance);
 
-    uint32_t _log_rfnd_bit = -1;
-    void Log_RFND() const;
+    uint32_t _log_press_bit = -1;
+    void Log_Pressures() const;
 
     HAL_Semaphore detect_sem;
 
