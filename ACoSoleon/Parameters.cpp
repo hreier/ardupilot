@@ -606,6 +606,7 @@ const AP_Param::Info Soleon::var_info[] = {
     // @Path: SO_RCMapper.cpp
     GOBJECT(so_rcmap, "SO_RCMAP_",        SoRCMapper),
 
+
     
 
 #if HAL_NAVEKF2_AVAILABLE
@@ -1131,13 +1132,13 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     // @Description: Takeoff is not permitted until motors report at least this RPM.  Set to zero to disable check
     // @Range: 0 10000
     // @User: Standard
-    AP_GROUPINFO("TKOFF_RPM_MIN", 58, ParametersG2, takeoff_rpm_min, 0),
+   // AP_GROUPINFO("TKOFF_RPM_MIN", 58, ParametersG2, takeoff_rpm_min, 0),
 #endif
 
 #if WEATHERVANE_ENABLED == ENABLED
     // @Group: WVANE_
     // @Path: ../libraries/AC_AttitudeControl/AC_WeatherVane.cpp
-    AP_SUBGROUPINFO(weathervane, "WVANE_", 59, ParametersG2, AC_WeatherVane),
+   // AP_SUBGROUPINFO(weathervane, "WVANE_", 59, ParametersG2, AC_WeatherVane),
 #endif
 
     // ID 60 is reserved for the SHIP_OPS
@@ -1158,6 +1159,12 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
      ///---- https://ardupilot.org/dev/docs/code-overview-adding-a-new-parameter.html
      // idx == 64 doesn't work
      // actual we use workaround with idx == 59 (weathervane)
+
+    
+    // @Group: SO_CTRL
+    // @Path: mode_spray_press.cpp
+   // AP_SUBGROUPINFO(ctrl_spray_press, "SO_CTRL", 58, ParametersG2, ModeCtrlSprayPress),  
+    // actual we use workaround with idx == 58 (Takeoff)
 
     AP_GROUPEND
 };

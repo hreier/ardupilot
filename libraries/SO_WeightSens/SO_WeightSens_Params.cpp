@@ -42,7 +42,7 @@ const AP_Param::GroupInfo SO_WeightSens_Params::var_info[] = {
     // @Units: N
     // @Range: 0 1000
     // @User: Standard
-    AP_GROUPINFO("PWRRNG", 5, SO_WeightSens_Params, range, 500),
+    AP_GROUPINFO("SENSRNG", 5, SO_WeightSens_Params, range, 500),
 
 
     AP_GROUPEND

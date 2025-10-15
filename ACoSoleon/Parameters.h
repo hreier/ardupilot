@@ -620,6 +620,7 @@ public:
 
 
 
+
 #if MODE_SMARTRTL_ENABLED == ENABLED
     // Safe RTL library
     AP_SmartRTL smart_rtl;

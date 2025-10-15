@@ -11,11 +11,6 @@
 Mode::Mode(void) :
     g(soleon.g),
     g2(soleon.g2),
-    wp_nav(soleon.wp_nav),
-    loiter_nav(soleon.loiter_nav),
-    pos_control(soleon.pos_control),
-    inertial_nav(soleon.inertial_nav),
-    ahrs(soleon.ahrs),
     channel_speed(soleon.channel_speed),
     channel_offset(soleon.channel_offset),
     channel_override(soleon.channel_override),

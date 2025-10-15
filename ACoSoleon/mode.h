@@ -15,7 +15,8 @@ public:
     enum class Number : uint8_t {
         CTRL_DISABLED =     0,  // Soleon controller disabled
         CTRL_SPRAY_PPM =    1,  // Soleon spray controller generate ppm signals
-        CTRL_TEST =         2,  // Soleon controller for test 
+        CTRL_SPRAY_PRESS =  2,  // Soleon spray controller with pressure controller (and flow estimation)
+        CTRL_TEST =         3,  // Soleon controller for test 
 
 
         // Mode number 127 reserved for the "drone show mode" in the Skybrush
@@ -85,6 +86,15 @@ public:
     RC_Channel::AuxSwitchPos _last_offset_trim_pos;
     float offset_trim_proz;
    
+    // convenience references to avoid code churn in conversion:
+    Parameters &g;
+    ParametersG2 &g2;
+    RC_Channel *&channel_speed;
+    RC_Channel *&channel_offset;
+    RC_Channel *&channel_override;
+    RC_Channel *&channel_on_mode;
+    float &G_Dt;
+
 
 protected:
     virtual void overrideBySwitch(uint8_t & command, uint8_t & status);
@@ -95,20 +105,6 @@ protected:
     void updateSprayerPumpPPMs(uint8_t mp_cmd, float ppm_left, float ppm_right, float ppm_off);
     void updateSprayerStatus(uint8_t mp_cmd, uint8_t & mp_status);
 
-
-    // convenience references to avoid code churn in conversion:
-    Parameters &g;
-    ParametersG2 &g2;
-    AC_WPNav *&wp_nav;
-    AC_Loiter *&loiter_nav;
-    AC_PosControl *&pos_control;
-    AP_InertialNav &inertial_nav;
-    AP_AHRS &ahrs;
-    RC_Channel *&channel_speed;
-    RC_Channel *&channel_offset;
-    RC_Channel *&channel_override;
-    RC_Channel *&channel_on_mode;
-    float &G_Dt;
 
     
 public:

@@ -2,6 +2,20 @@
 
 #include <AP_Param/AP_Param.h>
 
+// default rate controller PID gains
+#define SO_PRESS_RATE_RP_P                       0.135f
+#define SO_PRESS_RATE_RP_I                       0.135f
+#define SO_PRESS_RATE_RP_D                       0.0036f
+#define SO_PRESS_RATE_RP_IMAX                    0.4f
+#define SO_PRESS_RATE_RP_FF                      0.15f
+#define SO_PRESS_RATE_RP_FILT_T_HZ               20.0f
+#define SO_PRESS_RATE_RP_FILT_E_HZ               0.0f
+#define SO_PRESS_RATE_RP_FILT_D_HZ               20.0f
+#define SO_PRESS_CTRL_MIN_FLOW                   0.0f
+
+
+
+
 class UserParameters {
 
 public:
@@ -20,9 +34,17 @@ public:
 
 private:
     // Put your parameter variable definitions here
+    //---- Soleon PID controller configuration
     AP_Float _ctrl_p;
     AP_Float _ctrl_i;
     AP_Float _ctrl_d;
+    AP_Float _ctrl_imax;
+    AP_Float _ctrl_ff;
+    AP_Float _ctrl_filt_t;
+    AP_Float _ctrl_filt_e;
+    AP_Float _ctrl_filt_d;
+
+    AP_Float _ctrl_min_flow;   //-- flow  minimum limitation for ModeCtrlSprayPress-class
 
     //---- debug stuff: intended for testing purpose
     AP_Float _dbg_0;

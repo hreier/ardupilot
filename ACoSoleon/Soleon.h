@@ -62,6 +62,10 @@
 
 #include "SO_RCMapper.h"        // Soleon RC input mapping library
 #include "SO_BkgProcessing.h"   // Soleon background processing
+#include "mode.h"
+#include "mode_spray_press.h"
+
+
 
 
 // Configuration
@@ -157,8 +161,6 @@
 #endif
 #include "Parameters.h"
 
-
-#include "mode.h"
 
 
 class Soleon : public AP_Vehicle {
@@ -767,6 +769,7 @@ private:
     ModeCtrlDisabled ctrl_disabled;
     ModeCtrlSprayPPM ctrl_spray_ppm;
     ModeCtrlTest     ctrl_test;
+    ModeCtrlSprayPress ctrl_spray_press; 
 
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);
