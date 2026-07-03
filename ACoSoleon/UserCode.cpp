@@ -12,6 +12,7 @@ void Soleon::userhook_init()
 void Soleon::userhook_FastLoop()
 {
     // put your 100Hz code here
+    
 }
 #endif
 

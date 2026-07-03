@@ -117,6 +117,7 @@ enum LoggingParameters {
 #define MASK_SO_LOG_PM                  (1<<3)
 #define MASK_SO_LOG_SCALE               (1<<4)
 #define MASK_SO_LOG_PRESS               (1<<5)
+#define MASK_SO_LOG_FLOW                (1<<6)
 #define MASK_SO_LOG_ANY                  0xFFFF
 
 

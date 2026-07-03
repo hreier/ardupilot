@@ -87,6 +87,8 @@ const AP_Scheduler::Task Soleon::scheduler_tasks[] = {
     SCHED_TASK_CLASS(RC_Channels, (RC_Channels*)&soleon.g2.rc_channels, read_aux_all,    10,  50,  18),
     SCHED_TASK_CLASS(WeightSens,  &soleon.g2.so_scale,                  update,          10,  50,  18),
     SCHED_TASK_CLASS(PressSens,   &soleon.g2.so_press,                  update,          20,  50,  18),
+    SCHED_TASK_CLASS(SoFlowSens,  &soleon.flow_sens,                           update,          20,  50,  18),
+    
 
     SCHED_TASK(auto_trim,             10,     75,  30),
 

@@ -32,6 +32,9 @@ protected:
     bool should_be_spraying;
     uint8_t _mp_cmd_act;      //-- used for class internal processing 
 
+    void configurePid(AC_PID *ptPid);
+    void updateFromParameters(void);
+
     AC_PID   _pid_press_right {
         AC_PID::Defaults{
             .p         = SO_PRESS_RATE_RP_P,
@@ -61,9 +64,16 @@ protected:
         }
     };
 
-    // convenience references to avoid code churn in conversion:
- //   Parameters &g;
- //   ParametersG2 &g2;
+    float ctrl_p;
+    float ctrl_d;
+    float ctrl_i;
+    float ctrl_imax;
+    float ctrl_ff;
+    float ctrl_filt_d;
+    float ctrl_filt_e;
+    float ctrl_filt_t;
+
+    float ctrl_min_flow;
 
 };
 

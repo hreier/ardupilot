@@ -62,6 +62,7 @@
 
 #include "SO_RCMapper.h"        // Soleon RC input mapping library
 #include "SO_BkgProcessing.h"   // Soleon background processing
+#include "SO_FlowSens.h"
 #include "mode.h"
 #include "mode_spray_press.h"
 
@@ -202,6 +203,8 @@ public:
     friend class ModeAutorotate;
     friend class SO_TankSupervision;
     friend class SoBkgProcessing;
+    friend class SoFlowSens;
+    friend class ModeCtrlSprayPPM;
 
     Soleon(void);
 
@@ -282,6 +285,8 @@ private:
     // GCS selection
     GCS_Soleon _gcs; // avoid using this; use gcs()
     GCS_Soleon &gcs() { return _gcs; }
+
+    SoFlowSens flow_sens;
 
     // User variables
 #ifdef USERHOOK_VARIABLES

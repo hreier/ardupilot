@@ -27,6 +27,13 @@ public:
     AP_Float get_ctrl_p() const { return _ctrl_p; }
     AP_Float get_ctrl_i() const { return _ctrl_i; }
     AP_Float get_ctrl_d() const { return _ctrl_d; }
+    AP_Float get_ctrl_imax() const { return _ctrl_imax; }
+    AP_Float get_ctrl_ff() const { return _ctrl_ff; }
+    AP_Float get_ctrl_filt_t() const { return _ctrl_filt_t; }
+    AP_Float get_ctrl_filt_e() const { return _ctrl_filt_e; }
+    AP_Float get_ctrl_filt_d() const { return _ctrl_filt_d; }
+
+    AP_Float get_ctrl_min_flow() const { return _ctrl_min_flow; }
 
     AP_Float get_dbg_0() const { return _dbg_0; }
     AP_Float get_dbg_1() const { return _dbg_1; }

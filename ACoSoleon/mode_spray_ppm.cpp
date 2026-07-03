@@ -31,8 +31,6 @@ void ModeCtrlSprayPPM::run()
     _ppm_pump = g.so_servo_out_spraying.get();
     _mp_cmd_act = _mp_cmd; //--- first get the active command from missionplan (_mp_cmd)  
 
-    //_mp_sprayrate = g2.so_press.get_measure(0);  //-- this will somehow be used for regulated modes
-
     manage_offset_trim(true);    //- update the offset trim value from remote controller (-5.0...0...+5.0%; 0,5% steps) 
 
     //_ppm_pump = modulate_value_trim(_ppm_pump, 1000);  //-- Manage the trimming; may be needs to be validated if between the limits???
@@ -50,8 +48,16 @@ void ModeCtrlSprayPPM::run()
     _fill_level = g2.so_scale.get_measure(0); 
 
 
-    if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
-    else               _mp_sprayrate = 0;
+    if ( g.so_sprayrate_est.get() > 0)
+    { //--- estimate the sprayrate ---
+        if (is_spraying()) _mp_sprayrate = g.so_sprayrate_est.get();
+        else               _mp_sprayrate = 0;  
+    }
+    else
+    { //-- use the measured value for sprayrate
+        //_mp_sprayrate = g2.so_press.get_measure(0);  //-- from pressure measurement
+        _mp_sprayrate = soleon.flow_sens.get_measure()/1000;  //- l/min
+    }
 
 }
 

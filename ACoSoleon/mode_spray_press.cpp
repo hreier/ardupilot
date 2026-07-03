@@ -1,6 +1,6 @@
 #include "Soleon.h"
 
-// table of user settable parameters
+/* // table of user settable parameters
 const AP_Param::GroupInfo ModeCtrlSprayPress::var_info[] = {
 
     // @Param: SO_CTRL_P
@@ -104,20 +104,15 @@ const AP_Param::GroupInfo ModeCtrlSprayPress::var_info[] = {
 //AP_SUBGROUPINFO(user_parameters, "SO", 28, ParametersG2, UserParameters),
     AP_GROUPEND
 };
+ */
 
-
-ModeCtrlSprayPress::ModeCtrlSprayPress(void)://Mode(),
- //   g(soleon.g),
- //   g2(soleon.g2),
+ModeCtrlSprayPress::ModeCtrlSprayPress(void):
     _pid_press_right(SO_PRESS_RATE_RP_P, SO_PRESS_RATE_RP_I, SO_PRESS_RATE_RP_D, SO_PRESS_RATE_RP_FF, SO_PRESS_RATE_RP_IMAX, SO_PRESS_RATE_RP_FILT_T_HZ, SO_PRESS_RATE_RP_FILT_E_HZ, SO_PRESS_RATE_RP_FILT_D_HZ),
     _pid_press_left(SO_PRESS_RATE_RP_P, SO_PRESS_RATE_RP_I, SO_PRESS_RATE_RP_D, SO_PRESS_RATE_RP_FF, SO_PRESS_RATE_RP_IMAX, SO_PRESS_RATE_RP_FILT_T_HZ, SO_PRESS_RATE_RP_FILT_E_HZ, SO_PRESS_RATE_RP_FILT_D_HZ)
 {
-//    AP_Param::setup_object_defaults(this, var_info);
-
-    //--- set left site PID configuration same as right site PID configuration ---
-    _pid_press_left (_pid_press_right.kP(), _pid_press_right.kI(), _pid_press_right.kD(), _pid_press_right.ff(), _pid_press_right.kIMAX(), \
-                       _pid_press_right.filt_T_hz(), _pid_press_right.filt_E_hz(), _pid_press_right.filt_D_hz(), _pid_press_right.kDff() );
-
+    updateFromParameters();
+    configurePid(&_pid_press_right);
+    configurePid(&_pid_press_left);
 }
 
 
@@ -179,4 +174,31 @@ bool ModeCtrlSprayPress::is_spraying()
 {
     //return should_be_spraying;
     return (_ppm_pump > g.so_servo_out_nospraying.get());
+}
+
+void ModeCtrlSprayPress::configurePid(AC_PID *ptPid)
+{
+    ptPid->kP(ctrl_p);
+    ptPid->kD(ctrl_d);
+    ptPid->kI(ctrl_i);
+    ptPid->imax(ctrl_imax);
+    ptPid->ff(ctrl_ff);
+    ptPid->filt_D_hz(ctrl_filt_d);
+    ptPid->filt_E_hz(ctrl_filt_e);
+    ptPid->filt_T_hz(ctrl_filt_t);
+}
+
+void ModeCtrlSprayPress::updateFromParameters(void)
+{
+    ctrl_p = g2.user_parameters.get_ctrl_p(); 
+    ctrl_d = g2.user_parameters.get_ctrl_d();
+    ctrl_i = g2.user_parameters.get_ctrl_i();
+    ctrl_imax = g2.user_parameters.get_ctrl_imax();
+    ctrl_ff = g2.user_parameters.get_ctrl_ff(); 
+    ctrl_filt_d = g2.user_parameters.get_ctrl_filt_d();
+    ctrl_filt_e = g2.user_parameters.get_ctrl_filt_e();
+    ctrl_filt_t = g2.user_parameters.get_ctrl_filt_t(); 
+
+    ctrl_min_flow = g2.user_parameters.get_ctrl_min_flow();;
+
 }
