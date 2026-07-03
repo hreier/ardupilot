@@ -56,8 +56,8 @@ void SoFlowSens::update(void)
     ml_accu_internal += state.flow * delta_ms;
     state.last_update_ms = timeStamp;
     state.ml_accu = ml_accu_internal/60000;      //- convert to ml
-    state.healthy_right = soleon.rpm_sensor.get_rpm(RIGHT_SENS_ID, fl_r);
-    state.healthy_left  = soleon.rpm_sensor.get_rpm(LEFT_SENS_ID, fl_l);
+    soleon.rpm_sensor.get_rpm(RIGHT_SENS_ID, fl_r);
+    soleon.rpm_sensor.get_rpm(LEFT_SENS_ID, fl_l);
     if (fl_r > 0) state.flow_right = fl_r;
     else          state.flow_right = 0;
     if (fl_l > 0) state.flow_left = fl_l;
@@ -99,14 +99,12 @@ void SoFlowSens::Log_FlowMeasurements() const
         return;
     }
 
-    AP::logger().Write("FLS", "TimeUS,flow,accu,fl_l,fl_r,hlt_l,hlt_r", "QffffBB",
+    AP::logger().Write("FLS", "TimeUS,flow,accu,fl_l,fl_r,hlt_l,hlt_r", "Qffff",
         AP_HAL::micros64(),
         (double)state.flow,
         (double)state.ml_accu,
         (double)state.flow_right,
-        (double)state.flow_left,
-        (uint8_t)state.healthy_right,
-        (uint8_t)state.healthy_left
+        (double)state.flow_left
         );
 }
 
