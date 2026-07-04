@@ -49,20 +49,24 @@ int dbg_cnt; //--debug
 void SoFlowSens::update(void)
 {
     uint32_t timeStamp = AP_HAL::millis();
-    uint32_t delta_ms;
-    float fl_r, fl_l;
+    uint32_t delta_ms_2;      //--- half value
+    float fl_r, fl_l, flow;
 
-    delta_ms = timeStamp - state.last_update_ms;
-    ml_accu_internal += state.flow * delta_ms;
-    state.last_update_ms = timeStamp;
-    state.ml_accu = ml_accu_internal/60000;      //- convert to ml
     soleon.rpm_sensor.get_rpm(RIGHT_SENS_ID, fl_r);
     soleon.rpm_sensor.get_rpm(LEFT_SENS_ID, fl_l);
     if (fl_r > 0) state.flow_right = fl_r;
     else          state.flow_right = 0;
     if (fl_l > 0) state.flow_left = fl_l;
     else          state.flow_left = 0;
-    state.flow = state.flow_right + state.flow_left;
+    flow = state.flow_right + state.flow_left;
+    
+    //--- accumulate the flow
+    delta_ms_2 = (timeStamp - state.last_update_ms)/2;
+    ml_accu_internal += (state.flow + flow) * delta_ms_2;
+
+    state.last_update_ms = timeStamp;
+    state.flow = flow;
+    state.ml_accu = ml_accu_internal/60000;      //- convert to ml
     
 #if HAL_LOGGING_ENABLED
     Log_FlowMeasurements();
@@ -73,7 +77,8 @@ if (dbg_cnt++ > 50)
   {
     dbg_cnt = 0;
 
-    gcs().send_text(MAV_SEVERITY_WARNING, "flow[ml/min]=%.2f; accu[ml]=%.2f; fl_r=%.2f; fl_l=%.2f;", state.flow, state.ml_accu, state.flow_right, state.flow_left);
+    //gcs().send_text(MAV_SEVERITY_WARNING, "flow[ml/min]=%.2f; accu[ml]=%.2f; fl_r=%.2f; fl_l=%.2f;", state.flow, state.ml_accu, state.flow_right, state.flow_left);
+    gcs().send_text(MAV_SEVERITY_WARNING, "flow[ml/min]=%.2f; accu[ml]=%.2f;", state.flow, state.ml_accu);
   }
 #endif
 }
