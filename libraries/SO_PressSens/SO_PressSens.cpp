@@ -188,7 +188,7 @@ void PressSens::Log_Pressures() const
         }
 
         if (i == 0){
-            AP::logger().Write("PRSR", "TimeUS,instance,status,pressure,flow", "QBBff",
+            AP::logger().Write("_PRR", "TimeUS,instance,status,pressure,flow", "QBBff",
                 AP_HAL::micros64(),
                 (uint8_t)i,
                 (uint8_t)s->status(),
@@ -197,7 +197,7 @@ void PressSens::Log_Pressures() const
                 );
         }
         else {
-           AP::logger().Write("PRSL", "TimeUS,instance,status,pressure,flow", "QBBff",
+           AP::logger().Write("_PRL", "TimeUS,instance,status,pressure,flow", "QBBff",
                 AP_HAL::micros64(),
                 (uint8_t)i,
                 (uint8_t)s->status(),

@@ -5,7 +5,11 @@
 class Parameters;
 class ParametersG2;
 
-
+typedef struct __copter_hud {
+    uint32_t rx_time; 
+    uint32_t rx_cnt;
+    float air_speed;     //- Copter airspeed [m/sec]
+} copter_hud_t;
 
 // --- SPRAY_PRESS 
 class ModeCtrlSprayPress : public Mode {
@@ -20,6 +24,7 @@ public:
     bool init() override;
     void run() override;
     bool is_spraying() override; 
+    void updateCopterHudData(float air_speed);
 
     // user settable parameters
     static const struct AP_Param::GroupInfo var_info[];
@@ -74,6 +79,8 @@ protected:
     float ctrl_filt_t;
 
     float ctrl_min_flow;
+
+    copter_hud_t copter_hud;
 
 };
 

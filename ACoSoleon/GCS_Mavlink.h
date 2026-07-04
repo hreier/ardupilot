@@ -2,6 +2,9 @@
 
 #include <GCS_MAVLink/GCS.h>
 
+//---- MavlinkId of the copter ----
+#define COPTER_ID 1
+
 class GCS_MAVLINK_Soleon : public GCS_MAVLINK
 {
 

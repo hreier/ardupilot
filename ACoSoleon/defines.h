@@ -114,10 +114,11 @@ enum LoggingParameters {
 #define MASK_SO_LOG_RCIN                (1<<0)
 #define MASK_SO_LOG_RCOUT               (1<<1)
 #define MASK_SO_LOG_CMD                 (1<<2)   //-- currently not implemented??
-#define MASK_SO_LOG_PM                  (1<<3)
+#define MASK_SO_LOG_PM                  (1<<3)   //-- System performance
 #define MASK_SO_LOG_SCALE               (1<<4)
 #define MASK_SO_LOG_PRESS               (1<<5)
 #define MASK_SO_LOG_FLOW                (1<<6)
+#define MASK_SO_LOG_HUD                 (1<<7)   //-- log HUD messages from Copter (airspeed)
 #define MASK_SO_LOG_ANY                  0xFFFF
 
 

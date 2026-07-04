@@ -104,7 +104,7 @@ void SoFlowSens::Log_FlowMeasurements() const
         return;
     }
 
-    AP::logger().Write("FLS", "TimeUS,flow,accu,fl_l,fl_r,hlt_l,hlt_r", "Qffff",
+    AP::logger().Write("_FLS", "TimeUS,flow,accu,fl_l,fl_r,hlt_l,hlt_r", "Qffff",
         AP_HAL::micros64(),
         (double)state.flow,
         (double)state.ml_accu,

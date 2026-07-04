@@ -170,6 +170,15 @@ void ModeCtrlSprayPress::run()
 
 }
 
+
+void ModeCtrlSprayPress::updateCopterHudData(float air_speed)
+{
+    copter_hud.rx_time = millis();
+    copter_hud.air_speed = air_speed;
+    copter_hud.rx_cnt++;
+};
+
+
 bool ModeCtrlSprayPress::is_spraying()
 {
     //return should_be_spraying;

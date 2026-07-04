@@ -813,7 +813,7 @@ void GCS_MAVLINK_Soleon::handle_message(const mavlink_message_t &msg)
 
     case MAVLINK_MSG_ID_VFR_HUD:           // MAV ID: 74
     {
-        handle_copter_hud_msg(msg, soleon.should_log(MASK_SO_LOG_PM));  //-- ToDo: logging
+        if (msg.sysid == COPTER_ID)   handle_copter_hud_msg(msg, soleon.should_log(MASK_SO_LOG_HUD));  //-- Read Copter HUD message for airspeed
         break;
     }
 
@@ -994,22 +994,22 @@ uint8_t GCS_MAVLINK_Soleon::high_latency_wind_direction() const
 }
 #endif // HAL_HIGH_LATENCY2_ENABLED
 
+///--- This processes hud-message from Copter (used by the flow controller)
 void GCS_MAVLINK_Soleon::handle_copter_hud_msg(const mavlink_message_t &msg, bool log_hud)
 {
-    static int test_cnt;
-    float my_speed;
     mavlink_vfr_hud_t packet;
   
     mavlink_msg_vfr_hud_decode(&msg, &packet);
-    my_speed = norm(packet.groundspeed, packet.climb);
 
-    if (test_cnt++ > 4){
-        test_cnt = 0;
-        //gcs().send_text(MAV_SEVERITY_INFO, "Mavlink msgid: %d; sysid: %d; compid: %d; ang: %d", msg.msgid, msg.sysid, msg.compid, packet.heading);   //--debug
-     //HaRe: disabled for the moment!!!!!!!   gcs().send_text(MAV_SEVERITY_WARNING, "as=%0.2f gs=%0.2f cl=%0.2f ms=%0.2f an=%d", packet.airspeed, packet.groundspeed, packet.climb ,my_speed ,packet.heading );   //--debug
-       my_speed=my_speed*test_cnt;  //- to make the compiler passing
-    }
-    
+    soleon.ctrl_spray_press.updateCopterHudData(packet.airspeed);  //--- update the data for the flow controller
+
+    //------- log Hud-Data from Copter ----
+    if (!log_hud) return;
+
+    AP::logger().Write("_HUD", "TimeUS,airspeed", "Qf",
+                AP_HAL::micros64(),
+                (double)packet.airspeed
+                );
 }
 
 //-- this fills and updates the datastructure before sending this via tunnel to missionplanner 'soleon service' plugin
