@@ -1163,7 +1163,7 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     
     // @Group: SO_CTRL
     // @Path: mode_spray_press.cpp
-   // AP_SUBGROUPINFO(ctrl_spray_press, "SO_CTRL", 58, ParametersG2, ModeCtrlSprayPress),  
+   // AP_SUBGROUPINFO(ctrl_spray_press, "SO_CTRL", 58, ParametersG2, ModeCtrlSprayFlow),  
     // actual we use workaround with idx == 58 (Takeoff)
 
     AP_GROUPEND

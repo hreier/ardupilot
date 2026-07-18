@@ -90,6 +90,7 @@ private:
     void send_wind() const;
     void send_so_status(void);
     void send_so_tunnel(void);
+    void log_so_commands(void);   //-- logs the Soleon missionplan commands
 
     typedef union {
       struct{

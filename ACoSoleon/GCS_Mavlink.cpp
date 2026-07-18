@@ -690,9 +690,8 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
                 break;
 
             case 1: //-- mission plan startup command/configuration
-                soleon.soleon_ctrl_mode->_mp_liter_ha = packet.param2;
-                soleon.soleon_ctrl_mode->_mp_line_dist = packet.param3;
-                soleon.soleon_ctrl_mode->_mp_planned_spd = packet.param4;
+                //-------------------------------------------- mp_liter_ha    mp_line_dist  mp_planned_spd--//
+                soleon.soleon_ctrl_mode->updateMpConfiguration(packet.param2, packet.param3, packet.param4);
                 break;
             
             case 2: //-- mission plan command
@@ -705,6 +704,8 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
                 break;
         }
         so_tunnel_f010.cntrRxMp++;
+
+        if (AP::logger().should_log(MASK_SO_LOG_CMD)) log_so_commands();
         return MAV_RESULT_ACCEPTED;
         
     case MAV_CMD_SO_SYSMODE:  // Soleon Sysmode
@@ -725,6 +726,20 @@ MAV_RESULT GCS_MAVLINK_Soleon::handle_command_int_packet(const mavlink_command_i
     default:
         return GCS_MAVLINK::handle_command_int_packet(packet, msg);
     }
+}
+
+
+void GCS_MAVLINK_Soleon::log_so_commands(void)
+{
+        AP::logger().Write("_MPC", "TimeUS,cmd,dist_wp,l_ha,line_dist,speed", "QBffff",
+        AP_HAL::micros64(),
+        soleon.soleon_ctrl_mode->_mp_cmd,
+        (double)soleon.soleon_ctrl_mode->_mp_dist_waypoint,
+        (double)soleon.soleon_ctrl_mode->_mp_liter_ha,
+        (double)soleon.soleon_ctrl_mode->_mp_line_dist,
+        (double)soleon.soleon_ctrl_mode->_mp_planned_spd
+        );
+
 }
 
 #if HAL_MOUNT_ENABLED
@@ -1001,7 +1016,7 @@ void GCS_MAVLINK_Soleon::handle_copter_hud_msg(const mavlink_message_t &msg, boo
   
     mavlink_msg_vfr_hud_decode(&msg, &packet);
 
-    soleon.ctrl_spray_press.updateCopterHudData(packet.airspeed);  //--- update the data for the flow controller
+    soleon.ctrl_spray_flow.updateCopterHudData(packet.airspeed);  //--- update the data for the flow controller
 
     //------- log Hud-Data from Copter ----
     if (!log_hud) return;

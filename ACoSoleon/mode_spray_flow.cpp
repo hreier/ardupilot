@@ -1,7 +1,7 @@
 #include "Soleon.h"
 
 /* // table of user settable parameters
-const AP_Param::GroupInfo ModeCtrlSprayPress::var_info[] = {
+const AP_Param::GroupInfo ModeCtrlSprayFlow::var_info[] = {
 
     // @Param: SO_CTRL_P
     // @DisplayName: Pump controller P gain
@@ -11,7 +11,7 @@ const AP_Param::GroupInfo ModeCtrlSprayPress::var_info[] = {
     // @User: Standard
    // AP_GROUPINFO("SO_CTRL_P", 0, UserParameters, _mp_cmd_act, 10.0f),
 
-  //  AP_GROUPINFO("SO_CTRL_P", 0, ModeCtrlSprayPress, _mp_cmd_act, 0),
+  //  AP_GROUPINFO("SO_CTRL_P", 0, ModeCtrlSprayFlow, _mp_cmd_act, 0),
 
     // @Param: SO_CTRL_I
     // @DisplayName: Pump controller I gain
@@ -98,15 +98,15 @@ const AP_Param::GroupInfo ModeCtrlSprayPress::var_info[] = {
     // @Range: 1 8
     // @User: Advanced
 
-    AP_SUBGROUPINFO(_pid_press_right, "SO_CTRL_", 0, ModeCtrlSprayPress, AC_PID),
-  //  AP_SUBGROUPINFO(_pid_press_left, "SO_CTRL__", 0, ModeCtrlSprayPress, AC_PID),
-  //  AP_SUBGROUPINFO(_pid_press_right, "SO_", 1, ModeCtrlSprayPress, AC_PID),
+    AP_SUBGROUPINFO(_pid_press_right, "SO_CTRL_", 0, ModeCtrlSprayFlow, AC_PID),
+  //  AP_SUBGROUPINFO(_pid_press_left, "SO_CTRL__", 0, ModeCtrlSprayFlow, AC_PID),
+  //  AP_SUBGROUPINFO(_pid_press_right, "SO_", 1, ModeCtrlSprayFlow, AC_PID),
 //AP_SUBGROUPINFO(user_parameters, "SO", 28, ParametersG2, UserParameters),
     AP_GROUPEND
 };
  */
 
-ModeCtrlSprayPress::ModeCtrlSprayPress(void):
+ModeCtrlSprayFlow::ModeCtrlSprayFlow(void):
     _pid_press_right(SO_PRESS_RATE_RP_P, SO_PRESS_RATE_RP_I, SO_PRESS_RATE_RP_D, SO_PRESS_RATE_RP_FF, SO_PRESS_RATE_RP_IMAX, SO_PRESS_RATE_RP_FILT_T_HZ, SO_PRESS_RATE_RP_FILT_E_HZ, SO_PRESS_RATE_RP_FILT_D_HZ),
     _pid_press_left(SO_PRESS_RATE_RP_P, SO_PRESS_RATE_RP_I, SO_PRESS_RATE_RP_D, SO_PRESS_RATE_RP_FF, SO_PRESS_RATE_RP_IMAX, SO_PRESS_RATE_RP_FILT_T_HZ, SO_PRESS_RATE_RP_FILT_E_HZ, SO_PRESS_RATE_RP_FILT_D_HZ)
 {
@@ -117,7 +117,7 @@ ModeCtrlSprayPress::ModeCtrlSprayPress(void):
 
 
 // Controller disabled - initialise the disabled controller mode
-bool ModeCtrlSprayPress::init()
+bool ModeCtrlSprayFlow::init()
 {
     gcs().send_text(MAV_SEVERITY_INFO, "SoCtrlMode init: <%s>", name()); //-- the activation routine send similar message
     should_be_spraying = false;
@@ -130,7 +130,7 @@ bool ModeCtrlSprayPress::init()
 
 //#define start_delay 0
 // Controller disabled - runs the disabled controller mode
-void ModeCtrlSprayPress::run()
+void ModeCtrlSprayFlow::run()
 {
     // exit immediately if the pump function has not been set-up for any servo
     if (!SRV_Channels::function_assigned(SRV_Channel::k_sprayer_pump_r)) {
@@ -171,21 +171,23 @@ void ModeCtrlSprayPress::run()
 }
 
 
-void ModeCtrlSprayPress::updateCopterHudData(float air_speed)
+void ModeCtrlSprayFlow::updateCopterHudData(float air_speed)
 {
     copter_hud.rx_time = millis();
     copter_hud.air_speed = air_speed;
     copter_hud.rx_cnt++;
+    
+    updateCalcFlow(air_speed);
 };
 
 
-bool ModeCtrlSprayPress::is_spraying()
+bool ModeCtrlSprayFlow::is_spraying()
 {
     //return should_be_spraying;
     return (_ppm_pump > g.so_servo_out_nospraying.get());
 }
 
-void ModeCtrlSprayPress::configurePid(AC_PID *ptPid)
+void ModeCtrlSprayFlow::configurePid(AC_PID *ptPid)
 {
     ptPid->kP(ctrl_p);
     ptPid->kD(ctrl_d);
@@ -197,7 +199,7 @@ void ModeCtrlSprayPress::configurePid(AC_PID *ptPid)
     ptPid->filt_T_hz(ctrl_filt_t);
 }
 
-void ModeCtrlSprayPress::updateFromParameters(void)
+void ModeCtrlSprayFlow::updateFromParameters(void)
 {
     ctrl_p = g2.user_parameters.get_ctrl_p(); 
     ctrl_d = g2.user_parameters.get_ctrl_d();

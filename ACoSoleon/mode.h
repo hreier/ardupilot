@@ -1,3 +1,14 @@
+/*  --------------------------------------------------------------------------------------------------
+  Flow formula: 
+
+  #########################################################################################################
+  #  flow(liter_ha[l/ha], air_speed[m/sec], za[m]) = air_speed[m/sec]* liter_ha[l/ha] * za[m] * (3/500);  #
+  #####################################################################---------------------------------###
+  #              flow_fact(liter_ha[l/ha] * za[m]) =                   liter_ha[l/ha] * za[m] * (3/500);  #
+  #           flow(air_speed[m/sec], flow_fact)    = air_speed[m/sec]* flow_fact                          #
+  #########################################################################################################
+*/
+
 #pragma once
 
 #include "Soleon.h"
@@ -55,6 +66,10 @@ public:
     float getOffsetTrim() {return offset_trim_proz;} ;
     uint16_t getPumpPPMleft(); 
     uint16_t getPumpPPMright(); 
+
+    //---- Used by mav-link to interface with sprayer ---
+    void updateMpConfiguration(float mp_liter_ha, float mp_line_dist, float mp_planned_spd);
+    void updateCalcFlow(float copter_speed);  //- Mavlink calls this when speedsignal comes from Copter
     
 
     // return a string for this flightmode
@@ -64,6 +79,8 @@ public:
 //private:
     //---- Soleon Spraycontrollers (mostly from missionplan) ----
     float    _mp_liter_ha, _mp_line_dist, _mp_planned_spd, _mp_dist_waypoint, _mp_sprayrate, _ppm_pump;
+    float _mp_flow_fact;
+    float _actual_flow; //-- depends on _mp_liter_ha, _mp_line_dist and copter-speed
     uint8_t _mp_cmd; 
     float _delta_fill;
     bool _mode_booting;

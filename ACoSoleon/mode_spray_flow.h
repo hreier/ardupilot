@@ -12,12 +12,12 @@ typedef struct __copter_hud {
 } copter_hud_t;
 
 // --- SPRAY_PRESS 
-class ModeCtrlSprayPress : public Mode {
+class ModeCtrlSprayFlow : public Mode {
 
 public:
     // inherit constructor
     using Mode::Mode;
-    ModeCtrlSprayPress(void);
+    ModeCtrlSprayFlow(void);
 
     Number mode_number() const override { return Number::CTRL_SPRAY_PRESS; }
 

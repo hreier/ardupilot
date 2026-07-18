@@ -93,6 +93,30 @@ void Mode::updateSprayerValveRelays(uint8_t mp_cmd)
     else                                    ap_relay->set(AP_Relay_Params::FUNCTION::SO_VALVE_RL, 0);
 }
 
+//-------------------------------------------------------------------------
+// This updates the Missionplan configuration data into mode for sprayer processing  
+
+void Mode::updateMpConfiguration(float mp_liter_ha, float mp_line_dist, float mp_planned_spd)
+{
+    _mp_liter_ha    = mp_liter_ha;
+    _mp_line_dist   = mp_line_dist;
+    _mp_planned_spd = mp_planned_spd;
+
+    //--- calculate _mp_flow_fact(_mp_liter_ha, _mp_line_dist)
+    // for formula see: mode.h
+    _mp_flow_fact = (_mp_liter_ha * _mp_line_dist * 3)/500;
+}
+
+
+//-------------------------------------------------------------------------
+// This updates the the copter speed for sprayer processing  (flow calculation from copter-speed)
+// MavLink module calls this after receive 
+void Mode::updateCalcFlow(float copter_speed)
+{
+    //--- _actual_flow (copter_speed, mp_liter_ha, mp_line_dist)
+    _actual_flow = copter_speed * _mp_flow_fact;
+}
+
 
 //-------------------------------------------------------------------------
 // This updates the Pump ppm values according to mp_cmd and ppm_values 

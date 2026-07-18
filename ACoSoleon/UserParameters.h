@@ -51,7 +51,7 @@ private:
     AP_Float _ctrl_filt_e;
     AP_Float _ctrl_filt_d;
 
-    AP_Float _ctrl_min_flow;   //-- flow  minimum limitation for ModeCtrlSprayPress-class
+    AP_Float _ctrl_min_flow;   //-- flow  minimum limitation for ModeCtrlSprayFlow-class
 
     //---- debug stuff: intended for testing purpose
     AP_Float _dbg_0;

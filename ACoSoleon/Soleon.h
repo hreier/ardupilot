@@ -64,7 +64,7 @@
 #include "SO_BkgProcessing.h"   // Soleon background processing
 #include "SO_FlowSens.h"
 #include "mode.h"
-#include "mode_spray_press.h"
+#include "mode_spray_flow.h"
 
 
 
@@ -774,7 +774,7 @@ private:
     ModeCtrlDisabled ctrl_disabled;
     ModeCtrlSprayPPM ctrl_spray_ppm;
     ModeCtrlTest     ctrl_test;
-    ModeCtrlSprayPress ctrl_spray_press; 
+    ModeCtrlSprayFlow ctrl_spray_flow; 
 
     // mode.cpp
     Mode *mode_from_mode_num(const Mode::Number mode);
