@@ -26,7 +26,7 @@ public:
     enum class Number : uint8_t {
         CTRL_DISABLED =     0,  // Soleon controller disabled
         CTRL_SPRAY_PPM =    1,  // Soleon spray controller generate ppm signals
-        CTRL_SPRAY_PRESS =  2,  // Soleon spray controller with pressure controller (and flow estimation)
+        CTRL_SPRAY_FLOW =   2,  // Soleon spray controller with flow controller (and flow estimation)
         CTRL_TEST =         3,  // Soleon controller for test 
 
 

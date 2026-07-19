@@ -19,7 +19,7 @@ public:
     using Mode::Mode;
     ModeCtrlSprayFlow(void);
 
-    Number mode_number() const override { return Number::CTRL_SPRAY_PRESS; }
+    Number mode_number() const override { return Number::CTRL_SPRAY_FLOW; }
 
     bool init() override;
     void run() override;
@@ -31,7 +31,7 @@ public:
 
 protected:
 
-    const char *name() const override { return "SPRAY_PRESS"; }
+    const char *name() const override { return "SPRAY_FLOW"; }
     const char *name4() const override { return "SPRE"; }
 
     bool should_be_spraying;
@@ -42,28 +42,28 @@ protected:
 
     AC_PID   _pid_press_right {
         AC_PID::Defaults{
-            .p         = SO_PRESS_RATE_RP_P,
-            .i         = SO_PRESS_RATE_RP_I,
-            .d         = SO_PRESS_RATE_RP_D,
-            .ff        = SO_PRESS_RATE_RP_FF,
-            .imax      = SO_PRESS_RATE_RP_IMAX,
-            .filt_T_hz = SO_PRESS_RATE_RP_FILT_T_HZ,
-            .filt_E_hz = SO_PRESS_RATE_RP_FILT_E_HZ,
-            .filt_D_hz = SO_PRESS_RATE_RP_FILT_D_HZ,
+            .p         = SO_FLOW_RATE_RP_P,
+            .i         = SO_FLOW_RATE_RP_I,
+            .d         = SO_FLOW_RATE_RP_D,
+            .ff        = SO_FLOW_RATE_RP_FF,
+            .imax      = SO_FLOW_RATE_RP_IMAX,
+            .filt_T_hz = SO_FLOW_RATE_RP_FILT_T_HZ,
+            .filt_E_hz = SO_FLOW_RATE_RP_FILT_E_HZ,
+            .filt_D_hz = SO_FLOW_RATE_RP_FILT_D_HZ,
             .srmax     = 0,
             .srtau     = 1.0
         }
     };
     AC_PID   _pid_press_left{
         AC_PID::Defaults{
-            .p         = SO_PRESS_RATE_RP_P,
-            .i         = SO_PRESS_RATE_RP_I,
-            .d         = SO_PRESS_RATE_RP_D,
-            .ff        = SO_PRESS_RATE_RP_FF,
-            .imax      = SO_PRESS_RATE_RP_IMAX,
-            .filt_T_hz = SO_PRESS_RATE_RP_FILT_T_HZ,
-            .filt_E_hz = SO_PRESS_RATE_RP_FILT_E_HZ,
-            .filt_D_hz = SO_PRESS_RATE_RP_FILT_D_HZ,
+            .p         = SO_FLOW_RATE_RP_P,
+            .i         = SO_FLOW_RATE_RP_I,
+            .d         = SO_FLOW_RATE_RP_D,
+            .ff        = SO_FLOW_RATE_RP_FF,
+            .imax      = SO_FLOW_RATE_RP_IMAX,
+            .filt_T_hz = SO_FLOW_RATE_RP_FILT_T_HZ,
+            .filt_E_hz = SO_FLOW_RATE_RP_FILT_E_HZ,
+            .filt_D_hz = SO_FLOW_RATE_RP_FILT_D_HZ,
             .srmax     = 0,
             .srtau     = 1.0
         }

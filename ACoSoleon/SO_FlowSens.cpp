@@ -15,7 +15,7 @@
 #include <GCS_MAVLink/GCS.h> //-testing
 
 //-- uncomment for module debugging 
-#define DEBUG_ME
+//#define DEBUG_ME
 
 
 extern const AP_HAL::HAL &hal;

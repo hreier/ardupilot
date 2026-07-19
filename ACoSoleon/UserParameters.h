@@ -3,15 +3,15 @@
 #include <AP_Param/AP_Param.h>
 
 // default rate controller PID gains
-#define SO_PRESS_RATE_RP_P                       0.135f
-#define SO_PRESS_RATE_RP_I                       0.135f
-#define SO_PRESS_RATE_RP_D                       0.0036f
-#define SO_PRESS_RATE_RP_IMAX                    0.4f
-#define SO_PRESS_RATE_RP_FF                      0.15f
-#define SO_PRESS_RATE_RP_FILT_T_HZ               20.0f
-#define SO_PRESS_RATE_RP_FILT_E_HZ               0.0f
-#define SO_PRESS_RATE_RP_FILT_D_HZ               20.0f
-#define SO_PRESS_CTRL_MIN_FLOW                   0.0f
+#define SO_FLOW_RATE_RP_P                       0.135f
+#define SO_FLOW_RATE_RP_I                       0.135f
+#define SO_FLOW_RATE_RP_D                       0.0036f
+#define SO_FLOW_RATE_RP_IMAX                    0.4f
+#define SO_FLOW_RATE_RP_FF                      0.15f
+#define SO_FLOW_RATE_RP_FILT_T_HZ               20.0f
+#define SO_FLOW_RATE_RP_FILT_E_HZ               0.0f
+#define SO_FLOW_RATE_RP_FILT_D_HZ               20.0f
+#define SO_FLOW_CTRL_MIN_FLOW                   0.0f
 
 
 
